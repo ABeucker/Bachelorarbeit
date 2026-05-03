@@ -18,3 +18,5 @@
 *.bbl
 *.bcf
 *.run.xml
+*.spl
+*.xdv

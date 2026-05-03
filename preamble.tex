@@ -1,0 +1,183 @@
+% ---------- Sprache & Kodierung ----------
+% ----- KOMMENTAR: nutze fontspec, falls du mit LuaLaTeX oder XeLaTeX kompilierst
+\usepackage{fontspec}
+\usepackage[german, english]{babel}
+\usepackage{microtype}        % optischer Randausgleich, Proportionalität
+
+% =========================================
+% SEITENLAYOUT (Lehrbuch-Stil)
+% =========================================
+\usepackage[
+  a4paper,
+  twoside, 
+  inner=1.5cm,    
+  outer=1.5cm,
+  top=2.5cm,
+  bottom=3cm,
+  headheight=14pt,
+  includeheadfoot
+]{geometry}
+
+\usepackage{setspace}         % Zeilenabstand
+% \OnehalfSpacing               % memoir-kompatible Version für 1.5-zeilig
+\setlength{\emergencystretch}{3em} % Zeilenumbruch bei Überfüllung erlauben
+
+% ==============================
+% Farben & Schrift
+% ==============================
+\usepackage[dvipsnames]{xcolor}
+\definecolor{chaptergray}{gray}{0.20}
+\definecolor{linegray}{gray}{0.7}
+
+% ==============================
+% Kapitel
+% ==============================
+\usepackage{titlesec}
+
+% --- Kapitel (ohne Nummer) ---
+\titleformat{\chapter}[display]
+  {\sffamily\bfseries\LARGE\centering} % Sans-Serif, fett, groß, zentriert
+  {} % keine Nummer standardmäßig
+  {0pt} % Abstand zwischen Label und Titel (nicht genutzt)
+  {} % Vorblock leer
+\titlespacing*{\chapter}
+  {0pt}   % linker Einzug
+  {-10em} % Abstand vor der Überschrift (negativ zieht es nach oben)
+  {5ex}   % Abstand nach der Überschrift
+% ==============================
+% Section
+% ==============================
+% \titleformat{\section}
+%   {\sffamily\bfseries\Large} % Sans-Serif, fett, groß
+%   {} % keine Nummer
+%   {0pt}
+%   {\color{chaptergray}}
+% \titlespacing*{\section}{0pt}{2ex}{1ex}
+
+% --- Section nummeriert optional ---
+\newcommand{\sectionnumbered}[1]{%
+  \refstepcounter{section}%
+  \addcontentsline{toc}{section}{\protect\numberline{\thesection}#1}%
+  \section*{#1}%
+}
+
+% ==============================
+% Subsection
+% ==============================
+\titleformat{\subsection}
+  {\sffamily\bfseries\large} % Sans-Serif, fett, etwas kleiner
+  {} % keine Nummer
+  {0pt}
+  {\color{chaptergray}\MakeUppercase} % Großbuchstaben + Farbe
+\titlespacing*{\subsection}{0pt}{2ex}{1ex}
+
+% ==============================
+% Subsubsection
+% ==============================
+\titleformat{\subsubsection}
+  {\sffamily\bfseries\normalsize} % Sans-Serif, fett
+  {} % keine Nummer
+  {0pt}
+  {\color{chaptergray}}
+\titlespacing*{\subsubsection}{0pt}{1.5ex}{0.8ex}
+
+% ==============================
+% Kopf- und Fußzeilen für twocolumn
+% ==============================
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\nouppercase{\leftmark}} % Kapitel links
+\fancyhead[RO]{\small\nouppercase{\rightmark}} % Section rechts
+\fancyhead[LO,RE]{\thepage}                     % Seitenzahl außen
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Kopfzeilen ohne Nummern
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+
+% ==============================
+% Allgemeine Abstände
+% ==============================
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+
+% \twocolumn  % im main.tex nach \mainmatter aktivieren
+\setlength{\columnsep}{0.8cm} % Abstand zwischen Spalten
+
+% optional: optische Linie auf jeder Seite außen
+% \usepackage{background}
+% \backgroundsetup{position={current page.west}, angle=0, scale=1,
+%   color=linegray, opacity=0.3, contents={\rule{0.2pt}{\paperheight}}}
+
+% ---------- Grafiken & Tabellen ----------
+\usepackage{graphicx}
+% \usepackage{caption}  % wird von subcaption mit kompiliert, daher hier auskommentiert
+\usepackage{subcaption}
+% \usepackage{float}     % falls [H] benutzt wird
+\usepackage{tabularray}
+\usepackage{adjustbox}
+\usepackage{booktabs}
+
+\renewenvironment{table}[1][Eine Tabelle]{%
+  \SetTblrInner{rowsep=5pt}
+  \begin{center}
+  \begin{adjustbox}{max width=\textwidth}
+  \begin{talltblr}[#1]{rows={bg=azure9}, row{1}={bg=azure8}, hlines={white}, vlines={white}}
+}{%
+  \end{talltblr}
+  \end{adjustbox}
+  \end{center}
+}
+
+% ---------- Sonstige nützliche Pakete ----------
+\usepackage{enumitem}
+\usepackage[version=4]{mhchem}
+\usepackage{tcolorbox}
+\usepackage{siunitx}
+
+% Instead of minted, use package listings for code snippets (no external dependencies)
+
+% ---------- Literatur ----------
+% Style "numeric" good in general, for physics using AIP-style, i.e "phys"
+\usepackage[backend=biber, 
+            style=phys, 
+            eprint=true,
+            sorting=none]{biblatex}
+\addbibresource{backmatter/bibliography.bib}
+\usepackage{csquotes}
+
+% ---------- Inhaltsverzeichnis ----------
+\usepackage{titletoc}
+\dottedcontents{section}[5.5em]{}{3em}{1pc}
+
+% ---------- Hyperlinks ----------
+\usepackage[
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=black,
+  urlcolor=blue
+]{hyperref}
+\usepackage{cleveref}   % grouped references
+
+% ---------- ImportAll-Befehl ----------
+\usepackage{pgffor}
+\newcommand*{\MaxNumOfChapters}{10}
+\newcommand*{\MaxNumOfSections}{5}
+\newcommand{\importAll}{
+    \foreach \c in {1,...,\MaxNumOfChapters}{%
+        % Keine Kapitelzählung mehr – volle manuelle Kontrolle
+        \foreach \s in {0,1,2,...,\MaxNumOfSections}{%
+            \IfFileExists{mainmatter/chapter\c/section\s.tex}{%
+                \input{mainmatter/chapter\c/section\s.tex}%
+                \clearpage
+            }{%
+                % Datei existiert nicht → tue nichts
+            }%
+        }%
+    }%
+}
+
+
+% ---------- Kürzel ----------
+\newcommand{\red}[1]{\textcolor{red}{#1}}

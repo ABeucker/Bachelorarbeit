@@ -1,0 +1,34 @@
+\section{Specific Architectures}
+
+The following setup is common in current 21cm SBI:
+
+One networks learns a compression of the image data to a much lower-dimensional latent space, i.e. a \red{summary statistic}. Another network learns a mapping from the latent space to the parameter space.
+
+The compressing network usually has a much heavier architecture. Once it has been trained, one can learn different lighter networks to map its summary to different parameter spaces. Example for parameter spaces include the parameters used for the simulations, or a simple physical summary statistic of the image data.
+
+\red{Maybe put some more examples, e.g. SKATR?}
+
+\red{Which construction is PIE-INN based on? Is it completely new?}
+
+One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
+
+It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
+
+\begin{figure}[]
+    \centering
+    \begin{subfigure}{0.6\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
+        \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
+        \label{fig:21cmPIE-INN_architecture}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.35\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
+        \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
+        \label{fig:EoRFlow_flow_architecture}
+    \end{subfigure}
+
+    \caption{Overall caption for both figures}
+\end{figure}

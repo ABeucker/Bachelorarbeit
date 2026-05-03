@@ -1,0 +1,118 @@
+\section{Basic Neural Networks}
+
+EoRFlow general description, goal etc. Why it is needed. Have figure of architecture.
+
+How this type of model can be used in 21 cm cosmology in general, and then how it is used here specifically.
+
+Traditionally, data as complex as those expected from SKA are analyzed using summary statistics. A summary statistic is a function that maps the data to a lower-dimensional space, typically with some physical interpretation. An example is the power spectrum. The interpretation of the power spectrum is \red{blablabla}. However the power spectrum \red{is not a sufficient statistic} for the 21 cm signal. As an alternative, one can use a neural network to learn a summary statistic of the data. While being potentially more informative, this comes at the cost of less interpretability.
+
+For cnn and flow:
+    - general stuff on model
+    - architecture, where it's inspired from, how it was adapted to the problem, etc
+    - loss function
+    - backpropagation 
+
+Training
+    - details on scheduler, optimizer, etc
+    - training hyperparameters, chip used
+
+Why is a generative model needed? Why is the flow chosen? What are the advantages of flows over other generative models?
+
+Why this very specific architecture?
+
+\red{Do I want a short ML intro? Could e.g. introduce MLP here and rename section to NNs in general}
+
+\red{A word about how architectures will be discussed, e.g. notation with h, z, x, etc.}
+
+\subsection{Convolutional Neural Networks}
+
+CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. An early version was successfully implemented in 1983 with Fukushima's ”Neucognitron”~\red{Neocognitron citation}. An architecture implementing backpropagation was LeCun's ”LeNet”~\red{LeNet citation}.
+
+To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will first be discussed in 1D. The generalization to higher dimensions will be discussed afterwards.
+
+Let $X$ denote the \red{data space} and $Y$ the feature space. 
+
+Let the input have dimensions $x \in \R^{C\times H \times W}$ where C the channel dimension, H the height dimension and W the width dimension. In case of an RGB image, this channel dimension would be three. 
+
+The CNN learns a function $f_\theta: X \rightarrow Y$. 
+
+As opposed to a simple MLP, the CNN offers the following advantages:
+
+\red{Using summation convention}
+
+\red{Not writing bias explicitly}
+
+A basic MLP consists of only one type of layer. If $h$ is the output of the previous layer, the current layer is defined by
+\begin{align}
+    z_i = \phi(W_{ij} h_j),
+\end{align}
+The CNN implements additional layers.
+
+A convolutional layer applies a convolution operaton:
+
+\red{Talk abt convolution vs cross-correlation here}
+
+\red{Is this def even correct? Not need different indices on h?}
+\begin{align}
+    z_i = \phi(\left[w \circledast h\right]_i) = \phi(\sum_k w_k h_{i+k})
+\end{align}
+where the dimensionality of the kernel $w\in \R^K$ is typically much lower than that of the data.
+
+A pooling layer applies a pooling operation:
+\begin{align}
+    z_i = \operatorname{pool} K_{ij}h_j
+\end{align}
+where $K$ defines a pooling window for each index $i$. Typical choices for $\operatorname{pool}$ are $\operatorname{maxpool}$, which chooses the maximum of all given values, or $\operatorname{meanpool}$, which calculates their mean.
+
+\red{The purpose of a pooling layer is to...}
+
+\red{Add normalization layers here}
+
+\red{Add info on stride params etc here}
+
+\red{Put it together here, potentially add image of total architecture.}
+
+
+\subsection{Normalizing Flows}
+
+\red{Choose a Schreibweise. Use $p_u$ if necessary, otherwise $u \sim p(u)$?}
+
+\red{Differentiate the true target distribution and the modelled one. Then going for Kullback Leibler of the two is equivalent to maximizing log likelihood.}
+
+A normalizing flow model is a generative model that learns to transform a simple (often Gaussian) distribution into a more complex one. The transformation is a composition of invertible functions, which are chosen to be computationally efficient to invert. 
+
+Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $x \sim p_x$ \red{how to signal that x is n-dimensional?} the target distribution.
+
+The normalizing flow learns a transformation given by an invertible function $f: \R^n \to \R^n$, such that sampling from the base distribion and applying the transfomation yields samples from the target distribution.
+
+Let $f: \R^n \to \R^n$ a differentiable, invertible function with $g = f^{-1}$ its inverse (i.e. $f$ is a diffeomorphism). Then the model is a normalizing flow if:
+\begin{align}
+x = f(u) \sim p_x, \quad u \sim p_u.
+\end{align}
+
+\red{Should have two sim signs, no? How to differentiate sampling and being part of distribution?}
+
+Once the flow is learned, the process to generate samples from $p_x$ is $u \sim p_u$ and subsequent $x = f(u)$.
+
+In order to compute $p_x(x)$ for a given $x$, on applies the change of variables formula:
+\begin{align}
+p_x(x) = p_u(g(x)) \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
+\end{align}
+
+The normalizing flow becomes expressive by allowing f to be as complex as possible, while restricting f to a certain class of functions with efficiently computable Jacobian determinants makes it computationally tractable.
+
+\red{Come up with nicer notation for $g_i (\cdot | \theta_i)$}
+
+In practice, one often models $g$ as a composition of simple neural networks, e.g. multilayer perceptrons. Let $g_\theta = g_1 \circ g_2 \circ ... \circ g_k$ with $g_i: \R^n \to \R^n, x \mapsto g_i(x | \theta_i)$ and $k \in \N$. 
+
+Now the loss becomes
+\begin{align}
+    \text{NLL}_\theta =  \sum_{i=1}^{k} \log \left| \det J(g_i) \right| - \log p_u (g_\theta(x))
+\end{align}
+
+\red{Now what this specific Freia flow does. Research on website!}
+
+\red{Or maybe put exact architecture in appendix?}
+
+
+\subsection{Variational Autoencoders}

@@ -1,0 +1,48 @@
+%-------------------GENERAL--------------------
+\usepackage{amsmath,latexsym, amssymb, dsfont}
+\usepackage{braket}
+
+%-------------------UNITS--------------------
+\usepackage{siunitx}
+\DeclareSIUnit{\Mpc}{Mpc}
+\DeclareSIUnit{\solarMass}{\ensuremath{M_\odot}}
+\DeclareSIUnit{\erg}{erg}
+\DeclareSIUnit{\year}{yr}
+\DeclareSIUnit{\nats}{nats}
+
+%------------------SHORTCUTS-------------------
+
+\newcommand{\mean}{\overset{-}{T}}
+\newcommand{\degree}{^{\circ}}
+
+\newcommand{\inv}{^{-1}}
+
+\newcommand{\sinc}{\text{sinc}}
+\newcommand{\const}{\text{const}}
+
+\newcommand{\Lp}{\text{L}}
+\newcommand{\Hilbert}{\mathcal{H}}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+
+\newcommand{\0}{\hat{\mathbf{0}}}
+\newcommand{\1}{\hat{\mathds{1}}}
+
+% Inner and outer product
+\newcommand{\ip}[2]{\bra{#1}\!\!\ket{#2}}
+\newcommand{\op}[2]{\ket{#1}\!\!\bra{#2}}
+
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+
+%-------------MATRIX ENVIRONMENTS-------------
+
+% Three matrix types [], (), ||, chosen by options b, p, v. Standard ist b.
+\newcommand{\bmat}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\newcommand{\pmat}[1]{\begin{pmatrix} #1 \end{pmatrix}}
+\newcommand{\vmat}[1]{\begin{vmatrix} #1 \end{vmatrix}}
+%-------------THEOREM ENVIRONMENTS-------------
+
+%Hier bei Bedarf Definitionen der Theorem-Umgebungen.

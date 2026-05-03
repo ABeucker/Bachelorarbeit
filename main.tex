@@ -1,0 +1,48 @@
+\documentclass[12pt]{article}
+
+% --- Präambeln ---
+\input{preamble_2.tex}
+\input{math_preamble.tex} 
+
+% ---------- Frontmatter ----------
+
+\title{Title}
+\author{Your Name}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\selectlanguage{english}
+\begin{abstract}
+Abstract text.
+\end{abstract}
+
+\selectlanguage{german}
+\begin{abstract}
+Abstract text.
+\end{abstract}
+
+% ---------- Mainmatter ----------
+
+\selectlanguage{english}
+\input{mainmatter/section1.tex}
+\input{mainmatter/section2.tex}
+\input{mainmatter/section3.tex}
+\input{mainmatter/section4.tex}
+\input{mainmatter/section5.tex}
+\input{mainmatter/section6.tex}
+\input{mainmatter/section7.tex}
+\input{mainmatter/section8.tex}
+\input{mainmatter/section9.tex}
+\input{mainmatter/section10.tex}
+
+% ---------- Backmatter ----------
+\newpage
+\appendix
+\input{mainmatter/appendix1.tex}
+
+\printbibliography
+
+\end{document}

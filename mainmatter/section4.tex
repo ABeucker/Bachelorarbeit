@@ -1,0 +1,55 @@
+\section{Information Theory and Neural Estimators}
+
+Information theory: 
+    - Entropy, KL divergence, mutual information
+    - Interpretation of these quantities, maybe expectation?
+
+Information geometry:
+    - Fisher information metric, geodesic distance, curvature
+    - Interpretation of these quantities, maybe expectation?
+
+
+\subsection{Some Basic Measures in Information Theory}
+Given a discrete random variable $X \sim p$, the entropy of $X$ is defined as:
+\begin{align}
+\mathbb{H}(X) = -\sum_x p(x) \log p(x) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
+\end{align}
+If the logarithm is chosen as with base 2, one defines the entropy to be measured in units of bits. If one uses the natural logarithm, the entropy is measured in units of nats.
+
+Entropy is a measure of the unvertainty of a random variable. A high entropy corresponds to a lack of predictability and as such to a high amount of information contained in the distribution.
+
+As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. 
+
+\red{Do better with the example.}
+
+Another important metric in information theory is the Kullback-Leibler divergence, which can be interpreted as a measure of distance between to probability distributions.
+
+\red{X and Y might be same? At least p and q need to be defined on same probability space.}
+
+Let $X \sim p$ and $Y \sim q$ be two discrete random variables. The KL divergence between $p$ and $q$ is defined as:
+\begin{align}
+\mathbb{D}_{\text{KL}}(p || q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] = \mathbb{H}(X) + \mathbb{E}_{X} \left[ -\log q(X) \right]
+\end{align}
+
+The KL-divergence is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still \red{continue}
+
+Lastly, the mutual information between two random variables $X$ and $Y$ is defined as:
+\red{Change some of these to Y, this is still autocorrect}
+\begin{align}
+\mathbb{I}(X; Y)
+         &= \mathbb{D}_{\text{KL}}(p(x, y) || p(x) p(y)) \\
+         &= \mathbb{H}(X) - \mathbb{H}(X | Y) \\
+         &= \mathbb{H}(Y) - \mathbb{H}(Y | X).
+\end{align}
+\red{How mutual information quantifies the amount of information obtained about a distribution when knowing another}.
+
+For discrete random variables, one can write:
+\begin{align}
+    \mathbb{I}(X; Y) &= \sum_{x, y} p(x, y) \log \frac{p(x, y)}{p(x) p(y)}
+\end{align}
+which makes a Monte-Carlo estimation of mutual information accessible. 
+
+
+\red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
+
+\red{Something on summary statistics?}

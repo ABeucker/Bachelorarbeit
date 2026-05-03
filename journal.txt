@@ -1,0 +1,40 @@
+
+
+
+
+# 29.3.26 ---------------------------------------
+
+Run 6 completed for bottleneck sizes 15,16,17,18,20.
+
+Evaulated MI for those runs which haven't done it automatically.
+
+Plotted MI evolution in joint figure.
+
+Worked on latex formatting.
+
+Calculated average MI for completed bottleneck sizes. 
+
+
+# ---------------------------------------
+
+Still trying to get used to using this...
+
+# ---------------------------------------
+
+
+# 02.5.26 ---------------------------------------
+
+
+
+
+# TODO
+
+NEED SAME SEEDS FOR COMPARISON!
+
+Subtract q_log_all from prior and do same analysis, are results better?
+
+Definitely check MI estimation paper, seems to be quite applicable.
+
+Expand information theory part, especially variational MI estimation. Good point to introduce good notation with true prob p and estimated q.
+
+If models with higher bottleneck have large offset from 0 conditional entropy in beginning, maybe could normalize?

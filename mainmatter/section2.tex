@@ -1,0 +1,116 @@
+\section{Physics Background}
+
+A few topics:
+    - short introduction to history of universe
+    - then focus on EoR
+    - 21 cm signal from QM and how it can be used to learn about the EoR
+
+\red{Still need some more subsections to explain the other parameters being examined}
+
+\subsection{The Cosmological Setting}
+
+For the purposes of this thesis, the standard cosmological model and an additional warm dark matter parameter are assumed.
+
+\red{Also assuming inflation..., though this not discussed here.}
+
+The standard cos
+
+\red{Cite a few papers that give the current status of cosmology in $\Lambda$CDM, e.g. Planck 2018, etc.}
+
+The $\Lambda$CDM-model assumes:
+
+The six parameters describing the $\Lambda$CDM-model and their estimated values today are shown in table~\ref{tab:LCDM_params}.
+
+\red{These are not the fundamental params. Choose which exactly to include.}
+% \begin{table}[caption={Parameters of  $\Lambda$CDM with estimated values}, label={tab:LCDM_params}]
+%     Name & Symbole & Value & Unit & Source \\
+%     Hubble constant & $H_0$ & 67.4 & \si{\kilo\meter\per\second\per\Mpc} & Planck 2018 \\
+%     Matter density & $\Omega_m$ & $0.315 \pm 0.007$ & & Planck 2018 \\
+%     Dark energy density & $\Omega_\Lambda$ & 0.685 & & Planck 2018 \\
+%     Spectral index & $n_s$ & 0.965 & & Planck 2018 \\
+%     Matter fluctuation amplitude & $\sigma_8$ & $0.811\pm0.006$ & & Planck 2018 \\
+%     Equation of state & $w$ & -1 & & Planck 2018 \\
+% \end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Parameters of  $\Lambda$CDM with estimated values}
+\label{tab:LCDM_params}
+\begin{tabular}{l c c c c}
+\toprule
+
+Name & Symbole & Value & Unit & Source \\
+\midrule
+Hubble constant & $H_0$ & 67.4 & \si{\kilo\meter\per\second\per\Mpc} & Planck 2018 \\
+Matter density & $\Omega_m$ & $0.315 \pm 0.007$ & & Planck 2018 \\
+Dark energy density & $\Omega_\Lambda$ & 0.685 & & Planck 2018 \\
+Spectral index & $n_s$ & 0.965 & & Planck 2018 \\
+Matter fluctuation amplitude & $\sigma_8$ & $0.811\pm0.006$ & & Planck 2018 \\
+Equation of state & $w$ & -1 & & Planck 2018 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\red{Need today's parameters so that can explain choice of priors}
+
+\red{Do I want a derivation of these here?}
+
+Under these assumptions, one can solve Einstein's field equations. The solutionss are the Friedmann equations:
+\begin{align}
+\left( \frac{\dot{a}}{a} \right)^2 &= \frac{8 \pi G}{3} \rho + \frac{\Lambda}{3} - \frac{k}{a^2},\\
+ \quad \frac{\ddot{a}}{a} &= -\frac{4 \pi G}{3} (\rho + 3p) + \frac{\Lambda}{3}
+\end{align}
+The Friedmann equations describe the evolution of the universe \red{starting at approx THIS time}.
+
+\red{Could define redshift here}
+
+According to the cosmological standard model, the timeline of the universe is approximately as follows:
+
+The first phase of the universe is marked by \textit{radiation domination}. Immediately after the Big Bang, the universe underwent a period of rapid expansion called \textit{inflation}, during which space expanded by appriximately an order of $10^{26}$. This inflation was driven by the so-called inflaton field. During the following process of reheating, the energy of the inflaton field was converted to SM particles, which enabled subsequent \textit{baryogenesis}, i.e. the creation of matter and antimatter particles. In the subsequent annihilation of matter.antimatter pairs, a small excess of matter paticles survived, composing the matter content of the universe today. There have been many proposed mechaninisms for both reheating and baryogensesis, and both are active fields of research. \red{Insert sources here} In the following time scale of $20\cdot 10^{-12}\si{\s} - 1000\si{\s}$, particles acquired mass and coalesced into hadrons. Neurinos decoupled from baryons and thus the cosmic neutrino background was formed. What followed was an epoch named \textit{big bang nuceosynthesis}, during which mostly protons and neutrons bound to primordial nuclei, consisting mostly of hydrogen, Helium-4 and traces of deuteron, Helium-3 and lithium. 
+
+The second phase of the universe is marked by \textit{matter domination}. During \textit{recombination}, electrons and nuclei where bound to neutral atoms. Photons were no longer in thermal equilibrium with matter and thus ”decouple”, forming the cosmic microwave background (CMB). Measurements of the CMB today provide one of the most crucial constraints on cosmological parameters.
+
+After recombinations, most photons propagate freely and are quickly redshifted, such that the universe becomes dark. This period is therefore called the \textit{dark ages}. Matter has not yet coalesced into stars and galaxies. The main source of photons \red{visible phtons?} is the 21 cm emission line of neutral hydrogen. 
+
+Once first stars and galaxies have formed, they emit photons energetic enough to ionize the surrounding hydrogen. This period is called the \textit{epoch of reionization} (EoR). By the end of the EoR, most of the IGM is ionized and continues to be so today.
+
+
+
+\red{These sections are based on~\cite{PDG_2024}}
+
+\red{Maybe short example of how an evolution might be described...}
+
+
+\red{How other cosmological models can be tested with the EorFlow setup, maybe also put this somewhere else.}
+
+\red{What is matter distribution at the redshift when beginning study?}
+
+\red{Brief summary of CMB}
+
+\red{Small overview of existing studies of timeline of universe, why there is a gap in EoR}
+
+\red{Maybe cite more recent paper that explains why studying this exact regime of redshifts}
+
+\subsection{The Astrophysical Setting}
+
+
+\subsection{On the Origin of the 21 cm Signal}
+
+Temperature of the ISM at around these redshifts, why neutral hydrogen does not absorb of emit visible light at these temperatures.
+
+How trace elements interact with visible light at these temperatures.
+
+At least mention the possibility of a derivation 
+
+Quantum mechanical aspect: hyperfine splitting of ground state of hydrogen.
+
+Statistical mehanics aspect: spin temperature and how it is useful in measuring the 21 cm signal.
+
+    - Einstein coefficients from QM
+    - Different processes that influence the spin temperature, e.g. collisional coupling, Wouthuysen-Field effect, etc.
+    - Final formula for spin temperature
+
+\subsection{Evolution of the 21 cm Signal}
+

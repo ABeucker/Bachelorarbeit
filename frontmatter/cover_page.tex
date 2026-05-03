@@ -1,0 +1,21 @@
+%------------------------COVER PAGE--------------------------
+
+%Die Stellen, an denen etwas eingefügt werden kann, sind markiert
+
+\newlength\drop%
+
+\newcommand*{\coverpage}{\begingroup
+\drop=0.1\textheight
+\vspace*{\drop}
+\centering
+{\LARGE COVER PAGE}\\[2\baselineskip]   %Hier einfügen
+{\LARGE\sffamily Untertitel 1}\par      %Hier einfügen
+\vfill
+{\HUGE% 
+Untertitel 2}\par                %Hier einfügen
+\vspace{\drop}
+{\Large zuletzt aktualisiert am \today}\par
+\vfill
+{\large Namen}\par                      %Hier einfügen
+\vspace*{\drop}
+\endgroup}

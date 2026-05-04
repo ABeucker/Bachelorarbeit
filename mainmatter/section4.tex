@@ -8,7 +8,6 @@ Information geometry:
     - Fisher information metric, geodesic distance, curvature
     - Interpretation of these quantities, maybe expectation?
 
-
 \subsection{Some Basic Measures in Information Theory}
 Given a discrete random variable $X \sim p$, the entropy of $X$ is defined as:
 \begin{align}
@@ -47,8 +46,25 @@ For discrete random variables, one can write:
 \begin{align}
     \mathbb{I}(X; Y) &= \sum_{x, y} p(x, y) \log \frac{p(x, y)}{p(x) p(y)}
 \end{align}
-which makes a Monte-Carlo estimation of mutual information accessible. 
+which makes a Monte-Carlo estimation of mutual information accessible.
 
+\red{What makes MI such an attractive measure? -> Data processing inequality?}
+
+\red{Why estimating MI in high dimensions is hard, and quantify!}
+
+\subsection{KNN Mutual Information Estimation}
+
+\subsection{Variation Mutual Information Estimation}
+
+\red{In case the probability densities used to estimate mutual information are learned neural networks, one calls the procedure} \textit{variational mutual information estimation}.
+
+Let $q_\theta:\mathcal{S}\mapsto \mathcal{P}(\mathcal{L})$ be a learned conditional probability distribution over $\mathcal{X}$, \red{and assume it to be the best approximation of the true probability distribution} $p:\mathcal{S}\mapsto \mathcal{P}(\mathcal{L})$. Then a lower bound estimation of the true mutual information is given by the \textit{Barber-Agakov estimate}:
+\begin{align}
+    \mathbb{I}(X;Y) \geq \E_{P(X,Y)} [\log q_\theta (x|y) - \log p(x)]
+\end{align}
+\red{Or also indicate $p(x)$ might be approximated.}
+
+\red{Also another method of approximation, maybe Donsker-Varadahn (MINE) ?}
 
 \red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
 

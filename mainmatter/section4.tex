@@ -46,26 +46,39 @@ Mutual information is symmetric and nonnegative. It is zero iff X and Y are inde
 
 \subsection{Mutual Information Estimation}
 
-\red{What makes MI such an attractive measure? -> Data processing inequality?}
+In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the \textit{data processing inequality}, which in this context can be phrased as follows:
 
-For discrete random variables, one can write:
+Let $X$, $Y$ and $Z$ be random variables where $X$ is the original data, $Y$ is a learned summary of $X$ and $Z$ is a label associated with $X$. These form a Markov chain $X \rightarrow Y \rightarrow Z$, where $Z$ is only inferred from $Y$. Then $Z$ cannot contain more information about $X$ than $Y$, so
 \begin{align}
-    \mathbb{I}(X; Y) &= \sum_{x, y} p(x, y) \log \frac{p(x, y)}{p(x) p(y)}
+    \mathbb{I}(X;Y) \geq \mathbb{I}(X;Z)
 \end{align}
-which makes a Monte-Carlo estimation of mutual information accessible.
+A good representation keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. \red{Mit Formel unterstützen}
+
+\red{It also captures more information than just covariance!}
+
+\red{Something on summary statistics?}
+
+In practice, this necessitates an estimation of mutual information between the representation and the target distribution. 
+
+In the setting of variational inference, one can use the learned posterior to estimate mutual information in a natural way, described in the following:
+\begin{align}
+    \mathbb{I}(X; Y) &= \int_{\mathcal{X}\times\mathcal{Y}} p(x, y) \log \frac{p(x|y)}{p(x)}~\label{eq:MI_int},
+\end{align}
+where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\cref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}~\cite{Barber_2003}:
+\begin{align}
+    \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_P(X,Y) \left[ \log q_\theta(x|y) - \log p(x) \right]
+\end{align}
+This is computable, because the distribution of the prior $p(x)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(x)$ can also be estimated separately, which introduces more uncertainty in the above estimate.
+
+Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on the true mutual information:
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}_{\text{BA}}(X;Y)
+\end{align}
 
 \red{Why estimating MI in high dimensions is hard, and quantify!}
-
-\red{In case the probability densities used to estimate mutual information are learned neural networks, one calls the procedure} \textit{variational mutual information estimation}.
-
-Let $q_\theta:\mathcal{S}\mapsto \mathcal{P}(\mathcal{L})$ be a learned conditional probability distribution over $\mathcal{X}$, \red{and assume it to be the best approximation of the true probability distribution} $p:\mathcal{S}\mapsto \mathcal{P}(\mathcal{L})$. Then a lower bound estimation of the true mutual information is given by the \textit{Barber-Agakov estimate}:
-\begin{align}
-    \mathbb{I}(X;Y) \geq \E_{P(X,Y)} [\log q_\theta (x|y) - \log p(x)]
-\end{align}
-\red{Or also indicate $p(x)$ might be approximated.}
 
 \red{Also another method of approximation, maybe Donsker-Varadahn (MINE) ?}
 
 \red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
 
-\red{Something on summary statistics?}
+\red{Write about what is expected here}

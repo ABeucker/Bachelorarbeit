@@ -1,18 +1,10 @@
 \section{Implementation}
 
-Mutual information: 
-    - General, then specific formula used here
-    - Interpretation, maybe expectation?
-
-How interpretable is MI? What can really be understood from it? 
-
-Why is it useful in a physics setting? What can it tell us about the physics of the problem?
 
 \red{Maybe put choice of priors here actually. Then say that label distribution is not uniform.}
 
 The dataset consists of 5000 lightcones simulated with \red{21cmFast, cite the paper somewhere!} and the calculated neutral hydrogen fraction as labels. It is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. In preprocessing, the \red{temperature fluctuation values} are normalized individually for each lightcone \red{why is this better?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. The labels are originially 92-dimensional and are first truncated to 75 dimensions and then binned to 15-dimensional vectors. This step reduces the dimensionality of the inference problem. An additional logit transformation is applied to the labels, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state.
 
-The training process is as follows: an ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. This allows the estimation of the ensemble error. The CNN and flow are trained jointly. Both models were trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. Training is performed on one NVIDIA A30 GPU.
+In order to model the conditional distribution $p(x|y)$, the following steps are taken: An ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. The CNN and flow are trained jointly. Both models were trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. Training is performed on one NVIDIA A30 GPU.
 
-\red{This section might be a good place to write about what is expected in the results}
-
+Unlike the original distribution of simulation parameters, the distribution of reionization history vectors is not uniform. It is therefore modelled separately. It is also modelled with a flow of the same architecture as the one from the conditional distribution, without any conditional input. This choice of model a priori adds additional uncertainty to the mutual information estimation. The idea behind choosing the same architecture to model the label distribution is that an \red{artefact} of the flow $q_\theta(x|y)$ leading to high variance in the MI estimation might be learned by $q_{\tilde{\theta}}(x)$ as well, thus leading to smaller variance in the final MI estimation.

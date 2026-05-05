@@ -2,14 +2,34 @@
 
 Does MI increase with accuracy on validation set? Does it increase with training time?
 
+The average runtime for training is \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. Bottleneck dimensions $1-3$ are analyzed for an estimate of lowest mutual information achievable with this model. Dimension $6$ is analyzed because it equals the amount of parameters used to simulate the original lightcones. Dimensions $14-16$ are analyzed because one naively expects the model to be able to compress the information of 15-dimensional labels in a latent space of higher dimension. Given noise and a generally hard learning task, one might need more dimensions though, which is why dimensions $25$ and $30$ are also analyzed.
 
-In total, \red{these model where trained}. The average runtime for training is \red{insert average runtime}. 
+\red{Updates on this to come, more models will be trained!}
 
-Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. \red{Quantify epoch range with best validation performance.} Each model then reaches a plateau \red{in epoch range...} \red{Does this epoch range change across bottleneck dimensions? I.e. were does model take longer to learn?}
+Two sources of error in the MI estimation will be discussed. The error from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different weight initializations, i.e. seeds, will be referrred to as the \textit{seed error}.
 
-In the following, two sources of error in the MI estimation will be discussed. The error of the MI estimation from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different weight initializations, i.e. seeds, will be referrred to as the \textit{seed error}.
+Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. Training stops after 250 epochs.
 
-One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. \red{Quantify the seed variance for best validation loss here.} This indicates a higher training instability for models with smaller bottleneck dimension.
+\red{Comments on training here}
+
+One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension. These results are summarized in table~\ref{tab:training_stability}\red{Ist noch quatsch, richtige Werte folgen}.
+\begin{table}[htbp]
+\centering
+\caption{Results on training stability}
+\label{tab:training_stability}
+\begin{tabular}{l c c c}
+\toprule
+
+Bottleneck & Best epoch & Val loss & No. samples\\
+\midrule
+4 & $38.81\pm 0.71$ & $0.39$ &  $3$ \\
+6 & $38.49\pm 0.95$ & $0.83$ & $4$ \\
+15 & $39.90\pm 0.42$ & $0.13$ & $5$ \\
+16 & $39.57\pm 0.46$ & $0.13$ &  $4$ \\
+
+\bottomrule
+\end{tabular}
+\end{table}
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{graphics/ensemble_4/joint_losses.png}
@@ -108,7 +128,7 @@ According to the CLT, one would estimate the model error by the standard deviati
 
 For each bottleneck dimension, the final MI estimate is made by selecting the model with best validation loss from each seed and 
 
-averaging the conditional entropy for each of these models. The final error on the CE estimate is comprised of the model error and the \text{seed error}, stemming from the variability of results across different seeds. The final estimates with errors as shown in table~\ref{tab:CE_results}.
+averaging the conditional entropy for each of these models. The final error on the CE estimate is comprised of the model error and the \text{seed error}, stemming from the variability of results across different seeds. The final estimates with errors as shown in table~\ref{tab:CE_results}\red{Noch sind das conditional-entropy werte, die aktuellen Werte folgen gleich}.
 \begin{table}[htbp]
 \centering
 \caption{Final Esimation of CE per Bottleneck Dimension (all entropy values in~\si{nats})}

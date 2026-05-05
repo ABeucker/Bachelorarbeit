@@ -9,38 +9,44 @@ Information geometry:
     - Interpretation of these quantities, maybe expectation?
 
 \subsection{Some Basic Measures in Information Theory}
-Given a discrete random variable $X \sim p$, the entropy of $X$ is defined as:
+Given a random variable $X \sim p$, the \textit{entropy} of $X$ is defined as:
 \begin{align}
-\mathbb{H}(X) = -\sum_x p(x) \log p(x) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
+\mathbb{H}(X) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
 \end{align}
-If the logarithm is chosen as with base 2, one defines the entropy to be measured in units of bits. If one uses the natural logarithm, the entropy is measured in units of nats.
+If the logarithm is chosen as with base 2, one defines the unit of this quantity as bits. If one uses the natural logarithm, the entropy is measured in units of nats. 
 
-Entropy is a measure of the unvertainty of a random variable. A high entropy corresponds to a lack of predictability and as such to a high amount of information contained in the distribution.
+Entropy is a measure of the uncertainty of a random variable. A high entropy corresponds to a lack of predictability of the random variable's outcome. As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. One therefore considers entropy to be a measure of the amount of information contained in the random variable's distribution.
 
-As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. 
-
-\red{Do better with the example.}
-
-Another important metric in information theory is the Kullback-Leibler divergence, which can be interpreted as a measure of distance between to probability distributions.
-
-\red{X and Y might be same? At least p and q need to be defined on same probability space.}
-
-Let $X \sim p$ and $Y \sim q$ be two discrete random variables. The KL divergence between $p$ and $q$ is defined as:
+The generalization to conditional entropy is:
 \begin{align}
-\mathbb{D}_{\text{KL}}(p || q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] = \mathbb{H}(X) + \mathbb{E}_{X} \left[ -\log q(X) \right]
+    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right]
+\end{align} 
+
+Another important metric in information theory is the \textit{Kullback-Leibler divergence}. Let $X \sim p$ and $Y \sim q$ be two random variables over the same sample space. The KL-divergence between $p$ and $q$ is defined as:
+\begin{align}
+\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0
 \end{align}
+The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
 
-The KL-divergence is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still \red{continue}
+\red{Maybe a word about consequece of assymetry of D KL}
 
-Lastly, the mutual information between two random variables $X$ and $Y$ is defined as:
-\red{Change some of these to Y, this is still autocorrect}
+\red{Could also talk about why mionimizing D KL is often equivalent to common optimization objectives.}
+
+Lastly, the \textit{mutual information} between two random variables $X$ and $Y$ is defined as:
 \begin{align}
 \mathbb{I}(X; Y)
-         &= \mathbb{D}_{\text{KL}}(p(x, y) || p(x) p(y)) \\
-         &= \mathbb{H}(X) - \mathbb{H}(X | Y) \\
-         &= \mathbb{H}(Y) - \mathbb{H}(Y | X).
+         &= \mathbb{D}_{\text{KL}}(p(X, Y) || p_X(X) p_Y(Y)) \geq 0.
 \end{align}
-\red{How mutual information quantifies the amount of information obtained about a distribution when knowing another}.
+An alternative formulation in terms of entropy is:
+\begin{align}
+    \mathbb{I}(X; Y) = \mathbb{H}(X) - \mathbb{H}(X | Y) 
+    = \mathbb{H}(Y) - \mathbb{H}(Y | X).
+\end{align}
+Mutual information is symmetric and nonnegative. It is zero iff X and Y are independent and becomes maximal iff $X = Y$. One interprets it's value as the amount of information obtained about one random variable while observing another.
+
+\subsection{Mutual Information Estimation}
+
+\red{What makes MI such an attractive measure? -> Data processing inequality?}
 
 For discrete random variables, one can write:
 \begin{align}
@@ -48,13 +54,7 @@ For discrete random variables, one can write:
 \end{align}
 which makes a Monte-Carlo estimation of mutual information accessible.
 
-\red{What makes MI such an attractive measure? -> Data processing inequality?}
-
 \red{Why estimating MI in high dimensions is hard, and quantify!}
-
-\subsection{KNN Mutual Information Estimation}
-
-\subsection{Variation Mutual Information Estimation}
 
 \red{In case the probability densities used to estimate mutual information are learned neural networks, one calls the procedure} \textit{variational mutual information estimation}.
 

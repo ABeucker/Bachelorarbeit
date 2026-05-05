@@ -7,9 +7,9 @@ In total, \red{these model where trained}. The average runtime for training is \
 
 Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. \red{Quantify epoch range with best validation performance.} Each model then reaches a plateau \red{in epoch range...} \red{Does this epoch range change across bottleneck dimensions? I.e. were does model take longer to learn?}
 
-\red{Comparability of loss curves? Since loss scaled with bottleneck dim}
+In the following, two sources of error in the MI estimation will be discussed. The error of the MI estimation from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different weight initializations, i.e. seeds, will be referrred to as the \textit{seed error}.
 
-One can observe a higher \red{seeding variance} for models with smaller bottleneck dimension in training and validation losses. \red{Quantify the seed variance for best validation loss here.} This indicates a higher training instability for models with smaller bottleneck dimension.
+One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. \red{Quantify the seed variance for best validation loss here.} This indicates a higher training instability for models with smaller bottleneck dimension.
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{graphics/ensemble_4/joint_losses.png}
@@ -71,7 +71,15 @@ One can observe a higher \red{seeding variance} for models with smaller bottlene
 % \end{figure}
 
 
-Figures~\cref{fig:mi_bootstrap_bottle_4,fig:mi_bootstrap_bottle_6,fig:mi_bootstrap_bottle_15,fig:mi_bootstrap_bottle_16} show the estimated conditional entropy per epoch for each ensemble the model was trained on. Vertical lines again mark the epoch with best validation performance. The graphs' trends mirror those of the validation losses \red{Do they mirror valdidation losses? This would be expected.}, and all models reach a saturated estimate of the mutual information \red{in the epoch range...} The conditional entropy curves showcase a higher instability than the validation curves \red{Can I quantify this?}, which is here attributed to the smaller size of the test set (\red{put this interpretation somewhere else?}).
+Figures~\cref{fig:mi_bootstrap_bottle_4,fig:mi_bootstrap_bottle_6,fig:mi_bootstrap_bottle_15,fig:mi_bootstrap_bottle_16} show the estimated conditional entropy per epoch for each ensemble the model was trained on. Vertical lines again mark the epoch with best validation performance. All models reach a saturated estimate of the conditional entropy \red{in the epoch range...} The conditional entropy curves showcase a higher instability than the validation curves, which is attributed to the smaller size of the test set.
+
+The model error on the conditional entropy estimate grows with increasing training steps. Some reionization histories are attributed with very low likelihood, such that the distribution of $\log q_\theta (\text{label}_i|\text{summary}_i)$ has a heavy left-sided tail. This is in parts because of the distribution of the labels themselves. 
+
+A separate normalizing flow is trained on the label distribution. \red{Discuss other possible modelling choices and why not took them} The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
+
+As an example, a histogram plot of the distributions $\log q_\theta (\text{label}_i|\text{summary}_i)$ and $\log \tilde{q}_\theta (\text{label}_i)$ is shown in figure~\red{insert figure}. 
+
+According to the CLT, one would estimate the model error by the standard deviation. The heavy kurtosis inflates the value of standard deviation. As an alternative estimate of error, a bootstrapping method is implemented. \red{Quote some source that cites this as best practice.} \red{The exact values used for bootstrapping for reproducibility.} \red{Something on interpretation of bootstrap results.}
 
 \begin{figure}
     \centering
@@ -97,11 +105,10 @@ Figures~\cref{fig:mi_bootstrap_bottle_4,fig:mi_bootstrap_bottle_6,fig:mi_bootstr
     \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
     \label{fig:mi_bootstrap_bottle_16}
 \end{figure}
-The \red{per-epoch estimation of conditional entropy} comes with an associated error, here called the \textit{model error}. The model error stems from the variability in the log-probability of the test set samples as predicted by the flow. \red{Begründen, maybe something from MCMC.} 
 
-According to the CLT, one would expect the error to be estimated by the standard deviation. In this case, the log-probability values are distributed with heavy \red{left-sided} kurtosis, which inflates the value of the standard deviation. As an alternative estimate of error, a bootstrapping method is implemented. \red{Quote some source that cites this as best practice.} \red{The exact values used for bootstrapping for reproducibility.} \red{Something on interpretation of bootstrap results.}
+For each bottleneck dimension, the final MI estimate is made by selecting the model with best validation loss from each seed and 
 
-For each bottleneck dimension, the final conditional entropy estimate is made by selecting the model with best validation loss from each seed and averaging the conditional entropy for each of these models. The final error on the CE estimate is comprised of the model error and the \text{seed error}, stemming from the variability of results across different seeds. The final estimates with errors as shown in table~\ref{tab:CE_results}.
+averaging the conditional entropy for each of these models. The final error on the CE estimate is comprised of the model error and the \text{seed error}, stemming from the variability of results across different seeds. The final estimates with errors as shown in table~\ref{tab:CE_results}.
 \begin{table}[htbp]
 \centering
 \caption{Final Esimation of CE per Bottleneck Dimension (all entropy values in~\si{nats})}

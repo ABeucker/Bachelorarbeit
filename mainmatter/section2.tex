@@ -9,17 +9,39 @@ A few topics:
 
 \subsection{The Cosmological Setting}
 
-For the purposes of this thesis, the standard cosmological model and an additional warm dark matter parameter are assumed.
+For the purposes of this thesis, a flat $\Lambda$CDM cosmology with an additional warm dark matter parameter is assumed. The $\Lambda$CDM-model is based on the Friedmann-Robertson-Walker metric:
+\begin{align}
+    ds^2 = -dt^2 + a^2(t) \biggl(\frac{dr^2}{1-k r^2} + r^2 \bigl(d\theta^2 + \sin^2\theta d\phi^2\bigr)\biggr).
+\end{align}
+where $a(t)$ is the dimensionless scale factor and $k$ is the curvature constant.
 
-\red{Also assuming inflation..., though this not discussed here.}
+Combined with Einstein's field equations and the assumption that the universe may be described as a perfect fluid, the dynamics of this universe are described by the Friedmann equations:
+\begin{align}
+\left( \frac{\dot{a}}{a} \right)^2 &= \frac{8 \pi G}{3} \rho + \frac{\Lambda}{3} - \frac{k}{a^2},\\
+ \quad \frac{\ddot{a}}{a} &= -\frac{4 \pi G}{3} (\rho + 3p) + \frac{\Lambda}{3}.
+\end{align}
+where $G$ is Newton's constant, $\Lambda$ is the cosmological constant and $\rho$ is the energy density of the universe. The scale factor as well as the energy density are time-dependent quantities.
 
-The standard cos
+The ratio $H = \dot{a}/a$ is called the Hubble parameter and measures how fast the universe is expanding in the following sense: given two observers at $(t_1, r_1), (t_2, r_2)$ in a FRW-universe, where observer 1 emits a signal of duration $\Delta t_1$, observer 2 seeds a scale-factor dependent dilation of the signal duration, as measured by the cosmological redshift:
+\begin{align}
+    z = \frac{\Delta t_2}{\Delta t_2} - 1 = \frac{a(t_2) - a(t_1)}{a(t_1)} > 0 \quad \text{if universe expanding}
+\end{align} 
+In the limit of $t_2 \rightarrow t_1$, if $d$ is the instantaneous distance between the observers, one then has
+\begin{align}
+    z \approx \frac{\dot{a}}{a} \biggl|_{t_1} d + \mathcal{O}((t_1-t_2)^2)
+\end{align}
+such that $H$ measures the expansion rate at a given time in units $\si{1/s}$.
 
-\red{Cite a few papers that give the current status of cosmology in $\Lambda$CDM, e.g. Planck 2018, etc.}
-
-The $\Lambda$CDM-model assumes:
+\red{Now a part on matter densities}
 
 The six parameters describing the $\Lambda$CDM-model and their estimated values today are shown in table~\ref{tab:LCDM_params}.
+
+\red{See PieNET paper:}
+
+All other cosmological parameters are fixed to the Planck measurements, assuming flat-
+ness and a cosmological constant. This means Ωb = 0.04897, $\sigma_8$ = 0.8102, h= 0.6766, and
+ns
+= 0.9665.
 
 \red{These are not the fundamental params. Choose which exactly to include.}
 % \begin{table}[caption={Parameters of  $\Lambda$CDM with estimated values}, label={tab:LCDM_params}]
@@ -52,19 +74,9 @@ Equation of state & $w$ & -1 & & Planck 2018 \\
 \end{tabular}
 \end{table}
 
+\red{Cite a few papers that give the current status of cosmology in $\Lambda$CDM, e.g. Planck 2018, etc.}
 
-\red{Need today's parameters so that can explain choice of priors}
-
-\red{Do I want a derivation of these here?}
-
-Under these assumptions, one can solve Einstein's field equations. The solutionss are the Friedmann equations:
-\begin{align}
-\left( \frac{\dot{a}}{a} \right)^2 &= \frac{8 \pi G}{3} \rho + \frac{\Lambda}{3} - \frac{k}{a^2},\\
- \quad \frac{\ddot{a}}{a} &= -\frac{4 \pi G}{3} (\rho + 3p) + \frac{\Lambda}{3}
-\end{align}
-The Friedmann equations describe the evolution of the universe \red{starting at approx THIS time}.
-
-\red{Could define redshift here}
+\red{Cite current values for all params that will be inferred}
 
 According to the cosmological standard model, the timeline of the universe is approximately as follows:
 
@@ -76,9 +88,11 @@ After recombinations, most photons propagate freely and are quickly redshifted, 
 
 Once first stars and galaxies have formed, they emit photons energetic enough to ionize the surrounding hydrogen. This period is called the \textit{epoch of reionization} (EoR). By the end of the EoR, most of the IGM is ionized and continues to be so today.
 
+\red{Need small intro on warm dark matter}
 
 
-\red{These sections are based on~\cite{PDG_2024}}
+\red{These sections are based on}
+% \cite{PDG_2024}
 
 \red{Maybe short example of how an evolution might be described...}
 

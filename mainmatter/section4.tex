@@ -64,9 +64,10 @@ In the setting of variational inference, one can use the learned posterior to es
 \begin{align}
     \mathbb{I}(X; Y) &= \int_{\mathcal{X}\times\mathcal{Y}} p(x, y) \log \frac{p(x|y)}{p(x)}~\label{eq:MI_int},
 \end{align}
-where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\cref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}~\cite{Barber_2003}:
+where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\cref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}
+% ~\cite{Barber_2003}:
 \begin{align}
-    \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_P(X,Y) \left[ \log q_\theta(x|y) - \log p(x) \right]
+    \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_{P(X,Y)} \left[ \log q_\theta(x|y) - \log p(x) \right]
 \end{align}
 This is computable, because the distribution of the prior $p(x)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(x)$ can also be estimated separately, which introduces more uncertainty in the above estimate.
 
@@ -75,10 +76,11 @@ Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on t
     \mathbb{I}(X;Y) \geq \mathbb{I}_{\text{BA}}(X;Y)
 \end{align}
 
+\red{Maybe something about the bias of the estimator oder so...}
+
 \red{Why estimating MI in high dimensions is hard, and quantify!}
 
 \red{Also another method of approximation, maybe Donsker-Varadahn (MINE) ?}
 
 \red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
 
-\red{Write about what is expected here}

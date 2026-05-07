@@ -75,6 +75,8 @@ such that $H$ measures the expansion rate at a given time in units $\si{1/s}$.
 
 The Friedmann equations describe the global expansion history of the universe under strong symmetry assumptions. Their results match observations very well: \red{citation} They act as an effective theory though, since, for example, they contain no information about specific particles and their interactions with each other \red{ausführen}. Cosmology draws on other areas of physics to answer these questions. The following gives a short summary of the history of the universe when considering these as well.
 
+\red{Maybe just have a nice image of this long text below, it's taking up lots of space.}
+
 The first phase of the universe is marked by \textit{radiation domination}. Immediately after the Big Bang, the universe underwent a period of rapid expansion called \textit{inflation}, during which space expanded by appriximately an order of $10^{26}$. This inflation was driven by the so-called inflaton field. During the following process of reheating, the energy of the inflaton field was converted to SM particles, which enabled subsequent \textit{baryogenesis}, i.e. the creation of matter and antimatter particles. In the subsequent annihilation of matter.antimatter pairs, a small excess of matter paticles survived, composing the matter content of the universe today. There have been many proposed mechaninisms for both reheating and baryogensesis, and both are active fields of research. \red{Insert sources here} In the following time scale of $20\cdot 10^{-12}\si{\s} - 1000\si{\s}$, particles acquired mass and coalesced into hadrons. Neurinos decoupled from baryons and thus the cosmic neutrino background was formed. What followed was an epoch named \textit{big bang nuceosynthesis}, during which mostly protons and neutrons bound to primordial nuclei, consisting mostly of hydrogen, Helium-4 and traces of deuteron, Helium-3 and lithium. 
 
 The second phase of the universe is marked by \textit{matter domination}. During \textit{recombination}, electrons and nuclei where bound to neutral atoms. Photons were no longer in thermal equilibrium with matter and thus ”decouple”, forming the cosmic microwave background (CMB). Measurements of the CMB today provide one of the most crucial constraints on cosmological parameters.
@@ -136,22 +138,41 @@ Equation of state & $w$ & -1 & & Planck 2018 \\
 
 \subsubsection*{The Astrophysical Setting}
 
-
+\red{Might just leave this section away, but could write something on basic astro here}
 \subsubsection*{On the Origin of the 21 cm Signal}
 
-Temperature of the ISM at around these redshifts, why neutral hydrogen does not absorb of emit visible light at these temperatures.
+The two possible electron spin states of neutral hydrogen in the $1s$ state have slightly different energy levels. The transition is forbidden, the excited state having a mean lifetime of $\sim 11\cdot 10^6~\si{yr}$. The parallel state carries slightly more energy, the offset being approximately $\Delta E \approx 10^{-6}~\si{eV}$, which corresponds to $\nu \approx 1.42~\si{GHz}$, or $\lambda = 21~\si{cm}$. 
+
+\red{Temperature of the ISM at around these redshifts, why neutral hydrogen does not absorb of emit visible light at these temperatures.}
 
 How trace elements interact with visible light at these temperatures.
-
-At least mention the possibility of a derivation 
-
-Quantum mechanical aspect: hyperfine splitting of ground state of hydrogen.
 
 Statistical mehanics aspect: spin temperature and how it is useful in measuring the 21 cm signal.
 
     - Einstein coefficients from QM
     - Different processes that influence the spin temperature, e.g. collisional coupling, Wouthuysen-Field effect, etc.
-    - Final formula for spin temperature
 
-\subsubsection*{Evolution of the 21 cm Signal}
+\red{Could have something on evolution of signal in ISM}
 
+\subsubsection*{Measuring the 21 cm Signal}
+
+The $21~\si{cm}$ signal at redshift ranges $z \sim [6-30]$ corresponds to a frequency range of $\nu\sim [46-200]~\si{MHz}$. 
+
+This range is covered by the SKA-Low setup, which is sensitive in the $\nu \sim (50-350)~\si{MHz}$ range. \red{https://www.skao.int/en/science-users/118/ska-telescope-specifications}
+
+This range belongs to the regieme of radio astronomy. Various background signals disturb the measurement of the $21~\si{cm}$ line in this frequency range:
+\begin{itemize}
+    \item   The CMB spectrum
+    \item   Astrophysical sources
+    \item   Foreground noise 
+\end{itemize}
+In the following simple description, only the CMB-spectrum will be considered, as mitigation of the other sources requires significantly more work and is a field of active research \red{maybe cite some things?}.
+
+\begin{align}
+    \delta T_B = \frac{T_S - T_\gamma}{1+z} \bigl(1-\exp^{-\tau}\bigr)  
+\end{align}
+using
+\begin{align}
+    T_S^{-1} = \frac{T_\gamma^{-1} + x_c T_K^{-1} + x_\alpha T_C^{-1}}{1+x_c+x_\alpha}
+\end{align}
+and $\tau$ has to be estimated.

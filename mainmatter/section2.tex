@@ -143,16 +143,7 @@ Equation of state & $w$ & -1 & & Planck 2018 \\
 
 The two possible electron spin states of neutral hydrogen in the $1s$ state have slightly different energy levels. The transition is forbidden, the excited state having a mean lifetime of $\sim 11\cdot 10^6~\si{yr}$. The parallel state carries slightly more energy, the offset being approximately $\Delta E \approx 10^{-6}~\si{eV}$, which corresponds to $\nu \approx 1.42~\si{GHz}$, or $\lambda = 21~\si{cm}$. 
 
-\red{Temperature of the ISM at around these redshifts, why neutral hydrogen does not absorb of emit visible light at these temperatures.}
-
-How trace elements interact with visible light at these temperatures.
-
-Statistical mehanics aspect: spin temperature and how it is useful in measuring the 21 cm signal.
-
-    - Einstein coefficients from QM
-    - Different processes that influence the spin temperature, e.g. collisional coupling, Wouthuysen-Field effect, etc.
-
-\red{Could have something on evolution of signal in ISM}
+\red{Maybe some more details on ISM at these redshifts?}
 
 \subsubsection*{Measuring the 21 cm Signal}
 
@@ -160,19 +151,60 @@ The $21~\si{cm}$ signal at redshift ranges $z \sim [6-30]$ corresponds to a freq
 
 This range is covered by the SKA-Low setup, which is sensitive in the $\nu \sim (50-350)~\si{MHz}$ range. \red{https://www.skao.int/en/science-users/118/ska-telescope-specifications}
 
+
+\red{Start by explaining this formula:}
+\begin{align}
+    \delta T_B = \frac{T_S - T_\gamma}{1+z} \bigl(1-\exp^{-\tau}\bigr)  
+\end{align}
+\red{Then go into details with the following section, which still has to be fixed:}
+
 This range belongs to the regieme of radio astronomy. Various background signals disturb the measurement of the $21~\si{cm}$ line in this frequency range:
 \begin{itemize}
     \item   The CMB spectrum
     \item   Astrophysical sources
     \item   Foreground noise 
 \end{itemize}
-In the following simple description, only the CMB-spectrum will be considered, as mitigation of the other sources requires significantly more work and is a field of active research \red{maybe cite some things?}.
+In the following, the singlet state is denoted with index $0$ and the triplet state with index $1$. Then the index $01$ denotes excitation, and $10$ de-excitation.
+
+The relative number densities of neutral hydrogen are given by Boltzmann statistics:
+\begin{align}
+    \frac{n_1}{n_0} 
+    = \frac{g_1}{g_0} \exp \biggl(-\frac{\Delta E_{10}}{k_B T_S}\biggr) 
+    \equiv \frac{g_1}{g_0} \exp \biggl(-\frac{T_\star}{T_S}\biggr),
+\end{align}
+an expression which defines the excitation temperature, in this context also called spin-temperature $T_S$. \red{Define spin temp in words...}. In thermal equilibrium, this is equal to the thermodynamic temperature of the system. 
+
+Physical processes which lead to (de-)excitation of the neutral hydrogen spin state are:
+\begin{enumerate}
+    \item   Interactions with CMB photons
+    \item   Collisions with other particles
+    \item   Wouthuysen-Field effect 
+\end{enumerate}
+\red{More on these interacions? Maybe it's also too much...}
+
+The Einstein coefficients for each of these processes will be denoted $A$ for spontaneous emission, $B$ for emission/absorption from interaction with CMB, and two effective coefficients $C$ for collision interactions and $P$ for Lyman-$\alpha$ interactions.
+
+\red{About thermal equilibrium: quote from 21 cm text: Note that the relevant timescales are all much shorter than the expansion time,
+so equilibrium is an excellent approximation.}
+
+\red{Equilibrium and Rayleigh-Jeans approximation yield:}
+
+\red{While coefficients $A$ and $B$ are given by quantum mechanics, the other two...}
+
+The exact estimation of $T_S$ is achieved through numerics.
 
 \begin{align}
-    \delta T_B = \frac{T_S - T_\gamma}{1+z} \bigl(1-\exp^{-\tau}\bigr)  
+    T_S^{-1} &= \frac{T_\gamma^{-1} + x_c T_K^{-1} + x_\alpha T_C^{-1}}{1+x_c+x_\alpha}\\
+    x_c &= \frac{C_{10}}{A_{10}}\frac{h\nu}{k_B T_\gamma}\\
+    x_\alpha &= \frac{P_{10}}{A_{10}}\frac{h\nu}{k_B T_\gamma}
 \end{align}
-using
-\begin{align}
-    T_S^{-1} = \frac{T_\gamma^{-1} + x_c T_K^{-1} + x_\alpha T_C^{-1}}{1+x_c+x_\alpha}
-\end{align}
-and $\tau$ has to be estimated.
+
+Now, $\tau$ has to be estimated:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{graphics/lightcone.png}
+    \caption{A map of the $21~\si{cm}$ signal of neutral hydrogen}
+\end{figure}
+
+\red{Will still have some comments on the figure}

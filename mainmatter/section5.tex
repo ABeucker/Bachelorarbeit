@@ -1,6 +1,10 @@
 \section{Basic Neural Networks}
 
-Traditionally, data as complex as those expected from SKA are analyzed using \red{summary statistics}. A summary statistic is a function that maps the data to a lower-dimensional space, typically with some physical interpretation. It will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
+\red{Need some intro here}
+
+\red{Also clean up notation, still a bit all over the place}
+
+Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
 \begin{align}
     \mathbb{I}(\text{L};\text{D}) 
     \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 

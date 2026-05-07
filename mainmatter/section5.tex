@@ -1,26 +1,33 @@
 \section{Basic Neural Networks}
 
-EoRFlow general description, goal etc. Why it is needed. Have figure of architecture.
+Traditionally, data as complex as those expected from SKA are analyzed using \red{summary statistics}. A summary statistic is a function that maps the data to a lower-dimensional space, typically with some physical interpretation. It will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
+\begin{align}
+    \mathbb{I}(\text{L};\text{D}) 
+    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
+    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
+\end{align}
 
-How this type of model can be used in 21 cm cosmology in general, and then how it is used here specifically.
+In a Bayesian inference task, processing these data would typically be done by choosing:
+\begin{enumerate}
+    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
+    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
+\end{enumerate}
+Given data d, one then calculates the posterior distribution:
+\begin{align}
+    p(p|d) \sim p(d|p) p(p).
+\end{align}
+In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
 
-Traditionally, data as complex as those expected from SKA are analyzed using summary statistics. A summary statistic is a function that maps the data to a lower-dimensional space, typically with some physical interpretation. An example is the power spectrum. The interpretation of the power spectrum is \red{blablabla}. However the power spectrum \red{is not a sufficient statistic} for the 21 cm signal. As an alternative, one can use a neural network to learn a summary statistic of the data. While being potentially more informative, this comes at the cost of less interpretability.
+\red{The disadvantage of this method is that one looses... }
 
-For cnn and flow:
-    - general stuff on model
-    - architecture, where it's inspired from, how it was adapted to the problem, etc
-    - loss function
-    - backpropagation 
+\red{This doesnt work as well out-of-dataset}
 
-Training
-    - details on scheduler, optimizer, etc
-    - training hyperparameters, chip used
+An advantage is that unlike with the traditional Bayesian method, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
 
-Why is a generative model needed? Why is the flow chosen? What are the advantages of flows over other generative models?
+As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
 
-Why this very specific architecture?
+\red{The summary model is chosen to be a CNN. The posterior model has to be chosen to be as flexible as possible. These two neural networks are discussed in the following.}
 
-\red{Do I want a short ML intro? Could e.g. introduce MLP here and rename section to NNs in general}
 
 \red{A word about how architectures will be discussed, e.g. notation with h, z, x, etc.}
 
@@ -75,44 +82,80 @@ where $K$ defines a pooling window for each index $i$. Typical choices for $\ope
 
 \subsection{Normalizing Flows}
 
-\red{Choose a Schreibweise. Use $p_u$ if necessary, otherwise $u \sim p(u)$?}
+A normalizing flow is a model that learns to transform a simple (often Gaussian) distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution.
 
-\red{Differentiate the true target distribution and the modelled one. Then going for Kullback Leibler of the two is equivalent to maximizing log likelihood.}
-
-A normalizing flow model is a generative model that learns to transform a simple (often Gaussian) distribution into a more complex one. The transformation is a composition of invertible functions, which are chosen to be computationally efficient to invert. 
-
-Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $x \sim p_x$ \red{how to signal that x is n-dimensional?} the target distribution.
-
-The normalizing flow learns a transformation given by an invertible function $f: \R^n \to \R^n$, such that sampling from the base distribion and applying the transfomation yields samples from the target distribution.
-
-Let $f: \R^n \to \R^n$ a differentiable, invertible function with $g = f^{-1}$ its inverse (i.e. $f$ is a diffeomorphism). Then the model is a normalizing flow if:
+Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $x \sim p_x$ with $p_x$ the $n$-dim. target distribution. Let $f: \R^n \to \R^n$ a diffeomorphism, with $g = f^{-1}$ its inverse. The training objective is to find $g$, such that
 \begin{align}
-x = f(u) \sim p_x, \quad u \sim p_u.
+    u = g(x) \sim p_u, \qquad x \text{ sampled from } p_x.
 \end{align}
-
-\red{Should have two sim signs, no? How to differentiate sampling and being part of distribution?}
-
-Once the flow is learned, the process to generate samples from $p_x$ is $u \sim p_u$ and subsequent $x = f(u)$.
-
-In order to compute $p_x(x)$ for a given $x$, on applies the change of variables formula:
+The process of generating samples from the approximated distribution is the inverse of the above:
 \begin{align}
-p_x(x) = p_u(g(x)) \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
+x = f(u) \sim q_x, \qquad u \text{ sampled from } p_u.
 \end{align}
+For a given transformation, one computes $p_x(x)$ by applying the change of variables formula:
+\begin{align}
+q_x(x) = p_u(g(x)) \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
+\end{align}
+The NLL then becomes:
+\begin{align}
+    \mathcal{L}_{\text{NF}} = - \E_{x \sim p_x} \Biggl[ \frac{|g(x)|^2}{2} + 
+    \log \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right|\Biggr]
+\end{align}
+where the first term is a regularization for the latent (in this case Gaussian) space and the second stems from the transformation. See \red{cite Plehns book} for more details.
 
-The normalizing flow becomes expressive by allowing f to be as complex as possible, while restricting f to a certain class of functions with efficiently computable Jacobian determinants makes it computationally tractable.
+The normalizing flow becomes expressive by allowing the transformation to be as complex as possible, while restricting it to a class of functions with efficiently computable Jacobian determinants makes it computationally tractable. In practice, one often models $g$ as a composition of simple neural networks, e.g. multilayer perceptrons. \red{How these are invertible...}
 
-\red{Come up with nicer notation for $g_i (\cdot | \theta_i)$}
+\red{Next few lines could also just be skipped}
 
-In practice, one often models $g$ as a composition of simple neural networks, e.g. multilayer perceptrons. Let $g_\theta = g_1 \circ g_2 \circ ... \circ g_k$ with $g_i: \R^n \to \R^n, x \mapsto g_i(x | \theta_i)$ and $k \in \N$. 
+Let $g_\theta = g_1 \circ g_2 \circ ... \circ g_k$ with $g_i: \R^n \to \R^n, x \mapsto g_i(x | \theta_i)$ and $k \in \N$. 
 
 Now the loss becomes
 \begin{align}
     \text{NLL}_\theta =  \sum_{i=1}^{k} \log \left| \det J(g_i) \right| - \log p_u (g_\theta(x))
 \end{align}
 
+\red{How to ensure it is a probabilistic model?}
+
+\red{Come up with nicer notation for $g_i (\cdot | \theta_i)$}
+
+
 \red{Now what this specific Freia flow does. Research on website!}
 
 \red{Or maybe put exact architecture in appendix?}
 
+\red{What about the B-INN in Plehns book?}
 
-\subsection{Variational Autoencoders}
+\subsection{Specific Architectures}
+
+\red{Insert sentence introducing this section. Also, find better section title}
+
+A CNN learns a compression of lightcones to a much lower-dimensional latent space. A normalizing flow learns a mapping conditioned on this latent space to the target distribution. 
+
+\red{Something about representation learning?}
+
+Examples for target distributions include the parameters used for the simulations, or a simple physical summary statistic of the image data.
+
+\red{Which construction is PIE-INN based on? Is it completely new?}
+
+One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
+
+It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
+
+\begin{figure}[]
+    \centering
+    \begin{subfigure}{0.6\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
+        \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
+        \label{fig:21cmPIE-INN_architecture}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.35\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
+        \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
+        \label{fig:EoRFlow_flow_architecture}
+    \end{subfigure}
+
+    \caption{Overall caption for both figures}
+\end{figure}

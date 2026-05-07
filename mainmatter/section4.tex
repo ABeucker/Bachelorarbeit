@@ -30,7 +30,12 @@ The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) 
 
 \red{Maybe a word about consequece of assymetry of D KL}
 
-\red{Could also talk about why mionimizing D KL is often equivalent to common optimization objectives.}
+Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to maximizing the negative log-likelihood, because
+\begin{align}
+    \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\theta) = 
+    -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
+    \bigl[ \log q_\theta \bigr] = \text{NLL} + \text{const}
+\end{align}
 
 Lastly, the \textit{mutual information} between two random variables $X$ and $Y$ is defined as:
 \begin{align}

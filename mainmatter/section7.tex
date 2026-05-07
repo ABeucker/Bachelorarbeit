@@ -1,10 +1,155 @@
-\section{Implementation}
+\section{Results}
+
+Does MI increase with accuracy on validation set? Does it increase with training time?
+
+The average runtime for training is \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. Bottleneck dimensions $1-3$ are analyzed for an estimate of lowest mutual information achievable with this model. Dimension $6$ is analyzed because it equals the amount of parameters used to simulate the original lightcones. Dimensions $14-16$ are analyzed because one naively expects the model to be able to compress the information of 15-dimensional labels in a latent space of higher dimension. Given noise and a generally hard learning task, one might need more dimensions though, which is why dimensions $25$ and $30$ are also analyzed.
+
+\red{Updates on this to come, more models will be trained!}
+
+Two sources of error in the MI estimation will be discussed. The error from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different weight initializations, i.e. seeds, will be referrred to as the \textit{seed error}.
+
+Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. Training stops after 250 epochs.
+
+\red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
+
+\red{More comments on training here}
+
+One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension. These results are summarized in table~\ref{tab:training_stability}\red{Ist noch quatsch, richtige Werte folgen}.
+\begin{table}[htbp]
+\centering
+\caption{Results on training stability}
+\label{tab:training_stability}
+\begin{tabular}{l c c c}
+\toprule
+
+Bottleneck & Best epoch & Val loss & No. samples\\
+\midrule
+4 & $38.81\pm 0.71$ & $0.39$ &  $3$ \\
+6 & $38.49\pm 0.95$ & $0.83$ & $4$ \\
+15 & $39.90\pm 0.42$ & $0.13$ & $5$ \\
+16 & $39.57\pm 0.46$ & $0.13$ &  $4$ \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_4/joint_losses.png}
+    \caption{Train and Validation Losses for Bottleneck Dimension 4}
+    \label{fig:train_val_bottle_4}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_6/joint_losses.png}
+    \caption{Train and Validation Losses for Bottleneck Dimension 4}
+    \label{fig:train_val_bottle_6}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_15/joint_losses.png}
+    \caption{Train and Validation Losses for Bottleneck Dimension 4}
+    \label{fig:train_val_bottle_15}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_16/joint_losses.png}
+    \caption{Train and Validation Losses for Bottleneck Dimension 4}
+    \label{fig:train_val_bottle_16}
+\end{figure}
+
+% \begin{figure}[]
+%     \centering
+%     \begin{subfigure}{0.49\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{graphics/ensemble_4/joint_losses.png}
+%         \caption{caption}
+%         \label{fig:ensemble_4_joint_losses}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.49\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{graphics/ensemble_4/mutual_information_bootstrapped.png}
+%         \caption{caption}
+%         \label{fig:ensemble_4_ce}
+%     \end{subfigure}
+
+%     \vspace{0.5cm}
+
+%     \begin{subfigure}{0.49\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{graphics/ensemble_6/joint_losses.png}
+%         \caption{Bottom left}
+%         \label{fig:ensemble_6_joint_losses}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.49\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{graphics/ensemble_6/mutual_information_bootstrapped.png}
+%         \caption{Bottom right}
+%         \label{fig:ensemble_6_ce}
+%     \end{subfigure}
+
+%     \caption{Overall caption for both figures}
+% \end{figure}
 
 
-\red{Maybe put choice of priors here actually. Then say that label distribution is not uniform.}
+Figures~\cref{fig:mi_bootstrap_bottle_4,fig:mi_bootstrap_bottle_6,fig:mi_bootstrap_bottle_15,fig:mi_bootstrap_bottle_16} show the estimated conditional entropy per epoch for each ensemble the model was trained on. Vertical lines again mark the epoch with best validation performance. All models reach a saturated estimate of the conditional entropy \red{in the epoch range...} The conditional entropy curves showcase a higher instability than the validation curves, which is attributed to the smaller size of the test set.
 
-The dataset consists of 5000 lightcones simulated with \red{21cmFast, cite the paper somewhere!} and the calculated neutral hydrogen fraction as labels. It is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. In preprocessing, the \red{temperature fluctuation values} are normalized individually for each lightcone \red{why is this better?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. The labels are originially 92-dimensional and are first truncated to 75 dimensions and then binned to 15-dimensional vectors. This step reduces the dimensionality of the inference problem. An additional logit transformation is applied to the labels, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state.
+The model error on the conditional entropy estimate grows with increasing training steps. Some reionization histories are attributed with very low likelihood, such that the distribution of $\log q_\theta (\text{label}_i|\text{summary}_i)$ has a heavy left-sided tail. This is in parts because of the distribution of the labels themselves. 
 
-In order to model the conditional distribution $p(x|y)$, the following steps are taken: An ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. The CNN and flow are trained jointly. Both models were trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. Training is performed on one NVIDIA A30 GPU.
+A separate normalizing flow is trained on the label distribution. \red{Discuss other possible modelling choices and why not took them} The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
 
-Unlike the original distribution of simulation parameters, the distribution of reionization history vectors is not uniform. It is therefore modelled separately. It is also modelled with a flow of the same architecture as the one from the conditional distribution, without any conditional input. This choice of model a priori adds additional uncertainty to the mutual information estimation. The idea behind choosing the same architecture to model the label distribution is that an \red{artefact} of the flow $q_\theta(x|y)$ leading to high variance in the MI estimation might be learned by $q_{\tilde{\theta}}(x)$ as well, thus leading to smaller variance in the final MI estimation.
+As an example, a histogram plot of the distributions $\log q_\theta (\text{label}_i|\text{summary}_i)$ and $\log \tilde{q}_\theta (\text{label}_i)$ is shown in figure~\red{insert figure}. 
+
+According to the CLT, one would estimate the model error by the standard deviation. The heavy kurtosis inflates the value of standard deviation. As an alternative estimate of error, a bootstrapping method is implemented. \red{Quote some source that cites this as best practice.} \red{The exact values used for bootstrapping for reproducibility.} \red{Something on interpretation of bootstrap results.}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_4/mutual_information_bootstrapped.png}
+    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
+    \label{fig:mi_bootstrap_bottle_4}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_6/mutual_information_bootstrapped.png}
+    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
+    \label{fig:mi_bootstrap_bottle_6}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_15/mutual_information_bootstrapped.png}
+    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
+    \label{fig:mi_bootstrap_bottle_15}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_16/mutual_information_bootstrapped.png}
+    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
+    \label{fig:mi_bootstrap_bottle_16}
+\end{figure}
+
+For each bottleneck dimension, the final MI estimate is made by selecting the model with best validation loss from each seed and 
+
+averaging the conditional entropy for each of these models. The final error on the CE estimate is comprised of the model error and the \text{seed error}, stemming from the variability of results across different seeds. The final estimates with errors as shown in table~\ref{tab:CE_results}\red{Noch sind das conditional-entropy werte, die aktuellen Werte folgen gleich}.
+\begin{table}[htbp]
+\centering
+\caption{Final Esimation of CE per Bottleneck Dimension (all entropy values in~\si{nats})}
+\label{tab:CE_results}
+\begin{tabular}{l c c c c}
+\toprule
+
+Bottleneck & CE & Seed error & Model error & No. samples\\
+\midrule
+4 & $38.81\pm 0.71$ & $0.39$ & $0.12$ & $3$ \\
+6 & $38.49\pm 0.95$ & $0.83$ & $0.06$ & $4$ \\
+15 & $39.90\pm 0.42$ & $0.13$ & $0.05$ & $5$ \\
+16 & $39.57\pm 0.46$ & $0.13$ & $0.09$ & $4$ \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+These results can be described as follows: One does observe a general trend of increasing mutual information for increased bottleneck dimension, though the increase is not monotonous. In all cases, the seed error is larger than the model error, indicating training instablity to be the largest source of error in this setup. 
+
+\red{This indicates the seed error being overestimated? Maybe have to exclude some model. Talk about decision mechanisms and how this introduces bias}
+
+\red{Results if including selection bias}

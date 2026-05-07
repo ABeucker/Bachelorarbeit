@@ -1,13 +1,29 @@
-\section{Physics Background}
+\section{Introduction}
 
-A few topics:
-    - short introduction to history of universe
-    - then focus on EoR
-    - 21 cm signal from QM and how it can be used to learn about the EoR
+\red{I am currently still fighting with the citations, that will hopefully soon be resolved.}
+
+The current cosmological standard model predicts the epoch of Cosmic Dawn (CD) and the subsequent Epoch of Reionization (EoR) as mechanisms for star and structure formation and the following ionization of the intergalactic medium (IGM) at a redshift range of roughly $z \sim [5-20]$. A number of sources from multi-messenger astronomer have contributed to this current model: Scattering of CMB photons on free electrons during and after reionization can be detected once IGM became ionized significantly enough. This places the beginning of EoR at $z \sim 8$, though with a large uncertainty
+% ~\cite{Schosser_2026}. 
+Lymann-alpha forests in the spectra of distant quasars and galaxies are used to estimate the neutral hydrogen fraction at low redshifts, placing the end of the EoR at around \red{add here }\red{citation}. The JWST with an observational range of $z \sim \red{...}$ measures earliest galaxies and will be able to additionally constrain the speed of galaxy evolution.
+
+A comparatively new probe is that of the $21~\si{cm}$ hyperfine transition line of neutral hydrogen, which constitutes a background spectrum similar to that of the CMB. It is the only known probe with which the Dark Ages could be studied and also the one to study CD to the highest redshifts. First experiments have measured \red{reionization profiles in terms of power spectra and signals of possible dark matter presence} \red{cite}. Much better results are expected from the Square Kilometer Array (SKA) Observatory, which is a radio telescope currently in construction which will image the $21~\si{cm}$ line of the IGM at a redshift range of $z \sim [6-30]$ with unprecedented accuracy. Hopes are that this signal can be used to significantly improve the current understanding of the reionization history and structure formation and possibly act as a new dark matter probe.
+
+There are multiple difficulties in interpreting the $21~\si{cm}$ signal. Traditional Gaussian summary statistics do not capture enough of the signal's structure, reflecting the fact that the processes being observed are highly nonlinear. This also entails that the likelihood of the $21~\si{cm}$ signal is intractible. Additionally, the foreground contamination for ground-based observatories such as the SKA will be significant. 
+
+These challenges of non-Gaussianity and foreground noise motivate the use of neural networks for the analysis of SKA data. \red{Another sentence on NNs here.} Neural networks are nowadays commonly used in Bayesian inference, which attempts to reconcile prior knowledge and empirical data in order to find optimal parameters describing, for example, our universe. 
+
+The issue of an intractible likelihood is tackled with so-called simulation-based inference. The idea behind SBI is to train a NN on simulated data, were the inference parameters are known. Once the model is trained, inference is amortized: the model can perform inference on real data with the pre-trained model inexpensively. The prerequisite is, of course, that the model generalizes well from the training data to the real data. This approach has successfully bin implemented in \red{ergänzen}.
+
+Not all models are equally good for a given problem and as a consequence, the choice of model introduces bias to the inference. In an attempt to find a principled way to choose a model, one can use methods developed in information theory, which can here be used to quantify the quality of a model. 
+
+In this thesis, a model typically used in parameter inference for simulated SKA-data will be analyzed with the methods of information theory.
+% ~\cite{pdg_2024}
+
+\subsection{Theoretical Background}
 
 \red{Still need some more subsections to explain the other parameters being examined}
 
-\subsection{The Cosmological Setting}
+\subsubsection*{The Cosmological Setting}
 
 For the purposes of this thesis, a flat $\Lambda$CDM cosmology with an additional warm dark matter parameter is assumed. The $\Lambda$CDM-model is based on the Friedmann-Robertson-Walker metric:
 \begin{align}
@@ -22,6 +38,31 @@ Combined with Einstein's field equations and the assumption that the universe ma
 \end{align}
 where $G$ is Newton's constant, $\Lambda$ is the cosmological constant and $\rho$ is the energy density of the universe. The scale factor as well as the energy density are time-dependent quantities.
 
+Given the equation of state, $p = \omega \rho$, one finds for the density of different matter species:
+\begin{align}
+    \rho \sim \frac{\rho_0}{a^{3(1+\omega)}}
+\end{align}
+which yields the behavior of densities of 
+\begin{enumerate}
+    \item   Radiation: $\rho_r \sim 1/a^4$
+    \item   Matter: $\rho_m \sim 1/a^3$
+    \item   Vacuum energy: $\rho_\Lambda \sim \text{const}$
+\end{enumerate}
+Allowing matter, radiation and the cosmological constant to all be present, the Friedmann equation becomes
+\begin{align}
+    \biggl(\frac{\dot{a}}{a}\biggr)^2 + \frac{\kappa}{a^2} = 
+    \frac{8 \pi G}{3}(\rho_m + \rho_r) + \frac{\Lambda}{3}.~\label{eq:Friedmann}
+\end{align}
+By defining the Hubble parameter
+\begin{equation}
+    H = \frac{\dot{a}}{a}
+\end{equation}
+and dividing~\cref{eq:Friedmann} by $H^2$, one can identify the three terms on the r.h.s with energy densities:
+\begin{align}
+    1 + \frac{\kappa}{H^2 a^2} = \Omega_m + \Omega_r + \Omega_\Lambda
+\end{align}
+Knowledge of these density parameters therefore allows to determine the evolution of the scale factor $a$. \red{Refer to conservation laws etc that allow to fix the densities}
+
 The ratio $H = \dot{a}/a$ is called the Hubble parameter and measures how fast the universe is expanding in the following sense: given two observers at $(t_1, r_1), (t_2, r_2)$ in a FRW-universe, where observer 1 emits a signal of duration $\Delta t_1$, observer 2 seeds a scale-factor dependent dilation of the signal duration, as measured by the cosmological redshift:
 \begin{align}
     z = \frac{\Delta t_2}{\Delta t_2} - 1 = \frac{a(t_2) - a(t_1)}{a(t_1)} > 0 \quad \text{if universe expanding}
@@ -32,18 +73,19 @@ In the limit of $t_2 \rightarrow t_1$, if $d$ is the instantaneous distance betw
 \end{align}
 such that $H$ measures the expansion rate at a given time in units $\si{1/s}$.
 
-\red{Now a part on matter densities}
+The Friedmann equations describe the global expansion history of the universe under strong symmetry assumptions. Their results match observations very well: \red{citation} They act as an effective theory though, since, for example, they contain no information about specific particles and their interactions with each other \red{ausführen}. Cosmology draws on other areas of physics to answer these questions. The following gives a short summary of the history of the universe when considering these as well.
 
-The six parameters describing the $\Lambda$CDM-model and their estimated values today are shown in table~\ref{tab:LCDM_params}.
+The first phase of the universe is marked by \textit{radiation domination}. Immediately after the Big Bang, the universe underwent a period of rapid expansion called \textit{inflation}, during which space expanded by appriximately an order of $10^{26}$. This inflation was driven by the so-called inflaton field. During the following process of reheating, the energy of the inflaton field was converted to SM particles, which enabled subsequent \textit{baryogenesis}, i.e. the creation of matter and antimatter particles. In the subsequent annihilation of matter.antimatter pairs, a small excess of matter paticles survived, composing the matter content of the universe today. There have been many proposed mechaninisms for both reheating and baryogensesis, and both are active fields of research. \red{Insert sources here} In the following time scale of $20\cdot 10^{-12}\si{\s} - 1000\si{\s}$, particles acquired mass and coalesced into hadrons. Neurinos decoupled from baryons and thus the cosmic neutrino background was formed. What followed was an epoch named \textit{big bang nuceosynthesis}, during which mostly protons and neutrons bound to primordial nuclei, consisting mostly of hydrogen, Helium-4 and traces of deuteron, Helium-3 and lithium. 
 
-\red{See PieNET paper:}
+The second phase of the universe is marked by \textit{matter domination}. During \textit{recombination}, electrons and nuclei where bound to neutral atoms. Photons were no longer in thermal equilibrium with matter and thus ”decouple”, forming the cosmic microwave background (CMB). Measurements of the CMB today provide one of the most crucial constraints on cosmological parameters.
 
-All other cosmological parameters are fixed to the Planck measurements, assuming flat-
-ness and a cosmological constant. This means Ωb = 0.04897, $\sigma_8$ = 0.8102, h= 0.6766, and
-ns
-= 0.9665.
+After recombinations, most photons propagate freely and are quickly redshifted, such that the universe becomes dark. This period is therefore called the \textit{dark ages}. Matter has not yet coalesced into stars and galaxies. The main source of photons \red{visible phtons?} is the 21 cm emission line of neutral hydrogen. 
 
-\red{These are not the fundamental params. Choose which exactly to include.}
+Once first stars and galaxies have formed, they emit photons energetic enough to ionize the surrounding hydrogen. This period is called the \textit{epoch of reionization} (EoR). By the end of the EoR, most of the IGM is ionized and continues to be so today.
+
+\red{Some important cosmological params with definitions and their values nowadays, cite PDG}
+
+
 % \begin{table}[caption={Parameters of  $\Lambda$CDM with estimated values}, label={tab:LCDM_params}]
 %     Name & Symbole & Value & Unit & Source \\
 %     Hubble constant & $H_0$ & 67.4 & \si{\kilo\meter\per\second\per\Mpc} & Planck 2018 \\
@@ -78,39 +120,24 @@ Equation of state & $w$ & -1 & & Planck 2018 \\
 
 \red{Cite current values for all params that will be inferred}
 
-According to the cosmological standard model, the timeline of the universe is approximately as follows:
 
-The first phase of the universe is marked by \textit{radiation domination}. Immediately after the Big Bang, the universe underwent a period of rapid expansion called \textit{inflation}, during which space expanded by appriximately an order of $10^{26}$. This inflation was driven by the so-called inflaton field. During the following process of reheating, the energy of the inflaton field was converted to SM particles, which enabled subsequent \textit{baryogenesis}, i.e. the creation of matter and antimatter particles. In the subsequent annihilation of matter.antimatter pairs, a small excess of matter paticles survived, composing the matter content of the universe today. There have been many proposed mechaninisms for both reheating and baryogensesis, and both are active fields of research. \red{Insert sources here} In the following time scale of $20\cdot 10^{-12}\si{\s} - 1000\si{\s}$, particles acquired mass and coalesced into hadrons. Neurinos decoupled from baryons and thus the cosmic neutrino background was formed. What followed was an epoch named \textit{big bang nuceosynthesis}, during which mostly protons and neutrons bound to primordial nuclei, consisting mostly of hydrogen, Helium-4 and traces of deuteron, Helium-3 and lithium. 
-
-The second phase of the universe is marked by \textit{matter domination}. During \textit{recombination}, electrons and nuclei where bound to neutral atoms. Photons were no longer in thermal equilibrium with matter and thus ”decouple”, forming the cosmic microwave background (CMB). Measurements of the CMB today provide one of the most crucial constraints on cosmological parameters.
-
-After recombinations, most photons propagate freely and are quickly redshifted, such that the universe becomes dark. This period is therefore called the \textit{dark ages}. Matter has not yet coalesced into stars and galaxies. The main source of photons \red{visible phtons?} is the 21 cm emission line of neutral hydrogen. 
-
-Once first stars and galaxies have formed, they emit photons energetic enough to ionize the surrounding hydrogen. This period is called the \textit{epoch of reionization} (EoR). By the end of the EoR, most of the IGM is ionized and continues to be so today.
 
 \red{Need small intro on warm dark matter}
 
-
-\red{These sections are based on}
-% \cite{PDG_2024}
-
-\red{Maybe short example of how an evolution might be described...}
 
 
 \red{How other cosmological models can be tested with the EorFlow setup, maybe also put this somewhere else.}
 
 \red{What is matter distribution at the redshift when beginning study?}
 
-\red{Brief summary of CMB}
-
 \red{Small overview of existing studies of timeline of universe, why there is a gap in EoR}
 
 \red{Maybe cite more recent paper that explains why studying this exact regime of redshifts}
 
-\subsection{The Astrophysical Setting}
+\subsubsection*{The Astrophysical Setting}
 
 
-\subsection{On the Origin of the 21 cm Signal}
+\subsubsection*{On the Origin of the 21 cm Signal}
 
 Temperature of the ISM at around these redshifts, why neutral hydrogen does not absorb of emit visible light at these temperatures.
 
@@ -126,5 +153,5 @@ Statistical mehanics aspect: spin temperature and how it is useful in measuring 
     - Different processes that influence the spin temperature, e.g. collisional coupling, Wouthuysen-Field effect, etc.
     - Final formula for spin temperature
 
-\subsection{Evolution of the 21 cm Signal}
+\subsubsection*{Evolution of the 21 cm Signal}
 

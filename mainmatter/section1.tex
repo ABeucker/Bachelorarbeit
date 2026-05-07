@@ -36,23 +36,4 @@ Standard probability theory notation is adopted. In particular, the following no
     \item   $p_X$ for the density function of a probability measure $P$, index might be dropped if notation is clear
     \item   $X \sim p$ for a random variable X whose distribution is described by $p$
 \end{itemize}
-
-\section{Introduction}
-
-\red{I am currently still fighting with the citations, that will hopefully soon be resolved.}
-
-The current cosmological standard model predicts the epoch of Cosmic Dawn (CD) and the subsequent Epoch of Reionization (EoR) as mechanisms for star and structure formation and the following ionization of the intergalactic medium (IGM) at a redshift range of roughly $z \sim [5-20]$. A number of sources from multi-messenger astronomer have contributed to this current model: Scattering of CMB photons on free electrons during and after reionization can be detected once IGM became ionized significantly enough. This places the beginning of EoR at $z \sim 8$, though with a large uncertainty
-% ~\cite{Schosser_2026}. 
-Lymann-alpha forests in the spectra of distant quasars and galaxies are used to estimate the neutral hydrogen fraction at low redshifts, placing the end of the EoR at around \red{add here }\red{citation}. The JWST with an observational range of $z \sim \red{...}$ measures earliest galaxies and will be able to additionally constrain the speed of galaxy evolution.
-
-A comparatively new probe is that of the $21~\si{cm}$ hyperfine transition line of neutral hydrogen, which constitutes a background spectrum similar to that of the CMB. It is the only known probe with which the Dark Ages could be studied and also the one to study CD to the highest redshifts. First experiments have measured \red{reionization profiles in terms of power spectra and signals of possible dark matter presence} \red{cite}. Much better results are expected from the Square Kilometer Array (SKA) Observatory, which is a radio telescope currently in construction which will image the $21~\si{cm}$ line of the IGM at a redshift range of $z \sim [6-30]$ with unprecedented accuracy. Hopes are that this signal can be used to significantly improve the current understanding of the reionization history and structure formation and possibly act as a new dark matter probe.
-
-There are multiple difficulties in interpreting the $21~\si{cm}$ signal. Traditional Gaussian summary statistics do not capture enough of the signal's structure, reflecting the fact that the processes being observed are highly nonlinear. This also entails that the likelihood of the $21~\si{cm}$ signal is intractible. Additionally, the foreground contamination for ground-based observatories such as the SKA will be significant. 
-
-These challenges of non-Gaussianity and foreground noise motivate the use of neural networks for the analysis of SKA data. \red{Another sentence on NNs here.} Neural networks are nowadays commonly used in Bayesian inference, which attempts to reconcile prior knowledge and empirical data in order to find optimal parameters describing, for example, our universe. 
-
-The issue of an intractible likelihood is tackled with so-called simulation-based inference. The idea behind SBI is to train a NN on simulated data, were the inference parameters are known. Once the model is trained, inference is amortized: the model can perform inference on real data with the pre-trained model inexpensively. The prerequisite is, of course, that the model generalizes well from the training data to the real data. This approach has successfully bin implemented in \red{ergänzen}.
-
-Not all models are equally good for a given problem and as a consequence, the choice of model introduces bias to the inference. In an attempt to find a principled way to choose a model, one can use methods developed in information theory, which can here be used to quantify the quality of a model. 
-
-In this thesis, a model typically used in parameter inference for simulated SKA-data will be analyzed with the methods of information theory. 
+When discussing neural networks, the symbol $q$ or $q_\theta$ will be used for the model of a true distribution $p$.

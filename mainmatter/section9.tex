@@ -1,31 +1,9 @@
-\section{Interpretation}
+\section{Outlook}
 
-Possible interpretations of the results:
+How one could incorporate information geometry for similar problems
 
-The flow seems to be overcondident, because of the long negative tail in log probability plot. If choosing MI estimation from earlier epochs, get smaller error! This is due to observed overfitting and still improving performance.
+Any idea how to numerically resolve $F_{ij}$ for this flow?
 
-Could overconfidence be due to the choice of priors?
+Alternative choices than to model instead of $p(x|y)$ and $p(x)$?
 
-Alternative interpretation:
-
-The CNN learns the latent space. If the weights of the CNN aren't updated enough and the flow is doing too much of the heavy lifting, then the latent space structure might be hard to estimate, resulting in long negative tail.
-
-
-Check to see wether the extreme models are the reason for this, or if this is a problem with the flow.
-
-The seed uncertainty for this model is very high, given \red{some numbers here}. The high sensitivity towards weight initialization points towards unstable training. 
-
-Once possible explanation for this instability could be the choice of hyperparameters. For example, a large learning rate might magnify an initially chaotic training process, causing the model to end in different minimia of the loss landscape. 
-
-Another possibility is the choice of architecture. For example, the flow might be too deep given the data. While one might expect the need for a deep architecture to infer 15-dimensional labels, these labels are likely highly correlated across dimensions \red{because of curve shape etc}, making the problem easier than naively expected. The fact that one observes an early saturation in mutual information across bottleneck sizes supports the latter statement.
-
-Of course, there is always the possibility of there being too little training data. Choosing larger parts of the training set for validation and testing indeed showed an increase in overfitting towards the end of training.
-
-\red{Something about consistency of MI estimate, since e.g. CE estimate is not larger zero from beginning. Maybe cite from paper?}
-
-\red{From paper: "In par-
-ticular, higher estimated MI between observations and learned representations do not seem to indi-
-cate improved predictive performance when the representations are used for downstream supervised
-learning tasks (Tschannen et al., 2019)."}
-
-\red{This is also reflected in these data, where MI is sometimes higher! In case not making mistake in indexing in results code.}
+The compressing network usually has a much heavier architecture. Once it has been trained, one can learn different lighter networks to map its summary to different target distributions. \red{This is only really true in the self-supervised case, see SKATR. So Maybe this should go in outlook}

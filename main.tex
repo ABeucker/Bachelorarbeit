@@ -1,33 +1,23 @@
 \documentclass[12pt]{article}
 
 % --- Präambeln ---
-\input{preamble_2.tex}
-\input{math_preamble.tex} 
+\input{preamble.tex}
+\input{preamble_utils.tex} 
 
 % ---------- Frontmatter ----------
 
-\title{Title}
-\author{Your Name}
-\date{\today}
-
 \begin{document}
-
-\maketitle
-
-\selectlanguage{english}
-\begin{abstract}
-Abstract text.
-\end{abstract}
-
-\selectlanguage{german}
-\begin{abstract}
-Abstract text.
-\end{abstract}
+\input{frontmatter/title_page.tex}
 
 % ---------- Mainmatter ----------
 
 \selectlanguage{english}
+
+\newpage
+\tableofcontents
+\newpage
 \input{mainmatter/section1.tex}
+\newpage
 \input{mainmatter/section2.tex}
 \input{mainmatter/section3.tex}
 \input{mainmatter/section4.tex}
@@ -36,7 +26,6 @@ Abstract text.
 \input{mainmatter/section7.tex}
 \input{mainmatter/section8.tex}
 \input{mainmatter/section9.tex}
-\input{mainmatter/section10.tex}
 
 % ---------- Backmatter ----------
 \newpage

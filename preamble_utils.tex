@@ -1,9 +1,13 @@
 %-------------------GENERAL--------------------
-\usepackage{amsmath,latexsym, amssymb, dsfont}
+
 \usepackage{braket}
+
+%-----------------CHEMISTRY------------------
+\usepackage[version=4]{mhchem}
 
 %-------------------UNITS--------------------
 \usepackage{siunitx}
+\sisetup{detect-all}
 \DeclareSIUnit{\Mpc}{Mpc}
 \DeclareSIUnit{\solarMass}{\ensuremath{M_\odot}}
 \DeclareSIUnit{\erg}{erg}
@@ -47,3 +51,8 @@
 %-------------THEOREM ENVIRONMENTS-------------
 
 %Hier bei Bedarf Definitionen der Theorem-Umgebungen.
+
+% =========================================================
+% UTIL
+% =========================================================
+\newcommand{\red}[1]{\textcolor{red}{#1}}

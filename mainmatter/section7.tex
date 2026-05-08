@@ -14,13 +14,18 @@
 
 \green{As for error estimations, I will compare the CLT error estimate (np.std ...) with a bootstrap estimate to get a feeling for wether CLT assumptions are fulfilled. Turns out this is the case.}
 
-Each model is trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) were tested. Given a model, the estimation of conditional entropy and mutual information will both be shown. These are done on the model with the best performance on the validation set.
+Each model is trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions are analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) are tested. The held-out test set consisting of $10\%$ of the total dataset ($500$ samples) is used to obtain estimates on the conditional entropy as well as the mutual information:
+\begin{align}
+    \hat{\text{CE}} &= \E \bigl[\log q_\theta (l|s)\bigr] \\
+    \hat{\text{MI}} &= \E \bigl[\log q_\theta (l|s) - q_\phi (l)\bigr] 
+\end{align}
+For each training run, the CE/MI estimation is done on the model with the best validation performance. 
 
-Two sources of error in the MI estimation will be discussed. The error from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different seeds will be referrred to as the \textit{seed error}.
+Two sources of error in the estimation are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the \textit{model error}. This is estimated from the standard deviation and confirmed by bootstrap analysis, see below. When comparing results across seeds, an additional \textit{seed error} must be considered, which is also estimated from the standard deviation of the results. 
 
 Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. 
 
-Table \red{referece} shows the estimated conditional entropy for each model analyzed. All entropy values are given in nats. \red{observations...}
+Table~\ref{tab:CE_all_res} shows the estimated conditional entropy for each model. All entropy values are given in nats. \red{observations...}
 
 \begin{table}[htbp]
 \centering
@@ -37,6 +42,7 @@ Table \red{referece} shows the estimated conditional entropy for each model anal
 
 \bottomrule
 \end{tabular}
+\label{tab:CE_all_res}
 \end{table}
 
 \begin{table}[htbp]
@@ -54,6 +60,7 @@ Table \red{referece} shows the estimated conditional entropy for each model anal
 
 \bottomrule
 \end{tabular}
+\label{tab:MI_all_res}
 \end{table}
 
 

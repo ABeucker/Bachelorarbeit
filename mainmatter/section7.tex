@@ -1,14 +1,16 @@
 \section{Results}
 
-\green{I have recalculated my results and am currently rewriting this section. Results will be different (and better!)}
+\green{I have recalculated my results and am currently rewriting this section. Results are much better. I see increase in mutual information, though not too significant. I was making mistakes in the error calculations though.}
 
 \green{Procedure, while I am still rewriting this section:}
 
-\green{For each model, get all values log p(labels|summary) for the test set}
+\green{For each model, get all values log p(labels|summary) for the test set. Then calculate conditional entropy and error from the mean and std or these log p values.}
 
-\green{I have trained separate models for p(labels), these will be considered as well}
+\green{I have trained separate models for p(labels), these can be subtracted from  log p(labels|summary) to get MI estimate, though introducing some bias. Still see increase in MI though}
 
-\green{Bit within a given seed, the conditinoal entropy of log p(labels|summary) should hopefully increase already}
+\green{I will have results for CE and MI estimations for same seed, different bottlenecks}
+
+\green{I will also have results for CE and MI estimations averaged across seeds and bottlenecks}
 
 Each model was trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. A number of bottleneck dimensions as well as a number of different weight initializations (seeds) were tested.
 

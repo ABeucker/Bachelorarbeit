@@ -1,6 +1,6 @@
 \section{Results}
 
-\green{I have recalculated my results and am currently rewriting this section. Results are much better. I see increase in mutual information, though not too significant. I was making mistakes in the error calculations though.}
+\red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
 
 \green{Procedure, while I am still rewriting this section:}
 
@@ -14,36 +14,68 @@
 
 \green{As for error estimations, I will compare the CLT error estimate (np.std ...) with a bootstrap estimate to get a feeling for wether CLT assumptions are fulfilled. Turns out this is the case.}
 
-Each model was trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. A number of bottleneck dimensions as well as a number of different weight initializations (seeds) were tested.
+Each model is trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) were tested. Given a model, the estimation of conditional entropy and mutual information will both be shown. These are done on the model with the best performance on the validation set.
 
-\red{Updates on this to come, more models will be trained!}
-
-Two sources of error in the MI estimation will be discussed. The error from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different seeds, will be referrred to as the \textit{seed error}.
+Two sources of error in the MI estimation will be discussed. The error from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different seeds will be referrred to as the \textit{seed error}.
 
 Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. 
 
-\red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
+Table \red{referece} shows the estimated conditional entropy for each model analyzed. All entropy values are given in nats. \red{observations...}
 
-\red{More comments on training here}
-
-One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension. These results are summarized in table~\ref{tab:training_stability}\red{Ist noch quatsch, richtige Werte folgen}.
 \begin{table}[htbp]
 \centering
-\caption{Results on training stability}
-\label{tab:training_stability}
-\begin{tabular}{l c c c}
+\caption{CE estimates across bottleneck dims $N_\text{dim}$ in nats}
+\begin{tabular}{c | c c c}
 \toprule
-
-Bottleneck & Best epoch & Val loss & No. samples\\
+\diagbox{$N_{\text{dim}}$}{Seed} & 12 & 14 & 30 \\
 \midrule
-4 & $38.81\pm 0.71$ & $0.39$ &  $3$ \\
-6 & $38.49\pm 0.95$ & $0.83$ & $4$ \\
-15 & $39.90\pm 0.42$ & $0.13$ & $5$ \\
-16 & $39.57\pm 0.46$ & $0.13$ &  $4$ \\
+4  & $38.88 \pm 0.89$ & - &  $37.68 \pm 0.42$ \\
+6  & $36.75 \pm 0.40$ & - & $40.25 \pm 0.70$ \\
+15 & $39.64 \pm 0.52$ & $40.15 \pm 0.59$ & $40.61 \pm 0.37$ \\
+16 & $39.81 \pm 0.38$ & $40.17 \pm 0.50$ &  $39.72 \pm 0.68$ \\
+25 & - & - & $40.22 \pm 0.57$  \\
 
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{MI estimates across bottleneck dims $N_\text{dim}$ in nats}
+\begin{tabular}{c | c c c c}
+\toprule
+\diagbox{$N_{\text{dim}}$}{Seed} & 12 & 14 & 30 \\
+\midrule
+4  & $6.00 \pm 0.73$ & - &  $4.76 \pm 0.31$ \\
+6  & $3.87 \pm 0.30 $ & - & $7.24 \pm 0.61$ \\
+15 & $6.70 \pm 0.45$ & $7.25 \pm 0.48$ & $7.74 \pm 0.25$ \\
+16 & $6.94 \pm 0.29$ & $7.31 \pm 0.39$ &  $6.81 \pm 0.57$ \\
+25 & - & - & $7.34 \pm 0.47$  \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension. These results are summarized in table \red{reference coming soon}
+% \begin{table}[htbp]
+% \centering
+% \caption{Results on training stability}
+% \label{tab:training_stability}
+% \begin{tabular}{l c c c}
+% \toprule
+
+% Bottleneck & Best epoch & Val loss & No. samples\\
+% \midrule
+% 4 & $38.81\pm 0.71$ & $0.39$ &  $3$ \\
+% 6 & $38.49\pm 0.95$ & $0.83$ & $4$ \\
+% 15 & $39.90\pm 0.42$ & $0.13$ & $5$ \\
+% 16 & $39.57\pm 0.46$ & $0.13$ &  $4$ \\
+
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{graphics/ensemble_4/joint_losses.png}
@@ -140,22 +172,21 @@ According to the CLT, one would estimate the model error by the standard deviati
     \label{fig:mi_bootstrap_bottle_16}
 \end{figure}
 
-For each bottleneck dimension, the final MI estimate is made by selecting the model with best validation loss from each seed and 
-
-averaging the conditional entropy for each of these models. The final error on the CE estimate is comprised of the model error and the \text{seed error}, stemming from the variability of results across different seeds. The final estimates with errors as shown in table~\ref{tab:CE_results}\red{Noch sind das conditional-entropy werte, die aktuellen Werte folgen gleich}.
+The final estimates of conditiona entropy with errors as shown in table~\ref{tab:CE_results}. The total estimated errors as well as separate seed and model errors are listed.
 \begin{table}[htbp]
 \centering
-\caption{Final Esimation of CE per Bottleneck Dimension (all entropy values in~\si{nats})}
+\caption{Final Esimation of CE per Bottleneck Dimension in nats}
 \label{tab:CE_results}
 \begin{tabular}{l c c c c}
 \toprule
 
 Bottleneck & CE & Seed error & Model error & No. samples\\
 \midrule
-4 & $38.81\pm 0.71$ & $0.39$ & $0.12$ & $3$ \\
-6 & $38.49\pm 0.95$ & $0.83$ & $0.06$ & $4$ \\
-15 & $39.90\pm 0.42$ & $0.13$ & $0.05$ & $5$ \\
-16 & $39.57\pm 0.46$ & $0.13$ & $0.09$ & $4$ \\
+4  & $38.28 ± 0.48$ & $0.35$ & $0.32$ & $2$ \\
+6  & $38.47 ± 1.02$ & $0.99$ & $0.27$ & $2$ \\
+15 & $40.12 ± 0.24$ & $0.16$ & $0.18$ & $3$ \\
+16 & $39.91 ± 0.25$ & $0.10$ & $0.23$ & $3$ \\
+25 & $40.20 ± 0.59$ &   -    & $0.59$ & $1$ \\
 
 \bottomrule
 \end{tabular}

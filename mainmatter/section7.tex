@@ -84,13 +84,9 @@ Table~\ref{tab:CE_all_res} shows the estimated conditional entropy for each mode
 \end{tabular}
 \label{tab:MI_all_res}
 \end{table}
-
-
-A separate normalizing flow is trained on the label distribution. \red{Discuss other possible modelling choices and why not took them} The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
+A separate normalizing flow is trained on the label distribution. The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
 
 As an example, a histogram plot of the distributions $\log q_\theta (\text{label}_i|\text{summary}_i)$ and $\log \tilde{q}_\theta (\text{label}_i)$ is shown in figure~\red{insert figure}. 
-
-According to the CLT, one would estimate the model error by the standard deviation. The heavy kurtosis inflates the value of standard deviation. As an alternative estimate of error, a bootstrapping method is implemented. \red{Quote some source that cites this as best practice.} \red{The exact values used for bootstrapping for reproducibility.} \red{Something on interpretation of bootstrap results.}
 
 
 The final estimates of conditiona entropy with errors as shown in table~\ref{tab:CE_results}. The total estimated errors as well as separate seed and model errors are listed.

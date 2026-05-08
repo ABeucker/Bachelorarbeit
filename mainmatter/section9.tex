@@ -2,10 +2,13 @@
 
 \green{Hi Caroline, in case you're already reading this, I finally got the CNN to train on the 6-param inference problem as well! It even works if I attach a small MLP head to the end, which means I am now running pretraining also on larger bottleneck dims (since pretraining needs MSE error with original 6 params, I needed to add a small network that changes bottleneck dim output -> six dim outut). I hope smaller bottleneck dims will work as well!  $\smiley$} 
 
+See~\ref{fig:joint_loss_example} for an example of joint training loss after pretraining both models.
+
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{graphics/screnshot1.png}
     \caption{Joint loss after pretraining}
+    \label{fig:joint_loss_example}
 \end{figure}
 
 

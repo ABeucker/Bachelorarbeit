@@ -1,14 +1,20 @@
 \section{Results}
 
-Does MI increase with accuracy on validation set? Does it increase with training time?
+\green{Procedure, while I am still rewriting this section:}
 
-The average runtime for training is \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. Bottleneck dimensions $1-3$ are analyzed for an estimate of lowest mutual information achievable with this model. Dimension $6$ is analyzed because it equals the amount of parameters used to simulate the original lightcones. Dimensions $14-16$ are analyzed because one naively expects the model to be able to compress the information of 15-dimensional labels in a latent space of higher dimension. Given noise and a generally hard learning task, one might need more dimensions though, which is why dimensions $25$ and $30$ are also analyzed.
+\green{For each model, get all values log p(labels|summary) for the test set}
+
+\green{I have trained separate models for p(labels), these will be considered as well}
+
+\green{Bit within a given seed, the conditinoal entropy of log p(labels|summary) should hopefully increase already}
+
+Each model was trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions were analyzed. A number of bottleneck dimensions as well as a number of different weight initializations (seeds) were tested.
 
 \red{Updates on this to come, more models will be trained!}
 
-Two sources of error in the MI estimation will be discussed. The error from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different weight initializations, i.e. seeds, will be referrred to as the \textit{seed error}.
+Two sources of error in the MI estimation will be discussed. The error from one training run, stemming from the variability of log probability values on the test set, will be referred to as the \textit{model error}. The error of the MI estimation stemming from different seeds, will be referrred to as the \textit{seed error}.
 
-Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. Training stops after 250 epochs.
+Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. 
 
 \red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
 

@@ -2,17 +2,7 @@
 
 \red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
 
-\green{Procedure, while I am still rewriting this section:}
-
-\green{For each model, get all values log p(labels|summary) for the test set. Then calculate conditional entropy and error from the mean and std or these log p values.}
-
-\green{I have trained separate models for p(labels), these can be subtracted from  log p(labels|summary) to get MI estimate, though introducing some bias. Still see increase in MI though}
-
-\green{I will have results for CE and MI estimations for same seed, different bottlenecks}
-
-\green{I will also have results for CE and MI estimations averaged across seeds and bottlenecks}
-
-\green{As for error estimations, I will compare the CLT error estimate (np.std ...) with a bootstrap estimate to get a feeling for wether CLT assumptions are fulfilled. Turns out this is the case.}
+\red{A word on bootstrap error calculations for comparison}
 
 Each model is trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions are analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) are tested. The held-out test set consisting of $10\%$ of the total dataset ($500$ samples) is used to obtain estimates on the conditional entropy as well as the mutual information:
 \begin{align}
@@ -23,7 +13,39 @@ For each training run, the CE/MI estimation is done on the model with the best v
 
 Two sources of error in the estimation are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the \textit{model error}. This is estimated from the standard deviation and confirmed by bootstrap analysis, see below. When comparing results across seeds, an additional \textit{seed error} must be considered, which is also estimated from the standard deviation of the results. 
 
-Figures~\cref{fig:train_val_bottle_4,fig:train_val_bottle_6,fig:train_val_bottle_15,fig:train_val_bottle_16} show the training and validation losses for each ensemble the model was trained on. Vertical lines indicate the epoch with best validation performance. 
+As an example, the training and validation losses for an ensemble of runs with bottleneck dimension $N_\text{dim}=15$ are shown in figure~\ref{fig:train_val_bottle_15}. Vertical lines indicate the epoch with best validation performance. \red{Observations...} The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. 
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_15/joint_losses_excluded.png}
+    \caption{Train and Validation Losses for Bottleneck Dimension 15}
+    \label{fig:train_val_bottle_15}
+\end{figure}
+In order to compare the training processes, table~\ref{tab:training_stability} summarizes losses, epochs until convergence and seed variance for different bottleneck dimensions. One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension.(\red{Table almost ready, results coming soon})
+\begin{table}[htbp]
+\centering
+\caption{Results on training stability}
+\label{tab:training_stability}
+\begin{tabular}{l c c c}
+\toprule
+
+Bottleneck & Best epoch & Val loss & No. samples\\
+\midrule
+4 & $38.81\pm 0.71$ & $0.39$ &  $3$ \\
+6 & $38.49\pm 0.95$ & $0.83$ & $4$ \\
+15 & $39.90\pm 0.42$ & $0.13$ & $5$ \\
+16 & $39.57\pm 0.46$ & $0.13$ &  $4$ \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+As an example, figure~\ref{fig:mi_bootstrap_bottle_15} showcases how the conditional entropy estimate evolves during model training for the ensemble with bottleneck dimension $N_\text{dim}=15$. Vertical lines again indicate the epoch with best validation performance. All models reach a saturated estimate of the conditional entropy \red{in the epoch range...} The conditional entropy curves showcase a higher instability than the validation curves, which is attributed to the smaller size of the test set. All other ensemble plots are in the appendix (\red{reference coming soon}).
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{graphics/ensemble_15/conditional_entropy_standard_excluded.png}
+    \caption{Conditional Entropy per Epoch for Bottleneck Dimension 15}
+    \label{fig:ce_bottle_15}
+\end{figure}
+The model error on the conditional entropy estimate grows with increasing training steps. Some reionization histories are attributed with very low likelihood, such that the distribution of $\log q_\theta (\text{label}_i|\text{summary}_i)$ has a heavy left-sided tail. This is in parts because of the distribution of the labels themselves. 
 
 Table~\ref{tab:CE_all_res} shows the estimated conditional entropy for each model. All entropy values are given in nats. \red{observations...}
 
@@ -64,120 +86,12 @@ Table~\ref{tab:CE_all_res} shows the estimated conditional entropy for each mode
 \end{table}
 
 
-One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension. These results are summarized in table \red{reference coming soon}
-% \begin{table}[htbp]
-% \centering
-% \caption{Results on training stability}
-% \label{tab:training_stability}
-% \begin{tabular}{l c c c}
-% \toprule
-
-% Bottleneck & Best epoch & Val loss & No. samples\\
-% \midrule
-% 4 & $38.81\pm 0.71$ & $0.39$ &  $3$ \\
-% 6 & $38.49\pm 0.95$ & $0.83$ & $4$ \\
-% 15 & $39.90\pm 0.42$ & $0.13$ & $5$ \\
-% 16 & $39.57\pm 0.46$ & $0.13$ &  $4$ \\
-
-% \bottomrule
-% \end{tabular}
-% \end{table}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_4/joint_losses.png}
-    \caption{Train and Validation Losses for Bottleneck Dimension 4}
-    \label{fig:train_val_bottle_4}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_6/joint_losses.png}
-    \caption{Train and Validation Losses for Bottleneck Dimension 4}
-    \label{fig:train_val_bottle_6}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_15/joint_losses.png}
-    \caption{Train and Validation Losses for Bottleneck Dimension 4}
-    \label{fig:train_val_bottle_15}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_16/joint_losses.png}
-    \caption{Train and Validation Losses for Bottleneck Dimension 4}
-    \label{fig:train_val_bottle_16}
-\end{figure}
-
-% \begin{figure}[]
-%     \centering
-%     \begin{subfigure}{0.49\textwidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{graphics/ensemble_4/joint_losses.png}
-%         \caption{caption}
-%         \label{fig:ensemble_4_joint_losses}
-%     \end{subfigure}
-%     \hfill
-%     \begin{subfigure}{0.49\textwidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{graphics/ensemble_4/mutual_information_bootstrapped.png}
-%         \caption{caption}
-%         \label{fig:ensemble_4_ce}
-%     \end{subfigure}
-
-%     \vspace{0.5cm}
-
-%     \begin{subfigure}{0.49\textwidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{graphics/ensemble_6/joint_losses.png}
-%         \caption{Bottom left}
-%         \label{fig:ensemble_6_joint_losses}
-%     \end{subfigure}
-%     \hfill
-%     \begin{subfigure}{0.49\textwidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{graphics/ensemble_6/mutual_information_bootstrapped.png}
-%         \caption{Bottom right}
-%         \label{fig:ensemble_6_ce}
-%     \end{subfigure}
-
-%     \caption{Overall caption for both figures}
-% \end{figure}
-
-
-Figures~\cref{fig:mi_bootstrap_bottle_4,fig:mi_bootstrap_bottle_6,fig:mi_bootstrap_bottle_15,fig:mi_bootstrap_bottle_16} show the estimated conditional entropy per epoch for each ensemble the model was trained on. Vertical lines again mark the epoch with best validation performance. All models reach a saturated estimate of the conditional entropy \red{in the epoch range...} The conditional entropy curves showcase a higher instability than the validation curves, which is attributed to the smaller size of the test set.
-
-The model error on the conditional entropy estimate grows with increasing training steps. Some reionization histories are attributed with very low likelihood, such that the distribution of $\log q_\theta (\text{label}_i|\text{summary}_i)$ has a heavy left-sided tail. This is in parts because of the distribution of the labels themselves. 
-
 A separate normalizing flow is trained on the label distribution. \red{Discuss other possible modelling choices and why not took them} The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
 
 As an example, a histogram plot of the distributions $\log q_\theta (\text{label}_i|\text{summary}_i)$ and $\log \tilde{q}_\theta (\text{label}_i)$ is shown in figure~\red{insert figure}. 
 
 According to the CLT, one would estimate the model error by the standard deviation. The heavy kurtosis inflates the value of standard deviation. As an alternative estimate of error, a bootstrapping method is implemented. \red{Quote some source that cites this as best practice.} \red{The exact values used for bootstrapping for reproducibility.} \red{Something on interpretation of bootstrap results.}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_4/mutual_information_bootstrapped.png}
-    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
-    \label{fig:mi_bootstrap_bottle_4}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_6/mutual_information_bootstrapped.png}
-    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
-    \label{fig:mi_bootstrap_bottle_6}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_15/mutual_information_bootstrapped.png}
-    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
-    \label{fig:mi_bootstrap_bottle_15}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_16/mutual_information_bootstrapped.png}
-    \caption{Mutual Information per Epoch for Bottleneck Dimension 4}
-    \label{fig:mi_bootstrap_bottle_16}
-\end{figure}
 
 The final estimates of conditiona entropy with errors as shown in table~\ref{tab:CE_results}. The total estimated errors as well as separate seed and model errors are listed.
 \begin{table}[htbp]

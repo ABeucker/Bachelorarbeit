@@ -7,12 +7,48 @@ ness and a cosmological constant. This means Ωb = 0.04897, $\sigma_8$ = 0.8102,
 ns
 = 0.9665.
 
-\red{Maybe put choice of priors here actually. Then say that label distribution is not uniform.}
+Training is performed on one NVIDIA A30 GPU.
 
-The dataset consists of 5000 lightcones simulated with \red{21cmFast, cite the paper somewhere!} and the calculated neutral hydrogen fraction as labels. It is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. In preprocessing, the \red{temperature fluctuation values} are normalized individually for each lightcone \red{why is this better?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. The labels are originially 92-dimensional and are first truncated to 75 dimensions and then binned to 15-dimensional vectors. This step reduces the dimensionality of the inference problem. An additional logit transformation is applied to the labels, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The total dataset has a size of \red{insert current size}.
+\subsection{The dataset}
 
-In order to model the conditional distribution $p(x|y)$, the following steps are taken: An ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. The CNN and flow are trained jointly. Both models were trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. Training is performed on one NVIDIA A30 GPU.
+The dataset consists of 5000 lightcones simulated with \red{21cmFast, cite the paper somewhere!} where the simulation parameters are drawn from the priors in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The dataset is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
+
+\red{See comments on redshift range in Benedicts paper}
+
+\begin{table}[htbp]
+\centering
+\caption{Parameters used for the simulations}
+\label{tab:sim_params}
+\begin{tabular}{p{6cm} l l}
+
+\toprule
+Name & Symbol & Prior \\
+\midrule
+Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
+Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
+Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
+Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
+Specific X-ray luminosity & $\sigma_8$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
+X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Inference of the neutral hydrogen fraction}
+
+For inference of the neutral hydrogen fraction, the lightcones are preprocessed as in \red{reference yannics paper}: The \red{temperature fluctuation values} are min-max-normalized individually for each lightcone \red{Motivation from CNN?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. This allows the labels to first be truncated to 75 dimensions and then binned to 15-dimensional vectors. This step reduces the dimensionality of the inference problem. \red{Any additional reason for lightcone truncation?} An additional logit transformation is applied to the labels, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The total dataset has a size of \red{insert current size}.
+
+In order to model the conditional distribution $p(x|y)$, an ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. The CNN and flow are trained jointly. Both models are trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. 
+
+\red{Talk about significant difficulties with training here, and data methods used to improve training speed. Also mention gradient accumulation.}
 
 Unlike the original distribution of simulation parameters, the distribution of reionization history vectors is not uniform. It therefore has to be modeled separately. It is modeled with a flow of the same architecture as the one from the conditional distribution, without any conditional input. An additional prior model adds uncertainty to the mutual information estimation. The idea behind choosing the same architecture to model the label distribution is that an \red{artefact} of the flow $q_\theta(x|y)$ leading to high variance in the MI estimation might be learned by $q_{\tilde{\theta}}(x)$ as well, thus leading to smaller variance in the final MI estimation.
 
-\red{Discuss other possible modelling choices and why not took them}
+\subsection{Inference of the simulation parameters}
+
+For inference of the simulation parameters, the data are preprocessed as in \red{reference benedicts paper}: The lightcones are kept in their original dimensionality and lightcones as well as labels are globally standardized.
+
+\red{Talk about adjusting CNN architecture here}
+
+The conditional distribution $p(x|y)$ is again modelled with an ensemble of models for different bottleneck dimensions. Training is done with AdamW optimization and the ReduceLROnPlateau scheduler, but without a scaler. b

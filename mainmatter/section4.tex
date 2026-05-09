@@ -49,6 +49,8 @@ An alternative formulation in terms of entropy is:
 \end{align}
 Mutual information is symmetric and nonnegative. It is zero iff X and Y are independent and becomes maximal iff $X = Y$. One interprets it's value as the amount of information obtained about one random variable while observing another.
 
+\red{Something about how MI is sensitive to higher moments, maybe this can tease why one needs X amount of samples in MI estimation?}
+
 \subsection{Mutual Information Estimation}
 
 In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the \textit{data processing inequality}, which in this context can be phrased as follows:
@@ -80,6 +82,8 @@ Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on t
 \begin{align}
     \mathbb{I}(X;Y) \geq \mathbb{I}_{\text{BA}}(X;Y)
 \end{align}
+
+\red{Estimating the error of this estimate from the true value?}
 
 \red{Maybe something about the bias of the estimator oder so...}
 

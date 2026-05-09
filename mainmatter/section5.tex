@@ -85,7 +85,6 @@ where $K$ defines a pooling window for each index $i$. Typical choices for $\ope
 
 \red{Put it together here, potentially add image of total architecture.}
 
-
 \subsection{Normalizing Flows}
 
 A normalizing flow is a model that learns to transform a simple (often Gaussian) distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution.
@@ -102,7 +101,7 @@ For a given transformation, one computes $p_x(x)$ by applying the change of vari
 \begin{align}
 q_x(x) = p_u(g(x)) \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
 \end{align}
-The NLL then becomes:
+The NLL is the loss function used for optimization, which then becomes:
 \begin{align}
     \mathcal{L}_{\text{NF}} = - \E_{x \sim p_x} \Biggl[ \frac{|g(x)|^2}{2} + 
     \log \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right|\Biggr]
@@ -146,6 +145,12 @@ Examples for target distributions include the parameters used for the simulation
 One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
 
 It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
+
+Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is
+\begin{align}
+    \mathcal{L}_{\text{NPE}} = - \E_{(x,\theta) \sim p(x,\theta)} \Biggl[ \frac{|g(\theta|s(x))|^2}{2} + 
+    \log \left| \det \left( \frac{\partial g(\theta|s(x))}{\partial \theta} \right) \right|\Biggr].
+\end{align}
 
 \begin{figure}[]
     \centering

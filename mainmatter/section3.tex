@@ -1,47 +1,232 @@
-\section{Simulations}
+\subsection{Basic Neural Networks}
+
+\red{Need some intro here}
+
+\red{Also clean up notation, still a bit all over the place}
 
 
-\red{Will explain remaining physical quantities being inferred here}
+\subsubsection*{Convolutional Neural Networks}
 
-21 cm fast
+CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. An early version was successfully implemented in 1983 with Fukushima's ”Neucognitron”~\red{Neocognitron citation}. An architecture implementing backpropagation was LeCun's ”LeNet”~\red{LeNet citation}.
 
-The parameters used, and the priors on them. Why these parameters? What do they mean physically?
+To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will first be discussed in 1D. The generalization to higher dimensions will be discussed afterwards.
 
-The six parameters and their priors chosen for the simulations in this project are summarized in table~\ref{tab:sim_params}. The priors are chosen to be uniform and constrained to a range motivated by multimessenger observations.
-% \begin{table}[caption={Parameters used for the simulations}, label={tab:sim_params}]
-%     Name & Symbol & Prior \\
-%     Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
-%     Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
-%     Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
-%     Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
-%     Specific X-ray luminosity & $\sigma_8$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
-%     X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
-% \end{table}
+Let $X$ denote the \red{data space} and $Y$ the feature space. 
 
-\begin{table}[htbp]
-\centering
-\caption{Parameters used for the simulations}
-\label{tab:sim_params}
-\begin{tabular}{p{6cm} l l}
+Let the input have dimensions $x \in \R^{C\times H \times W}$ where C the channel dimension, H the height dimension and W the width dimension. In case of an RGB image, this channel dimension would be three. 
 
-\toprule
-Name & Symbol & Prior \\
-\midrule
-Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
-Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
-Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
-Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
-Specific X-ray luminosity & $\sigma_8$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
-X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
+The CNN learns a function $f_\theta: X \rightarrow Y$. 
 
-\bottomrule
-\end{tabular}
-\end{table}
+As opposed to a simple MLP, the CNN offers the following advantages:
 
-interpretation of data
+\red{Using summation convention}
 
-Noise simulations
+\red{Not writing bias explicitly}
+
+A basic MLP consists of only one type of layer. If $h$ is the output of the previous layer, the current layer is defined by
+\begin{align}
+    z_i = \phi(W_{ij} h_j),
+\end{align}
+The CNN implements additional layers.
+
+A convolutional layer applies a convolution operaton:
+
+\red{Talk abt convolution vs cross-correlation here}
+
+\red{Is this def even correct? Not need different indices on h?}
+\begin{align}
+    z_i = \phi(\left[w \circledast h\right]_i) = \phi(\sum_k w_k h_{i+k})
+\end{align}
+where the dimensionality of the kernel $w\in \R^K$ is typically much lower than that of the data.
+
+A pooling layer applies a pooling operation:
+\begin{align}
+    z_i = \operatorname{pool} K_{ij}h_j
+\end{align}
+where $K$ defines a pooling window for each index $i$. Typical choices for $\operatorname{pool}$ are $\operatorname{maxpool}$, which chooses the maximum of all given values, or $\operatorname{meanpool}$, which calculates their mean.
+
+\red{The purpose of a pooling layer is to...}
+
+\red{Add normalization layers here}
+
+\red{Add info on stride params etc here}
+
+\red{Hier kann man schon ein bisschen mehr schreiben, this is all very basic. More info on the CNN specific to this project to come.}
+
+\red{Put it together here, potentially add image of total architecture.}
+
+\red{Also missing MSE loss function as usual loss}
+
+\subsubsection*{Normalizing Flows}
+
+A normalizing flow is a model that learns to transform a simple (often Gaussian) distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution.
+
+Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $x \sim p_x$ with $p_x$ the $n$-dim. target distribution. Let $f: \R^n \to \R^n$ a diffeomorphism, with $g = f^{-1}$ its inverse. The training objective is to find $g$, such that
+\begin{align}
+    u = g(x) \sim p_u, \qquad x \text{ sampled from } p_x.
+\end{align}
+The process of generating samples from the approximated distribution is the inverse of the above:
+\begin{align}
+x = f(u) \sim q_x, \qquad u \text{ sampled from } p_u.
+\end{align}
+For a given transformation, one computes $p_x(x)$ by applying the change of variables formula:
+\begin{align}
+q_x(x) = p_u(g(x)) \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
+\end{align}
+The NLL is the loss function used for optimization, which then becomes:
+\begin{align}
+    \mathcal{L}_{\text{NF}} = - \E_{x \sim p_x} \Biggl[ \frac{|g(x)|^2}{2} + 
+    \log \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right|\Biggr]
+\end{align}
+where the first term is a regularization for the latent (in this case Gaussian) space and the second stems from the transformation. See \red{cite Plehns book} for more details.
+
+The normalizing flow becomes expressive by allowing the transformation to be as complex as possible, while restricting it to a class of functions with efficiently computable Jacobian determinants makes it computationally tractable. In practice, one often models $g$ as a composition of simple neural networks, e.g. multilayer perceptrons. \red{How these are invertible...}
+
+\red{Next few lines could also just be skipped}
+
+Let $g_\theta = g_1 \circ g_2 \circ ... \circ g_k$ with $g_i: \R^n \to \R^n, x \mapsto g_i(x | \theta_i)$ and $k \in \N$. 
+
+Now the loss becomes
+\begin{align}
+    \text{NLL}_\theta =  \sum_{i=1}^{k} \log \left| \det J(g_i) \right| - \log p_u (g_\theta(x))
+\end{align}
+
+\red{How to ensure it is a probabilistic model?}
+
+\red{Come up with nicer notation for $g_i (\cdot | \theta_i)$}
 
 
-\red{How reioniazation history is calculated}
+\red{Now what this specific Freia flow does. Research on website!}
+
+\red{Or maybe put exact architecture in appendix?}
+
+\red{What about the B-INN in Plehns book?}
+
+\subsection{Neural Posterior Estimation}
+
+Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
+\begin{align}
+    \mathbb{I}(\text{L};\text{D}) 
+    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
+    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
+\end{align}
+
+In a Bayesian inference task, processing these data would typically be done by choosing:
+\begin{enumerate}
+    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
+    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
+\end{enumerate}
+Given data d, one then calculates the posterior distribution:
+\begin{align}
+    p(p|d) \sim p(d|p) p(p).
+\end{align}
+In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
+
+\red{The disadvantage of this method is that one looses... }
+
+\red{This doesnt work as well out-of-dataset}
+
+An advantage is that unlike with the traditional Bayesian method, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
+
+As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
+
+\red{The summary model is chosen to be a CNN. The posterior model has to be chosen to be as flexible as possible. These two neural networks are discussed in the following.}
+
+
+\red{A word about how architectures will be discussed, e.g. notation with h, z, x, etc.}
+
+\subsection{Information Theory and Neural Estimators}
+
+Information theory: 
+    - Entropy, KL divergence, mutual information
+    - Interpretation of these quantities, maybe expectation?
+
+Information geometry:
+    - Fisher information metric, geodesic distance, curvature
+    - Interpretation of these quantities, maybe expectation?
+
+\subsubsection*{Some Basic Measures in Information Theory}
+Given a random variable $X \sim p$, the \textit{entropy} of $X$ is defined as:
+\begin{align}
+\mathbb{H}(X) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
+\end{align}
+If the logarithm is chosen as with base 2, one defines the unit of this quantity as bits. If one uses the natural logarithm, the entropy is measured in units of nats. 
+
+Entropy is a measure of the uncertainty of a random variable. A high entropy corresponds to a lack of predictability of the random variable's outcome. As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. One therefore considers entropy to be a measure of the amount of information contained in the random variable's distribution.
+
+The generalization to conditional entropy is:
+\begin{align}
+    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right]
+\end{align} 
+
+Another important metric in information theory is the \textit{Kullback-Leibler divergence}. Let $X \sim p$ and $Y \sim q$ be two random variables over the same sample space. The KL-divergence between $p$ and $q$ is defined as:
+\begin{align}
+\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0
+\end{align}
+The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
+
+\red{Maybe a word about consequece of assymetry of D KL}
+
+Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to maximizing the negative log-likelihood, because
+\begin{align}
+    \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\theta) = 
+    -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
+    \bigl[ \log q_\theta \bigr] = \text{NLL} + \text{const}
+\end{align}
+
+Lastly, the \textit{mutual information} between two random variables $X$ and $Y$ is defined as:
+\begin{align}
+\mathbb{I}(X; Y)
+         &= \mathbb{D}_{\text{KL}}(p(X, Y) || p_X(X) p_Y(Y)) \geq 0.
+\end{align}
+An alternative formulation in terms of entropy is:
+\begin{align}
+    \mathbb{I}(X; Y) = \mathbb{H}(X) - \mathbb{H}(X | Y) 
+    = \mathbb{H}(Y) - \mathbb{H}(Y | X).
+\end{align}
+Mutual information is symmetric and nonnegative. It is zero iff X and Y are independent and becomes maximal iff $X = Y$. One interprets it's value as the amount of information obtained about one random variable while observing another.
+
+\red{Something about how MI is sensitive to higher moments, maybe this can tease why one needs X amount of samples in MI estimation?}
+
+\subsubsection*{Mutual Information Estimation}
+
+In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the \textit{data processing inequality}, which in this context can be phrased as follows:
+
+Let $X$, $Y$ and $Z$ be random variables where $X$ is the original data, $Y$ is a learned summary of $X$ and $Z$ is a label associated with $X$. These form a Markov chain $X \rightarrow Y \rightarrow Z$, where $Z$ is only inferred from $Y$. Then $Z$ cannot contain more information about $X$ than $Y$, so
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}(X;Z)
+\end{align}
+A good representation keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. \red{Mit Formel unterstützen}
+
+\red{It also captures more information than just covariance!}
+
+\red{Something on summary statistics?}
+
+In practice, this necessitates an estimation of mutual information between the representation and the target distribution. 
+
+In the setting of variational inference, one can use the learned posterior to estimate mutual information in a natural way, described in the following:
+\begin{align}
+    \mathbb{I}(X; Y) &= \int_{\mathcal{X}\times\mathcal{Y}} p(x, y) \log \frac{p(x|y)}{p(x)}~\label{eq:MI_int},
+\end{align}
+where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\cref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}
+% ~\cite{Barber_2003}:
+\begin{align}
+    \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_{P(X,Y)} \left[ \log q_\theta(x|y) - \log p(x) \right]
+\end{align}
+This is computable, because the distribution of the prior $p(x)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(x)$ can also be estimated separately, which introduces more uncertainty in the above estimate.
+
+Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on the true mutual information:
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}_{\text{BA}}(X;Y)
+\end{align}
+
+\red{Estimating the error of this estimate from the true value?}
+
+\red{Maybe something about the bias of the estimator oder so...}
+
+\red{Why estimating MI in high dimensions is hard, and quantify!}
+
+\red{Also another method of approximation, maybe Donsker-Varadahn (MINE) ?}
+
+\red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
 

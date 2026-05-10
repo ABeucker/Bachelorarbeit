@@ -135,28 +135,17 @@ Equation of state & $w$ & -1 & & Planck 2018 \\
 \red{Small overview of existing studies of timeline of universe, why there is a gap in EoR}
 
 \red{Maybe cite more recent paper that explains why studying this exact regime of redshifts}
-
-\subsubsection*{The Astrophysical Setting}
-
-\red{Might just leave this section away, but could write something on basic astro here}
-\subsubsection*{On the Origin of the 21 cm Signal}
+\subsubsection*{Theoremhe 21 cm Signal}
 
 The two possible electron spin states of neutral hydrogen in the $1s$ state have slightly different energy levels. The transition is forbidden, the excited state having a mean lifetime of $\sim 11\cdot 10^6~\si{yr}$. The parallel state carries slightly more energy, the offset being approximately $\Delta E \approx 10^{-6}~\si{eV}$, which corresponds to $\nu \approx 1.42~\si{GHz}$, or $\lambda = 21~\si{cm}$. 
 
-\red{Maybe some more details on ISM at these redshifts?}
+In the following, the singlet state is denoted with index $0$ and the triplet state with index $1$. Then the index $01$ denotes excitation, and $10$ de-excitation.
 
-\subsubsection*{Measuring the 21 cm Signal}
+\red{Maybe some more details on ISM at these redshifts?}
 
 The $21~\si{cm}$ signal at redshift ranges $z \sim [6-30]$ corresponds to a frequency range of $\nu\sim [46-200]~\si{MHz}$. 
 
 This range is covered by the SKA-Low setup, which is sensitive in the $\nu \sim (50-350)~\si{MHz}$ range. \red{https://www.skao.int/en/science-users/118/ska-telescope-specifications}
-
-
-\red{Start by explaining this formula:}
-\begin{align}
-    \delta T_B = \frac{T_S - T_\gamma}{1+z} \bigl(1-\exp^{-\tau}\bigr)  
-\end{align}
-\red{Then go into details with the following section, which still has to be fixed:}
 
 This range belongs to the regieme of radio astronomy. Various background signals disturb the measurement of the $21~\si{cm}$ line in this frequency range:
 \begin{itemize}
@@ -164,17 +153,40 @@ This range belongs to the regieme of radio astronomy. Various background signals
     \item   Astrophysical sources
     \item   Foreground noise 
 \end{itemize}
-In the following, the singlet state is denoted with index $0$ and the triplet state with index $1$. Then the index $01$ denotes excitation, and $10$ de-excitation.
+Modelling noice of astrophysical sources and of the foreground is in practice the greatest challenge, but the correction for the CMB spectrum can be given in the following.
+
+The $21~\si{cm}$ signal is given in terms of brightness offset temperature $\delta T_B$ which is calculated from the specific intensity measured by a radio telescope, assuming the Rayleigh-Jeans regieme. Let $\nu$ be the frequency at which the $21~\si{cm}$ signal is to be observed. The signal is then composed of the background CMB radiation and the radiation emitted from clouds of neutral hydrogen, minus the CMB radiation absorbed in the neutral hydrogen cloud. This is expressed as 
+\begin{align}
+    \frac{dI}{ds} = -\alpha(\nu) I_\gamma + \alpha(\nu) I_S~\label{eq:specific_intensity}
+\end{align}
+where $I_\gamma$ denotes the CMB specific intensity, $I_S$ that of the emission of the $21~\si{cm}$ signal from the neutral hydrogen cloud and $\alpha(\nu)$ the absorption coefficient of neutral hydrogen.
+
+The observered specific intensity $I_B$ is obtained by solving the radiative transfer equation from~\ref{eq:specific_intensity}, yielding:
+\begin{align}
+    I_B &= I_S (1-\exp^{-\tau})+I_\gamma \exp^{-\tau}\\
+    \tau(\nu) &= \int \alpha(\nu) ds
+\end{align}
+where $\tau$ is the so-called optical depth. This carries the interpretation that for an optically thick material, $\tau >> 1$, the signal is dominated by the $21~\si{cm}$ signal and for an optically thin material,  $\tau << 1$, by CMB radiation. 
+
+In the Rayleigh-Jeans regieme, this observed specific intensity is proportional to the temperature. Adding the redshift correction for the CMB temperature, this yields
+\begin{align}
+    T_{B0}(1+z) = T_S (1-\exp^{-\tau})+T_0 (1+z)\exp^{-\tau}. 
+\end{align}
+Finally, the brightness offset temperature is obtained by subtracting the CMB background:
+\begin{align}
+    \delta T_B = T_{B0} - T_0 = \frac{T_S - T_\gamma}{1+z}(1-\exp^{-\tau}).~\label{eq:delta_T_simple}
+\end{align}
+The quantities $T_S$ and $\tau$ have to be estimated. In practice, this is done numerically. In the following are some comments on the procedure.
 
 The relative number densities of neutral hydrogen are given by Boltzmann statistics:
 \begin{align}
     \frac{n_1}{n_0} 
     = \frac{g_1}{g_0} \exp \biggl(-\frac{\Delta E_{10}}{k_B T_S}\biggr) 
-    \equiv \frac{g_1}{g_0} \exp \biggl(-\frac{T_\star}{T_S}\biggr),
+    \equiv \frac{g_1}{g_0} \exp \biggl(-\frac{T_\star}{T_S}\biggr),~\label{eq:Boltzmann}
 \end{align}
 an expression which defines the excitation temperature, in this context also called spin-temperature $T_S$. \red{Define spin temp in words...}. In thermal equilibrium, this is equal to the thermodynamic temperature of the system. 
 
-Physical processes which lead to (de-)excitation of the neutral hydrogen spin state are:
+Physical processes which lead to (de-)excitation of the neutral hydrogen spin state and therefore to a change of $T_S$ are:
 \begin{enumerate}
     \item   Interactions with CMB photons
     \item   Collisions with other particles
@@ -182,7 +194,7 @@ Physical processes which lead to (de-)excitation of the neutral hydrogen spin st
 \end{enumerate}
 \red{More on these interacions? Maybe it's also too much...}
 
-The Einstein coefficients for each of these processes will be denoted $A$ for spontaneous emission, $B$ for emission/absorption from interaction with CMB, and two effective coefficients $C$ for collision interactions and $P$ for Lyman-$\alpha$ interactions.
+The rates for each of these processes are described by the Einstein coefficients, which will be denoted $A$ for spontaneous emission, $B$ for emission/absorption from interaction with CMB, and two effective coefficients $C$ for collision interactions and $P$ for Lyman-$\alpha$ interactions. These measure the rate of interactions in units of probability per unit time per unit spectral energy density.
 
 \red{About thermal equilibrium: quote from 21 cm text: Note that the relevant timescales are all much shorter than the expansion time,
 so equilibrium is an excellent approximation.}
@@ -191,20 +203,90 @@ so equilibrium is an excellent approximation.}
 
 \red{While coefficients $A$ and $B$ are given by quantum mechanics, the other two...}
 
-The exact estimation of $T_S$ is achieved through numerics.
-
 \begin{align}
     T_S^{-1} &= \frac{T_\gamma^{-1} + x_c T_K^{-1} + x_\alpha T_C^{-1}}{1+x_c+x_\alpha}\\
     x_c &= \frac{C_{10}}{A_{10}}\frac{h\nu}{k_B T_\gamma}\\
     x_\alpha &= \frac{P_{10}}{A_{10}}\frac{h\nu}{k_B T_\gamma}
 \end{align}
 
-Now, $\tau$ has to be estimated:
+Now, $\tau$ has to be estimated. The absorption coefficient measures the probability of an interaction per frequency and unit distance. Given an Einstein coefficient X, it is given by 
+\begin{align}
+    \alpha(\nu) = \frac{h\nu}{c}~X~n~\phi(\nu)
+\end{align}
+where $n$ is number density of atoms partaking in the interaction and $\phi$ is the line profile normalized to one. Then one finds for neutral hydrogen:
+\begin{align}
+    \alpha(\nu) 
+    &= \frac{h\nu}{c}(B_{01}n_0 - B_{10}n_1)\phi(\nu)\\
+    &\approx \frac{h\nu}{c}n_0 B_{01}\frac{h \nu}{k_B T_S}\phi(\nu),
+\end{align}
+the approximation coming from equation~\ref{eq:Boltzmann}. There are multiple physical effects to be considered in correcting this approximation, and in the end one obtains
+\begin{align}
+    \tau(\nu) &= A(\nu) \frac{x_{HI}n_H }{T_S H(z)}\\
+    A(\nu) &= \frac{3c^2 h A_{10}}{32 \pi \nu^2 k_B}
+\end{align}
+Using separate estimations for $n_H$ and $H(z)$, one obtains a more detailed approximation of the brightness offset temperature from~\ref{eq:delta_T_simple} in the limit $\tau << 1$:
+\begin{align}
+    \delta T_B \approx 27~x_{\text{HI}}(1+\delta_b)\biggl(1-\frac{T_\gamma}{T_S}\biggr)
+    \biggl(\frac{1+z}{10}\frac{0.15}{\Omega_{m,0}h^2}\biggr)^{1/2}\biggl(\frac{\Omega_{b,0}h^2}{0.023}\biggr)~\si{mK}~\label{eq:brightness_offset_final}
+\end{align} 
+with $\delta_b$ the fluctuation of baryon content and $x_{\text{HI}}$ the neutral hydrogen fraction.
+
+From the expression in equation~\ref{eq:brightness_offset_final}, it becomes clear that if $T_S > T_\gamma$, the measured brightness offset is positive and vice versa. 
+
 
 \begin{figure}
     \centering
     \includegraphics[width=0.7\linewidth]{graphics/lightcone.png}
     \caption{A map of the $21~\si{cm}$ signal of neutral hydrogen}
+    \label{fig:lightcone}
 \end{figure}
 
 \red{Will still have some comments on the figure}
+
+\subsection{Simulating 21cm data}
+
+
+\red{Will explain remaining physical quantities being inferred here}
+
+21 cm fast
+
+The parameters used, and the priors on them. Why these parameters? What do they mean physically?
+
+The six parameters and their priors chosen for the simulations in this project are summarized in table~\ref{tab:sim_params}. The priors are chosen to be uniform and constrained to a range motivated by multimessenger observations.
+% \begin{table}[caption={Parameters used for the simulations}, label={tab:sim_params}]
+%     Name & Symbol & Prior \\
+%     Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
+%     Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
+%     Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
+%     Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
+%     Specific X-ray luminosity & $\sigma_8$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
+%     X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
+% \end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Parameters used for the simulations}
+\label{tab:sim_params}
+\begin{tabular}{p{6cm} l l}
+
+\toprule
+Name & Symbol & Prior \\
+\midrule
+Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
+Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
+Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
+Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
+Specific X-ray luminosity & $\sigma_8$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
+X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+interpretation of data
+
+Noise simulations
+
+
+\red{How reioniazation history is calculated}
+

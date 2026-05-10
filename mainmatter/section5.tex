@@ -1,41 +1,11 @@
-\section{Basic Neural Networks}
+\subsection{Basic Neural Networks}
 
 \red{Need some intro here}
 
 \red{Also clean up notation, still a bit all over the place}
 
-Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
-\begin{align}
-    \mathbb{I}(\text{L};\text{D}) 
-    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
-    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
-\end{align}
 
-In a Bayesian inference task, processing these data would typically be done by choosing:
-\begin{enumerate}
-    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
-    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
-\end{enumerate}
-Given data d, one then calculates the posterior distribution:
-\begin{align}
-    p(p|d) \sim p(d|p) p(p).
-\end{align}
-In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
-
-\red{The disadvantage of this method is that one looses... }
-
-\red{This doesnt work as well out-of-dataset}
-
-An advantage is that unlike with the traditional Bayesian method, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
-
-As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
-
-\red{The summary model is chosen to be a CNN. The posterior model has to be chosen to be as flexible as possible. These two neural networks are discussed in the following.}
-
-
-\red{A word about how architectures will be discussed, e.g. notation with h, z, x, etc.}
-
-\subsection{Convolutional Neural Networks}
+\subsubsection*{Convolutional Neural Networks}
 
 CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. An early version was successfully implemented in 1983 with Fukushima's ”Neucognitron”~\red{Neocognitron citation}. An architecture implementing backpropagation was LeCun's ”LeNet”~\red{LeNet citation}.
 
@@ -85,7 +55,7 @@ where $K$ defines a pooling window for each index $i$. Typical choices for $\ope
 
 \red{Put it together here, potentially add image of total architecture.}
 
-\subsection{Normalizing Flows}
+\subsubsection*{Normalizing Flows}
 
 A normalizing flow is a model that learns to transform a simple (often Gaussian) distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution.
 
@@ -130,43 +100,131 @@ Now the loss becomes
 
 \red{What about the B-INN in Plehns book?}
 
-\subsection{Specific Architectures}
+\subsection{Neural Posterior Estimation}
 
-\red{Insert sentence introducing this section. Also, find better section title}
-
-A CNN learns a compression of lightcones to a much lower-dimensional latent space. A normalizing flow learns a mapping conditioned on this latent space to the target distribution. 
-
-\red{Something about representation learning?}
-
-Examples for target distributions include the parameters used for the simulations, or a simple physical summary statistic of the image data.
-
-\red{Which construction is PIE-INN based on? Is it completely new?}
-
-One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
-
-It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
-
-Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is
+Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
 \begin{align}
-    \mathcal{L}_{\text{NPE}} = - \E_{(x,\theta) \sim p(x,\theta)} \Biggl[ \frac{|g(\theta|s(x))|^2}{2} + 
-    \log \left| \det \left( \frac{\partial g(\theta|s(x))}{\partial \theta} \right) \right|\Biggr].
+    \mathbb{I}(\text{L};\text{D}) 
+    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
+    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
 \end{align}
 
-\begin{figure}[]
-    \centering
-    \begin{subfigure}{0.6\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
-        \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
-        \label{fig:21cmPIE-INN_architecture}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.35\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
-        \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
-        \label{fig:EoRFlow_flow_architecture}
-    \end{subfigure}
+In a Bayesian inference task, processing these data would typically be done by choosing:
+\begin{enumerate}
+    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
+    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
+\end{enumerate}
+Given data d, one then calculates the posterior distribution:
+\begin{align}
+    p(p|d) \sim p(d|p) p(p).
+\end{align}
+In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
 
-    \caption{Overall caption for both figures}
-\end{figure}
+\red{The disadvantage of this method is that one looses... }
+
+\red{This doesnt work as well out-of-dataset}
+
+An advantage is that unlike with the traditional Bayesian method, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
+
+As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
+
+\red{The summary model is chosen to be a CNN. The posterior model has to be chosen to be as flexible as possible. These two neural networks are discussed in the following.}
+
+
+\red{A word about how architectures will be discussed, e.g. notation with h, z, x, etc.}
+
+\subsection{Information Theory and Neural Estimators}
+
+Information theory: 
+    - Entropy, KL divergence, mutual information
+    - Interpretation of these quantities, maybe expectation?
+
+Information geometry:
+    - Fisher information metric, geodesic distance, curvature
+    - Interpretation of these quantities, maybe expectation?
+
+\subsubsection*{Some Basic Measures in Information Theory}
+Given a random variable $X \sim p$, the \textit{entropy} of $X$ is defined as:
+\begin{align}
+\mathbb{H}(X) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
+\end{align}
+If the logarithm is chosen as with base 2, one defines the unit of this quantity as bits. If one uses the natural logarithm, the entropy is measured in units of nats. 
+
+Entropy is a measure of the uncertainty of a random variable. A high entropy corresponds to a lack of predictability of the random variable's outcome. As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. One therefore considers entropy to be a measure of the amount of information contained in the random variable's distribution.
+
+The generalization to conditional entropy is:
+\begin{align}
+    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right]
+\end{align} 
+
+Another important metric in information theory is the \textit{Kullback-Leibler divergence}. Let $X \sim p$ and $Y \sim q$ be two random variables over the same sample space. The KL-divergence between $p$ and $q$ is defined as:
+\begin{align}
+\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0
+\end{align}
+The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
+
+\red{Maybe a word about consequece of assymetry of D KL}
+
+Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to maximizing the negative log-likelihood, because
+\begin{align}
+    \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\theta) = 
+    -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
+    \bigl[ \log q_\theta \bigr] = \text{NLL} + \text{const}
+\end{align}
+
+Lastly, the \textit{mutual information} between two random variables $X$ and $Y$ is defined as:
+\begin{align}
+\mathbb{I}(X; Y)
+         &= \mathbb{D}_{\text{KL}}(p(X, Y) || p_X(X) p_Y(Y)) \geq 0.
+\end{align}
+An alternative formulation in terms of entropy is:
+\begin{align}
+    \mathbb{I}(X; Y) = \mathbb{H}(X) - \mathbb{H}(X | Y) 
+    = \mathbb{H}(Y) - \mathbb{H}(Y | X).
+\end{align}
+Mutual information is symmetric and nonnegative. It is zero iff X and Y are independent and becomes maximal iff $X = Y$. One interprets it's value as the amount of information obtained about one random variable while observing another.
+
+\red{Something about how MI is sensitive to higher moments, maybe this can tease why one needs X amount of samples in MI estimation?}
+
+\subsubsection*{Mutual Information Estimation}
+
+In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the \textit{data processing inequality}, which in this context can be phrased as follows:
+
+Let $X$, $Y$ and $Z$ be random variables where $X$ is the original data, $Y$ is a learned summary of $X$ and $Z$ is a label associated with $X$. These form a Markov chain $X \rightarrow Y \rightarrow Z$, where $Z$ is only inferred from $Y$. Then $Z$ cannot contain more information about $X$ than $Y$, so
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}(X;Z)
+\end{align}
+A good representation keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. \red{Mit Formel unterstützen}
+
+\red{It also captures more information than just covariance!}
+
+\red{Something on summary statistics?}
+
+In practice, this necessitates an estimation of mutual information between the representation and the target distribution. 
+
+In the setting of variational inference, one can use the learned posterior to estimate mutual information in a natural way, described in the following:
+\begin{align}
+    \mathbb{I}(X; Y) &= \int_{\mathcal{X}\times\mathcal{Y}} p(x, y) \log \frac{p(x|y)}{p(x)}~\label{eq:MI_int},
+\end{align}
+where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\cref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}
+% ~\cite{Barber_2003}:
+\begin{align}
+    \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_{P(X,Y)} \left[ \log q_\theta(x|y) - \log p(x) \right]
+\end{align}
+This is computable, because the distribution of the prior $p(x)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(x)$ can also be estimated separately, which introduces more uncertainty in the above estimate.
+
+Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on the true mutual information:
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}_{\text{BA}}(X;Y)
+\end{align}
+
+\red{Estimating the error of this estimate from the true value?}
+
+\red{Maybe something about the bias of the estimator oder so...}
+
+\red{Why estimating MI in high dimensions is hard, and quantify!}
+
+\red{Also another method of approximation, maybe Donsker-Varadahn (MINE) ?}
+
+\red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
+

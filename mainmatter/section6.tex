@@ -38,6 +38,46 @@ X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{
 
 \subsection{The network architecture}
 
+\red{Insert sentence introducing this section. Also, find better section title}
+
+A CNN learns a compression of lightcones to a much lower-dimensional latent space. A normalizing flow learns a mapping conditioned on this latent space to the target distribution. 
+
+\red{Something about representation learning?}
+
+Examples for target distributions include the parameters used for the simulations, or a simple physical summary statistic of the image data.
+
+\red{Which construction is PIE-INN based on? Is it completely new?}
+
+One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
+
+It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
+
+Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is
+\begin{align}
+    \mathcal{L}_{\text{NPE}} = - \E_{(x,\theta) \sim p(x,\theta)} \Biggl[ \frac{|g(\theta|s(x))|^2}{2} + 
+    \log \left| \det \left( \frac{\partial g(\theta|s(x))}{\partial \theta} \right) \right|\Biggr].
+\end{align}
+
+\begin{figure}[]
+    \centering
+    \begin{subfigure}{0.6\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
+        \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
+        \label{fig:21cmPIE-INN_architecture}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.35\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
+        \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
+        \label{fig:EoRFlow_flow_architecture}
+    \end{subfigure}
+
+    \caption{Overall caption for both figures}
+\end{figure}
+
+
 \red{Some introductory sentence...}
 
 Table~\ref{tab:cnn_architecture} shows the network architectures of the CNN and the NF for both inference cases \red{Shape values still taken from Caroline's paper, check these still!} In the CNN, the first convolutional layer is designed to learn patterns in the redshift direction. An aggressive stride is used to alter the dimensionality of the next layers. The kernel for hidden layers is set to (3x3x2) and max pooling is only applied in spacial dimensions. Finally, all information is compressed into a 128-dimensonal feature vector, with global average pooling, which is in turn transformed into an $N_B$-dimensional output vector with a simple MLP. In case the CNN is pretrained, an additional MLP head can be attached, which maps the $N_B$-dimensional output to a $6$-dimensional output. The head can be removed for the rest of training. This has the benefit of leaving the rest of the architecture untouched. The CNF gets the CNNs $N_B$-dimensional output as conditional input and learns to transform the feature space to a gaussian of the same dimension. It is used in two variants depending on the inference task, the heavier of the two architectures containing more coupling layers and more nodes per layer. 

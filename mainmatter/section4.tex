@@ -21,11 +21,8 @@ Simulating the data used for inference is not part of this project. An existing 
 
 \red{Do I need log priors or not?}
 
-Their priors used on each of these parameters are shown in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}.
-
-All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means Ωb = 0.04897, $\sigma_8$ = 0.8102, h= 0.6766, and
-ns
-= 0.9665.  
+Their priors used on each of these parameters are shown in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means $\Omega_b = 0.04897$, $\sigma_8 = 0.8102$, $h= 0.6766$, and
+$n_s= 0.9665$.  
 
 The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters and the neutral hydrogen fraction. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The dataset is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
 

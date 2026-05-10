@@ -40,15 +40,71 @@ X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{
 
 \red{Some introductory sentence...}
 
-Table~\ref{tab:architectures} shows the network architectures of the CNN and the NF for both inference cases \red{Shape values still taken from Caroline's paper, check these still!} The first convolutional layer is used to radically shorten the redshift dimension of the input image, and in turn adding channel dimensions. The next layers gradually reduce the dimensonality in the image's spatial dimensions while adding more channels. Finally, all information is compressed into a 128-dimensonal feature vector, which is transformed into an 6-dimensional output vector. In case the CNN is pretrained, an optional MLP head can be attached.
+Table~\ref{tab:cnn_architecture} shows the network architectures of the CNN and the NF for both inference cases \red{Shape values still taken from Caroline's paper, check these still!} In the CNN, the first convolutional layer is designed to learn patterns in the redshift direction. An aggressive stride is used to alter the dimensionality of the next layers. The kernel for hidden layers is set to (3x3x2) and max pooling is only applied in spacial dimensions. Finally, all information is compressed into a 128-dimensonal feature vector, with global average pooling, which is in turn transformed into an $N_B$-dimensional output vector with a simple MLP. In case the CNN is pretrained, an additional MLP head can be attached, which maps the $N_B$-dimensional output to a $6$-dimensional output. The head can be removed for the rest of training. This has the benefit of leaving the rest of the architecture untouched. The CNF gets the CNNs $N_B$-dimensional output as conditional input and learns to transform the feature space to a gaussian of the same dimension. It is used in two variants depending on the inference task, the heavier of the two architectures containing more coupling layers and more nodes per layer. 
+% \begin{table}[htbp]
+% \centering
+% \caption{CNN network architecture}
+% \label{tab:cnn_architecture}
+% \begin{tabular}{l l}
+
+% \toprule
+% Layer &  shape \\
+% \midrule
+% Input Layer  & (140,140,1916,1) \\
+% 3x3x75 Conv3D  & (138,138,23,32) \\
+% 3x3x2 Conv3D  & (136,136,22,32) \\
+% 2x2x1 Max Pooling  & (68,68,22,32) \\
+% 3x3x2 Conv3D  & (66,66,21,64) \\
+% 1x1x0 Zero Padding  & (68,68,21,64) \\
+% 3x3x2 Conv3D  & (66,66,20,64) \\
+% 2x2x1 Max Pooling  & (33,33,20,64) \\
+% 3x3x2 Conv3D  & (31,31,19,128) \\
+% 1x1x0 Zero Padding  & (33,33,19,128) \\
+% 3x3x2 Conv3D  & (31,31,18,128) \\
+% Global Average Pooling  & (128) \\
+% Dense  & (128) \\
+% Dense  & (128) \\
+% Dense  & (128) \\
+% Dense  & ($N_B$) \\
+% \midrule
+% (Dense)& (128) \\
+% (Dense)& (128) \\
+% (Dense)& (6) \\
+
+% \bottomrule
+% Number of Parameters: \red{651,526}
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[htbp]
+% \centering
+% \caption{Flow network architecture}
+% \label{tab:flow_architecture}
+% \begin{tabular}{l l}
+
+% \toprule
+% Feature &  shape \\
+% \midrule
+% Input layer & $N_B$ \\
+% Coupling layers & 8 \\
+% Nodes & 256 \\
+% Subnet depth & 3 \\
+
+% \bottomrule
+% Number of Parameters: \red{651,526}
+% \end{tabular}
+% \end{table}
+
 \begin{table}[htbp]
 \centering
-\caption{CNN network architecture}
-\label{tab:architectures}
-\begin{tabular}{l l l}
 
+\begin{minipage}[t][12.45cm]{0.48\textwidth}
+\centering
+\caption{CNN network architecture}
+\label{tab:cnn_architecture}
+\begin{tabular}{l l}
 \toprule
-Layer & Image shape \\
+Layer & Shape \\
 \midrule
 Input Layer  & (140,140,1916,1) \\
 3x3x75 Conv3D  & (138,138,23,32) \\
@@ -65,15 +121,55 @@ Global Average Pooling  & (128) \\
 Dense  & (128) \\
 Dense  & (128) \\
 Dense  & (128) \\
-Dense  & (6) \\
+Dense  & ($N_B$) \\
 \midrule
-(Dense)& (128) \\
-(Dense)& (128) \\
-(Dense)& (N) \\
-
+(Dense) & (128) \\
+(Dense) & (128) \\
+(Dense) & (6) \\
 \bottomrule
 \end{tabular}
+
+\vspace{0.3cm}
+Number of Parameters: \red{651,526}
+\end{minipage}
+\hfill
+\begin{minipage}[t][12.45cm]{0.48\textwidth}
+\centering
+\caption{Flow network architecture}
+\label{tab:flow_architecture}
+\textbf{Light network variant}
+\begin{tabular}{l l}
+\toprule
+Feature & Shape \\
+\midrule
+Input layer & $N_B$ \\
+Coupling layers & 8 \\
+Nodes & 256 \\
+Subnet depth & 3 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+Number of Parameters: \red{651,526}
+\vfill
+\textbf{Heavy network variant}
+\begin{tabular}{l l}
+\toprule
+Feature & Shape \\
+\midrule
+Input layer & $N_B$ \\
+Coupling layers & 10 \\
+Nodes & 512 \\
+Subnet depth & 3 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+Number of Parameters: \red{651,526}
+\end{minipage}
+
 \end{table}
+
 
 
 \subsection{Inference of the neutral hydrogen fraction}

@@ -1,4 +1,4 @@
-\section{Introduction}
+\section{Physics Background}
 
 \red{I am currently still fighting with the citations, that will hopefully soon be resolved.}
 
@@ -7,17 +7,6 @@ The current cosmological standard model predicts the epoch of Cosmic Dawn (CD) a
 Lymann-alpha forests in the spectra of distant quasars and galaxies are used to estimate the neutral hydrogen fraction at low redshifts, placing the end of the EoR at around \red{add here }\red{citation}. The JWST with an observational range of $z \sim \red{...}$ measures earliest galaxies and will be able to additionally constrain the speed of galaxy evolution.
 
 A comparatively new probe is that of the $21~\si{cm}$ hyperfine transition line of neutral hydrogen, which constitutes a background spectrum similar to that of the CMB. It is the only known probe with which the Dark Ages could be studied and also the one to study CD to the highest redshifts. First experiments have measured \red{reionization profiles in terms of power spectra and signals of possible dark matter presence} \red{cite}. Much better results are expected from the Square Kilometer Array (SKA) Observatory, which is a radio telescope currently in construction which will image the $21~\si{cm}$ line of the IGM at a redshift range of $z \sim [6-30]$ with unprecedented accuracy. Hopes are that this signal can be used to significantly improve the current understanding of the reionization history and structure formation and possibly act as a new dark matter probe.
-
-There are multiple difficulties in interpreting the $21~\si{cm}$ signal. Traditional Gaussian summary statistics do not capture enough of the signal's structure, reflecting the fact that the processes being observed are highly nonlinear. This also entails that the likelihood of the $21~\si{cm}$ signal is intractible. Additionally, the foreground contamination for ground-based observatories such as the SKA will be significant. 
-
-These challenges of non-Gaussianity and foreground noise motivate the use of neural networks for the analysis of SKA data. \red{Another sentence on NNs here.} Neural networks are nowadays commonly used in Bayesian inference, which attempts to reconcile prior knowledge and empirical data in order to find optimal parameters describing, for example, our universe. 
-
-The issue of an intractible likelihood is tackled with so-called simulation-based inference. The idea behind SBI is to train a NN on simulated data, were the inference parameters are known. Once the model is trained, inference is amortized: the model can perform inference on real data with the pre-trained model inexpensively. The prerequisite is, of course, that the model generalizes well from the training data to the real data. This approach has successfully bin implemented in \red{ergänzen}.
-
-Not all models are equally good for a given problem and as a consequence, the choice of model introduces bias to the inference. In an attempt to find a principled way to choose a model, one can use methods developed in information theory, which can here be used to quantify the quality of a model. 
-
-In this thesis, a model typically used in parameter inference for simulated SKA-data will be analyzed with the methods of information theory.
-% ~\cite{pdg_2024}
 
 \subsection{Theoretical Background}
 
@@ -243,7 +232,7 @@ From the expression in equation~\ref{eq:brightness_offset_final}, it becomes cle
 
 \red{Will still have some comments on the figure}
 
-\subsection{Simulating 21cm data}
+\subsubsection{Simulating 21cm data}
 
 
 \red{Will explain remaining physical quantities being inferred here}
@@ -263,25 +252,7 @@ The six parameters and their priors chosen for the simulations in this project a
 %     X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
 % \end{table}
 
-\begin{table}[htbp]
-\centering
-\caption{Parameters used for the simulations}
-\label{tab:sim_params}
-\begin{tabular}{p{6cm} l l}
 
-\toprule
-Name & Symbol & Prior \\
-\midrule
-Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
-Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
-Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
-Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
-Specific X-ray luminosity & $\sigma_8$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
-X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
-
-\bottomrule
-\end{tabular}
-\end{table}
 
 interpretation of data
 

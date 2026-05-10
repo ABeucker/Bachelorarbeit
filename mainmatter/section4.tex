@@ -2,17 +2,32 @@
 
 
 
-All other cosmological parameters are fixed to the Planck measurements, assuming flat-
-ness and a cosmological constant. This means Ωb = 0.04897, $\sigma_8$ = 0.8102, h= 0.6766, and
-ns
-= 0.9665.
-
 Training is performed on one NVIDIA A30 GPU.
 \red{Need specific values of learning rate etc for both models. Should this go in appendix?}
 
 \subsection{The dataset}
 
-The dataset consists of 5000 lightcones simulated with \red{21cmFast, cite the paper somewhere!} where the simulation parameters are drawn from the priors in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The dataset is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
+Simulating the data used for inference is not part of this project. An existing dataset is used. The data were simulated with \red{21cmFast, cite the paper somewhere!}. The parameters varied in the simulation are:
+\begin{itemize}
+    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
+    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
+    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
+    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
+    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
+    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
+\end{itemize}
+
+\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
+
+\red{Do I need log priors or not?}
+
+Their priors used on each of these parameters are shown in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}.
+
+All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means Ωb = 0.04897, $\sigma_8$ = 0.8102, h= 0.6766, and
+ns
+= 0.9665.  
+
+The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters and the neutral hydrogen fraction. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The dataset is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
 
 \red{See comments on redshift range in Benedicts paper}
 
@@ -29,7 +44,7 @@ Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
 Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
 Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
 Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
-Specific X-ray luminosity & $\sigma_8$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
+Specific X-ray luminosity & $L_X$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
 X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
 
 \bottomrule

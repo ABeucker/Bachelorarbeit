@@ -1,9 +1,55 @@
-\subsection{Basic Neural Networks}
+\section{Machine Learning Background}
 
-\red{Need some intro here}
 
-\red{Also clean up notation, still a bit all over the place}
+There are multiple difficulties in interpreting the $21~\si{cm}$ signal. Traditional Gaussian summary statistics do not capture enough of the signal's structure, reflecting the fact that the processes being observed are highly nonlinear. This also entails that the likelihood of the $21~\si{cm}$ signal is intractible. Additionally, the foreground contamination for ground-based observatories such as the SKA will be significant. 
 
+These challenges of non-Gaussianity and foreground noise motivate the use of neural networks for the analysis of SKA data. \red{Another sentence on NNs here.} Neural networks are nowadays commonly used in Bayesian inference, which attempts to reconcile prior knowledge and empirical data in order to find optimal parameters describing, for example, our universe. 
+
+The issue of an intractible likelihood is tackled with so-called simulation-based inference. The idea behind SBI is to train a NN on simulated data, were the inference parameters are known. Once the model is trained, inference is amortized: the model can perform inference on real data with the pre-trained model inexpensively. The prerequisite is, of course, that the model generalizes well from the training data to the real data. This approach has successfully bin implemented in \red{ergänzen}.
+
+Not all models are equally good for a given problem and as a consequence, the choice of model introduces bias to the inference. In an attempt to find a principled way to choose a model, one can use methods developed in information theory, which can here be used to quantify the quality of a model. 
+
+In this thesis, a model typically used in parameter inference for simulated SKA-data will be analyzed with the methods of information theory.
+% ~\cite{pdg_2024}
+
+Modern physics experiments generate an extreme amount of data, and the SKAO will be no exception. While processing the data will will be difficult because of it's sheer size, an additional obstacle is the complexity inherent in the $21~\si{cm}$ signal, which is highly non-Gaussian. This motivates the use of machine learning to extract physics information from the data. Since there are many possible models which could be applied to the data, there is need for a metric that evaluate's a model's quality. 
+
+As an introduction to the methods used in this field, this section covers the concept of neural posterior approximation, some theory behind the class of models analyzed in this thesis as well as a summary of metric from information theory, and how they can evaluate a model's quality.
+
+Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
+\begin{align}
+    \mathbb{I}(\text{L};\text{D}) 
+    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
+    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
+\end{align}
+
+In a Bayesian inference task, processing these data would typically be done by choosing:
+\begin{enumerate}
+    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
+    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
+\end{enumerate}
+Given data d, one then calculates the posterior distribution:
+\begin{align}
+    p(p|d) \sim p(d|p) p(p).
+\end{align}
+In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
+
+\red{The disadvantage of this method is that one looses... }
+
+\red{This doesnt work as well out-of-dataset}
+
+An advantage is that unlike with the traditional Bayesian methods, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
+
+As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
+
+\subsection{An architecture for complex data}
+
+An architecture that has proven to be successful in recent SBI approaches \red{some citations here} combines two neural networks in the following principle:
+\begin{enumerate}
+    \item   The image data are used as input for a convolutional neural network (CNN), which compresses these into a much lower-dimensional summary.
+    \item   This summary is mapped to whichever feature is being inferred by a conditional normalizing flow (CNF).
+\end{enumerate}
+The idea is that the CNN learns to efficiently encode any relevant physics information, while the flow learns to interpret the CNN's output and map it to the inferred quantity. These two networks are introduced in the following.
 
 \subsubsection*{Convolutional Neural Networks}
 
@@ -57,7 +103,7 @@ where $K$ defines a pooling window for each index $i$. Typical choices for $\ope
 
 \red{Also missing MSE loss function as usual loss}
 
-\subsubsection*{Normalizing Flows}
+\subsubsection*{Conditional Normalizing Flows}
 
 A normalizing flow is a model that learns to transform a simple (often Gaussian) distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution.
 
@@ -102,48 +148,9 @@ Now the loss becomes
 
 \red{What about the B-INN in Plehns book?}
 
-\subsection{Neural Posterior Estimation}
-
-Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
-\begin{align}
-    \mathbb{I}(\text{L};\text{D}) 
-    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
-    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
-\end{align}
-
-In a Bayesian inference task, processing these data would typically be done by choosing:
-\begin{enumerate}
-    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
-    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
-\end{enumerate}
-Given data d, one then calculates the posterior distribution:
-\begin{align}
-    p(p|d) \sim p(d|p) p(p).
-\end{align}
-In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
-
-\red{The disadvantage of this method is that one looses... }
-
-\red{This doesnt work as well out-of-dataset}
-
-An advantage is that unlike with the traditional Bayesian method, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
-
-As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
-
-\red{The summary model is chosen to be a CNN. The posterior model has to be chosen to be as flexible as possible. These two neural networks are discussed in the following.}
-
-
-\red{A word about how architectures will be discussed, e.g. notation with h, z, x, etc.}
-
 \subsection{Information Theory and Neural Estimators}
 
-Information theory: 
-    - Entropy, KL divergence, mutual information
-    - Interpretation of these quantities, maybe expectation?
-
-Information geometry:
-    - Fisher information metric, geodesic distance, curvature
-    - Interpretation of these quantities, maybe expectation?
+The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
 
 \subsubsection*{Some Basic Measures in Information Theory}
 Given a random variable $X \sim p$, the \textit{entropy} of $X$ is defined as:

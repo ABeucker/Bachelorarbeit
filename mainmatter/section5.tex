@@ -1,223 +1,243 @@
-\section{Results}
+\section{Implementation}
 
-\red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
 
-\red{A word on bootstrap error calculations for comparison}
 
-Due to long training times, only specific bottleneck dimensions are analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) are tested. The held-out test set consisting of $10\%$ of the total dataset ($500$ samples) is used to obtain estimates on the conditional entropy as well as the mutual information:
+Training is performed on one NVIDIA A30 GPU.
+\red{Need specific values of learning rate etc for both models. Should this go in appendix?}
+
+\subsection{The dataset}
+
+Simulating the data used for inference is not part of this project. An existing dataset is used. The data were simulated with \red{21cmFast, cite the paper somewhere!}. The parameters varied in the simulation are:
+\begin{itemize}
+    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
+    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
+    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
+    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
+    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
+    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
+\end{itemize}
+
+\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
+
+\red{Do I need log priors or not?}
+
+Their priors used on each of these parameters are shown in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means $\Omega_b = 0.04897$, $\sigma_8 = 0.8102$, $h= 0.6766$, and
+$n_s= 0.9665$.  
+
+The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters and the neutral hydrogen fraction. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The dataset is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
+
+\red{See comments on redshift range in Benedicts paper}
+
+\begin{table}[htbp]
+\centering
+\caption{Parameters used for the simulations}
+\label{tab:sim_params}
+\begin{tabular}{p{6cm} l l}
+
+\toprule
+Name & Symbol & Prior \\
+\midrule
+Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
+Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
+Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
+Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
+Specific X-ray luminosity & $L_X$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
+X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The network architecture}
+
+\red{Insert sentence introducing this section. Also, find better section title}
+
+A CNN learns a compression of lightcones to a much lower-dimensional latent space. A normalizing flow learns a mapping conditioned on this latent space to the target distribution. 
+
+\red{Something about representation learning?}
+
+Examples for target distributions include the parameters used for the simulations, or a simple physical summary statistic of the image data.
+
+\red{Which construction is PIE-INN based on? Is it completely new?}
+
+One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
+
+It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
+
+Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is
 \begin{align}
-    \hat{\mathbb{H}}_C &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s)\bigr] \\
-    \hat{\mathbb{I}} &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s) - q_\phi (l)\bigr] 
+    \mathcal{L}_{\text{NPE}} = - \E_{(x,\theta) \sim p(x,\theta)} \Biggl[ \frac{|g(\theta|s(x))|^2}{2} + 
+    \log \left| \det \left( \frac{\partial g(\theta|s(x))}{\partial \theta} \right) \right|\Biggr].
 \end{align}
-\red{A word on different choices of epoch, or is this too early here?}
 
-Two sources of error in the estimation are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the \textit{model error}. This is estimated from the standard deviation and confirmed by bootstrap analysis, see below. When comparing results across seeds, an additional \textit{seed error} must be considered, which is also estimated from the standard deviation of the results. 
-
-\subsection{Results for inference of $x_\text{HI}$}
-
-Each model is trained for 250 epochs, with an average runtime of \red{insert average runtime}. \red{Need more info here...}
-
-As an example, the training and validation losses for an ensemble of runs with bottleneck dimension $N_\text{dim}=15$ are shown in figure~\ref{fig:train_val_bottle_15}. Vertical lines indicate the epoch with best validation performance. \red{Observations...} The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. 
-\begin{figure}
+\begin{figure}[]
     \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_15/joint_losses_excluded.png}
-    \caption{Train and Validation Losses for Bottleneck Dimension 15}
-    \label{fig:train_val_bottle_15}
+    \begin{subfigure}{0.6\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
+        \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
+        \label{fig:21cmPIE-INN_architecture}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.35\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
+        \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
+        \label{fig:EoRFlow_flow_architecture}
+    \end{subfigure}
+
+    \caption{Overall caption for both figures}
 \end{figure}
-In order to compare the training processes, table~\ref{tab:training_stability} summarizes losses, epochs until convergence and seed variance for different bottleneck dimensions. One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension.(\red{Table almost ready, results coming soon})
-\begin{table}[htbp]
-\centering
-\caption{Results on training stability}
-\label{tab:training_stability}
-\begin{tabular}{l c c}
-\toprule
-
-Bottleneck & Average best epoch & Average best val loss \\
-\midrule
-4 & $130$ & $0.39$.  \\
-6 & $38.49\pm 0.95$ & $0.83$   \\
-15 & $39.90\pm 0.42$ & $0.13$  \\
-16 & $39.57\pm 0.46$ & $0.13$  \\
-
-\bottomrule
-\end{tabular}
-\end{table}
-As an example, figure~\ref{fig:mi_bootstrap_bottle_15} showcases how the conditional entropy estimate evolves during model training for the ensemble with bottleneck dimension $N_\text{dim}=15$. Vertical lines again indicate the epoch with best validation performance. All models reach a saturated estimate of the conditional entropy \red{in the epoch range...} The conditional entropy curves showcase a higher instability than the validation curves, which is attributed to the smaller size of the test set. All other ensemble plots are in the appendix (\red{reference coming soon}).
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{graphics/ensemble_15/conditional_entropy_standard_excluded.png}
-    \caption{Conditional Entropy per Epoch for Bottleneck Dimension 15}
-    \label{fig:ce_bottle_15}
-\end{figure}
-The model error on the conditional entropy estimate grows with increasing training steps. Some reionization histories are attributed with very low likelihood, such that the distribution of $\log q_\theta (\text{label}_i|\text{summary}_i)$ has a heavy left-sided tail. This is in parts because of the distribution of the labels themselves. 
-
-Table~\ref{tab:CE_all_res} shows the estimated conditional entropy for each model. All entropy values are given in nats. \red{observations...}
-
-\begin{table}[htbp]
-\centering
-\caption{CE estimates across bottleneck dims $N_\text{dim}$ in nats}
-\begin{tabular}{c | c c c}
-\toprule
-\diagbox{$N_{\text{dim}}$}{Seed} & 12 & 14 & 30 \\
-\midrule
-4  & $38.88 \pm 0.89$ & - &  $37.68 \pm 0.42$ \\
-6  & $36.75 \pm 0.40$ & - & $40.25 \pm 0.70$ \\
-15 & $39.64 \pm 0.52$ & $40.15 \pm 0.59$ & $40.61 \pm 0.37$ \\
-16 & $39.81 \pm 0.38$ & $40.17 \pm 0.50$ &  $39.72 \pm 0.68$ \\
-25 & - & - & $40.22 \pm 0.57$  \\
-
-\bottomrule
-\end{tabular}
-\label{tab:CE_all_res}
-\end{table}
-
-\begin{table}[htbp]
-\centering
-\caption{MI estimates across bottleneck dims $N_\text{dim}$ in nats}
-\begin{tabular}{c | c c c c}
-\toprule
-\diagbox{$N_{\text{dim}}$}{Seed} & 12 & 14 & 30 \\
-\midrule
-4  & $6.00 \pm 0.73$ & - &  $4.76 \pm 0.31$ \\
-6  & $3.87 \pm 0.30 $ & - & $7.24 \pm 0.61$ \\
-15 & $6.70 \pm 0.45$ & $7.25 \pm 0.48$ & $7.74 \pm 0.25$ \\
-16 & $6.94 \pm 0.29$ & $7.31 \pm 0.39$ &  $6.81 \pm 0.57$ \\
-25 & - & - & $7.34 \pm 0.47$  \\
-
-\bottomrule
-\end{tabular}
-\label{tab:MI_all_res}
-\end{table}
-A separate normalizing flow is trained on the label distribution. The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
-
-As an example, a histogram plot of the distributions $\log q_\theta (\text{label}_i|\text{summary}_i)$ and $\log \tilde{q}_\theta (\text{label}_i)$ is shown in figure~\red{insert figure}. 
 
 
-The final estimates of conditiona entropy with errors as shown in table~\ref{tab:CE_results}. The total estimated errors as well as separate seed and model errors are listed.
-\begin{table}[htbp]
-\centering
-\caption{Final Esimation of CE per Bottleneck Dimension in nats}
-\label{tab:CE_results}
-\begin{tabular}{l c c c c}
-\toprule
+\red{Some introductory sentence...}
 
-Bottleneck & CE & Seed error & Model error & No. samples\\
-\midrule
-4  & $38.26 \pm 0.49$ & $0.36$ & $0.34$ & $2$ \\
-6  & $38.47 \pm 1.02$ & $0.99$ & $0.27$ & $2$ \\
-15 & $40.10 \pm 0.25$ & $0.17$ & $0.19$ & $3$ \\
-16 & $39.88 \pm 0.26$ & $0.11$ & $0.23$ & $3$ \\
-25 & $40.20 \pm 0.58$ &   -    & $0.58$ & $1$ \\
+Table~\ref{tab:cnn_architecture} shows the network architectures of the CNN and the NF for both inference cases \red{Shape values still taken from Caroline's paper, check these still!} In the CNN, the first convolutional layer is designed to learn patterns in the redshift direction. An aggressive stride is used to alter the dimensionality of the next layers. The kernel for hidden layers is set to (3x3x2) and max pooling is only applied in spacial dimensions. Finally, all information is compressed into a 128-dimensonal feature vector, with global average pooling, which is in turn transformed into an $N_B$-dimensional output vector with a simple MLP. In case the CNN is pretrained, an additional MLP head can be attached, which maps the $N_B$-dimensional output to a $6$-dimensional output. The head can be removed for the rest of training. This has the benefit of leaving the rest of the architecture untouched. The CNF gets the CNNs $N_B$-dimensional output as conditional input and learns to transform the feature space to a gaussian of the same dimension. It is used in two variants depending on the inference task, the heavier of the two architectures containing more coupling layers and more nodes per layer. 
+% \begin{table}[htbp]
+% \centering
+% \caption{CNN network architecture}
+% \label{tab:cnn_architecture}
+% \begin{tabular}{l l}
 
-\bottomrule
-\end{tabular}
-\end{table}
+% \toprule
+% Layer &  shape \\
+% \midrule
+% Input Layer  & (140,140,1916,1) \\
+% 3x3x75 Conv3D  & (138,138,23,32) \\
+% 3x3x2 Conv3D  & (136,136,22,32) \\
+% 2x2x1 Max Pooling  & (68,68,22,32) \\
+% 3x3x2 Conv3D  & (66,66,21,64) \\
+% 1x1x0 Zero Padding  & (68,68,21,64) \\
+% 3x3x2 Conv3D  & (66,66,20,64) \\
+% 2x2x1 Max Pooling  & (33,33,20,64) \\
+% 3x3x2 Conv3D  & (31,31,19,128) \\
+% 1x1x0 Zero Padding  & (33,33,19,128) \\
+% 3x3x2 Conv3D  & (31,31,18,128) \\
+% Global Average Pooling  & (128) \\
+% Dense  & (128) \\
+% Dense  & (128) \\
+% Dense  & (128) \\
+% Dense  & ($N_B$) \\
+% \midrule
+% (Dense)& (128) \\
+% (Dense)& (128) \\
+% (Dense)& (6) \\
+
+% \bottomrule
+% Number of Parameters: \red{651,526}
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[htbp]
+% \centering
+% \caption{Flow network architecture}
+% \label{tab:flow_architecture}
+% \begin{tabular}{l l}
+
+% \toprule
+% Feature &  shape \\
+% \midrule
+% Input layer & $N_B$ \\
+% Coupling layers & 8 \\
+% Nodes & 256 \\
+% Subnet depth & 3 \\
+
+% \bottomrule
+% Number of Parameters: \red{651,526}
+% \end{tabular}
+% \end{table}
 
 \begin{table}[htbp]
 \centering
-\caption{Final Esimation of MI per Bottleneck Dimension in nats}
-\label{tab:CE_results}
-\begin{tabular}{l c c c c}
-\toprule
 
-Bottleneck & MI & Seed error & Model error & No. samples\\
-\midrule
-4  & $5.39 \pm 0.45$ & $0.35$ & $0.28$ & $2$ \\
-6  & $5.58 \pm 1.01$ & $0.99$ & $0.22$ & $2$ \\
-15 & $7.23 \pm 0.22$ & $0.16$ & $0.14$ & $3$ \\
-16 & $7.02 \pm 0.21$ & $0.10$ & $0.19$ & $3$ \\
-25 & $7.31 \pm 0.49$ &   -    & $0.49$ & $1$ \\
-
-\bottomrule
-\end{tabular}
-\end{table}
-These results can be described as follows: One does observe a general trend of increasing mutual information for increased bottleneck dimension, though the increase is not monotonous. Seed and model error are similar in magnitude, though with exceptions in case of failed training runs. 
-
-
-\begin{table}[htbp]
+\begin{minipage}[t][12.45cm]{0.48\textwidth}
 \centering
-\caption{Final estimates $x_\text{HI}$ inference}
-\label{tab:x_hi_results}
-\begin{tabular}{l |c |c |c}
+\caption{CNN network architecture}
+\label{tab:cnn_architecture}
+\begin{tabular}{l l}
 \toprule
-
-$N_B$ & CE [nats]& MI [nats]& No. samples\\
+Layer & Shape \\
 \midrule
-4  & $38.28 \pm 0.35  \pm 0.32$ & $5.39 \pm 0.35  \pm 0.28$ & $2$ \\
-6  & $38.47 \pm 0.99  \pm 0.27$ & $5.58 \pm 0.99  \pm 0.22$ & $2$ \\
-8  & $40.29 \pm 0.36  \pm 0.34$ & $7.40 \pm 0.36  \pm 0.25$ & $2$ \\
-15 & $40.12 \pm 0.16  \pm 0.18$ & $7.23 \pm 0.16  \pm 0.14$ & $3$ \\
-16 & $39.91 \pm 0.10  \pm 0.23$ & $7.02 \pm 0.10  \pm 0.19$ & $3$ \\
-25 & $39.91 \pm 0.29  \pm 0.38$ & $7.02 \pm 0.29  \pm 0.31$ & $2$ \\
-30 & $38.98 \pm -     \pm 0.80$ & $6.09 \pm -     \pm 0.69$ & $1$ \\
-
+Input Layer  & (140,140,1916,1) \\
+3x3x75 Conv3D  & (138,138,23,32) \\
+3x3x2 Conv3D  & (136,136,22,32) \\
+2x2x1 Max Pooling  & (68,68,22,32) \\
+3x3x2 Conv3D  & (66,66,21,64) \\
+1x1x0 Zero Padding  & (68,68,21,64) \\
+3x3x2 Conv3D  & (66,66,20,64) \\
+2x2x1 Max Pooling  & (33,33,20,64) \\
+3x3x2 Conv3D  & (31,31,19,128) \\
+1x1x0 Zero Padding  & (33,33,19,128) \\
+3x3x2 Conv3D  & (31,31,18,128) \\
+Global Average Pooling  & (128) \\
+Dense  & (128) \\
+Dense  & (128) \\
+Dense  & (128) \\
+Dense  & ($N_B$) \\
+\midrule
+(Dense) & (128) \\
+(Dense) & (128) \\
+(Dense) & (6) \\
 \bottomrule
 \end{tabular}
-\end{table}
 
-As shown in table~\red{trained performance table}, models with a smaller bottleneck dimension require more epochs to learn, though as seen in table~\ref{tab:x_hi_results}, they might still perform equally with regards to the information they contain about the feature distribution. However, they might only be able to do this because they are overfitting on the training set, the information they learn coming at the cost of worse out-of-dataset generalization. As an alternative to choosing the model based on best validation performance, one can instead choose the model for which training and validation losses were last within \red{X percent} of each other, thus constraining the models to better generalization. The resulting estimates for CE and MI are shown in table~\ref{tab:x_hi_results_constraints}. The estimates of CE and MI are generally lower than before, however their trend is closer to that expected, again with the exception of the model trained at $N_B = 8$. \red{Are errors really smaller in all cases though?}
-\begin{table}[htbp]
+\vspace{0.3cm}
+Number of Parameters: \red{651,526}
+\end{minipage}
+\hfill
+\begin{minipage}[t][12.45cm]{0.48\textwidth}
 \centering
-\caption{Final estimates $x_\text{HI}
-$ inference under constraints}
-\label{tab:x_hi_results_constraints}
-\begin{tabular}{l |c |c |c}
+\caption{Flow network architecture}
+\label{tab:flow_architecture}
+\textbf{Light network variant}
+\begin{tabular}{l l}
 \toprule
-
-Bottleneck & CE [nats]& MI [nats]& No. samples\\
+Feature & Shape \\
 \midrule
-4  & $36.16 \pm 0.51$ & $3.27 \pm 0.50$ & $2$ \\
-6  & $36.92 \pm 0.36$ & $4.02 \pm 0.34$ & $2$ \\
-8  & $39.40 \pm 0.28$ & $6.51 \pm 0.23$ & $2$ \\
-15 & $38.16 \pm 0.41$ & $5.27 \pm 0.40$ & $3$ \\
-16 & $38.20 \pm 0.38$ & $5.31 \pm 0.37$ & $3$ \\
-25 & $38.93 \pm 0.45$ & $6.04 \pm 0.41$ & $2$ \\
-30 & $39.04 \pm 0.45$ & $6.15 \pm 0.34$ & $1$ \\
-
+Input layer & $N_B$ \\
+Coupling layers & 8 \\
+Nodes & 256 \\
+Subnet depth & 3 \\
 \bottomrule
 \end{tabular}
-\end{table}
-Another decision rule is to choose the last epoch that the model was evaluated on. The idea is that conditional entropy values become much more stable towards the end of training, as seen in figure~\ref{fig:ce_bottle_15}. This mitigates bias stemming from one „lucky” epoch. The resulting estimates of CE and MI are shown in table~\ref{tab:x_hi_results_last_epoch}. In particular, the estimates for $N_B = 8$ are then in line with expectations.
-\begin{table}[htbp]
-\centering
-\caption{Final estimates $x_\text{HI}
-$ inference on last-epoch models}
-\label{tab:x_hi_results_last_epoch}
-\begin{tabular}{l |c |c |c}
+
+\vspace{0.3cm}
+Number of Parameters: \red{651,526}
+\vfill
+\textbf{Heavy network variant}
+\begin{tabular}{l l}
 \toprule
-
-Bottleneck & CE [nats]& MI [nats]& No. samples\\
+Feature & Shape \\
 \midrule
-4  & $37.92  \pm 0.44$ & $5.02  \pm 0.40$ & $2$ \\
-6  & $38.10  \pm 0.97$ & $5.21  \pm 0.95$ & $2$ \\
-8  & $39.34  \pm 0.78$ & $6.45  \pm 0.73$ & $2$ \\
-15 & $39.50  \pm 0.37$ & $6.61  \pm 0.34$ & $3$ \\
-16 & $39.57  \pm 0.35$ & $6.68  \pm 0.31$ & $3$ \\
-25 & $39.24  \pm 0.63$ & $6.34  \pm 0.57$ & $2$ \\
-30 & $38.33  \pm 0.98$ & $5.44  \pm 0.87$ & $1$ \\
-
+Input layer & $N_B$ \\
+Coupling layers & 10 \\
+Nodes & 512 \\
+Subnet depth & 3 \\
 \bottomrule
 \end{tabular}
+
+\vspace{0.3cm}
+Number of Parameters: \red{651,526}
+\end{minipage}
+
 \end{table}
 
-\subsection{Results for inference of simulation parameters}
 
-The final estimates of CE and MI when choosing models based on best validation performance are shown in table~\ref{tab:param_results_best_val}. In comparison with the inference of $x_\text{HI}$, values of \red{conditional entropy} are much smaller. In most cases, the information increase with bottleneck dimension is statistically significant. Mutual information appears to saturate after $N_B=7$.
-\begin{table}[htbp]
-\centering
-\caption{Final estimates 6-parameter inference}
-\label{tab:param_results_best_val}
-\begin{tabular}{l| c| c| c}
-\toprule
 
-$N_B$ & CE [nats]& MI [nats] & No. samples\\
-\midrule
-3 & $11.66 \pm 0.14$ & - & $1$ \\
-5 & $13.12 \pm 0.33$ & - & $1$ \\
-6 & $13.33 \pm 0.21$ & - & $1$ \\
-7 & $13.93 \pm 0.13$ & - & $1$ \\
-9 & $13.92 \pm 0.21$ & - & $1$ \\
+\subsection{Inference of the neutral hydrogen fraction}
 
-\bottomrule
-\end{tabular}
-\end{table}
+For inference of the neutral hydrogen fraction, the lightcones are preprocessed as in \red{reference yannics paper}: The \red{temperature fluctuation values} are min-max-normalized individually for each lightcone \red{Motivation from CNN?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. This allows the labels to first be truncated to 75 dimensions and then binned to 15-dimensional vectors. This step reduces the dimensionality of the inference problem. \red{Any additional reason for lightcone truncation?} An additional logit transformation is applied to the labels, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The total dataset has a size of \red{insert current size}.
+
+In order to model the conditional distribution $p(x|y)$, an ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. The CNN and flow are trained jointly. Both models are trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. 
+
+\red{Talk about significant difficulties with training here, and data methods used to improve training speed. Also mention gradient accumulation.}
+
+Unlike the original distribution of simulation parameters, the distribution of reionization history vectors is not uniform. It therefore has to be modeled separately. It is modeled with a flow of the same architecture as the one from the conditional distribution, without any conditional input. An additional prior model adds uncertainty to the mutual information estimation. The idea behind choosing the same architecture to model the label distribution is that an \red{artefact} of the flow $q_\theta(x|y)$ leading to high variance in the MI estimation might be learned by $q_{\tilde{\theta}}(x)$ as well, thus leading to smaller variance in the final MI estimation.
+
+\subsection{Inference of the simulation parameters}
+
+For inference of the simulation parameters, the data are preprocessed as in \red{reference benedicts paper}: The lightcones are kept in their original dimensionality and lightcones as well as labels are globally standardized.
+
+\red{Talk about adjusting CNN architecture here}
+
+The conditional distribution $p(x|y)$ is again modelled with an ensemble of models for different bottleneck dimensions. Training is done with AdamW optimization and the ReduceLROnPlateau scheduler. No scaler is needed. Using gradient accumulation with an effective batch size of $32$ causes training to fail, therefore gradient accumulation is not implemented. The model does not converge if the CNN and flow are trained jointly from the beginning, so a three-step training process is implemented. First, the CNN is pretrained on the labels with an MSE loss. Since this has to be done for varying bottleneck dimensions, an additional MLP head is added to the existing CNN architecture, mapping the $N_\text{dim}$ output to $6$ dimensions. Pretraining ends after 50 epochs. The CNN weights are then frozen and the MLP head is removed for the rest of training. The CNN outputs after pretraining are then used to pretrain the flow for 120 epochs. Afterwards, the CNN weights are unfrozen and the optimizers and schedulers of both models are reset. Both models are then trained jointly for another 80 epochs. 

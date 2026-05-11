@@ -1,243 +1,239 @@
-\section{Implementation}
+\section{Machine Learning Background}
 
 
+There are multiple difficulties in interpreting the $21~\si{cm}$ signal. Traditional Gaussian summary statistics do not capture enough of the signal's structure, reflecting the fact that the processes being observed are highly nonlinear. This also entails that the likelihood of the $21~\si{cm}$ signal is intractible. Additionally, the foreground contamination for ground-based observatories such as the SKA will be significant. 
 
-Training is performed on one NVIDIA A30 GPU.
-\red{Need specific values of learning rate etc for both models. Should this go in appendix?}
+These challenges of non-Gaussianity and foreground noise motivate the use of neural networks for the analysis of SKA data. \red{Another sentence on NNs here.} Neural networks are nowadays commonly used in Bayesian inference, which attempts to reconcile prior knowledge and empirical data in order to find optimal parameters describing, for example, our universe. 
 
-\subsection{The dataset}
+The issue of an intractible likelihood is tackled with so-called simulation-based inference. The idea behind SBI is to train a NN on simulated data, were the inference parameters are known. Once the model is trained, inference is amortized: the model can perform inference on real data with the pre-trained model inexpensively. The prerequisite is, of course, that the model generalizes well from the training data to the real data. This approach has successfully bin implemented in \red{ergänzen}.
 
-Simulating the data used for inference is not part of this project. An existing dataset is used. The data were simulated with \red{21cmFast, cite the paper somewhere!}. The parameters varied in the simulation are:
-\begin{itemize}
-    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
-    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
-    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
-    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
-    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
-    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
-\end{itemize}
+Not all models are equally good for a given problem and as a consequence, the choice of model introduces bias to the inference. In an attempt to find a principled way to choose a model, one can use methods developed in information theory, which can here be used to quantify the quality of a model. 
 
-\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
+In this thesis, a model typically used in parameter inference for simulated SKA-data will be analyzed with the methods of information theory.
+% ~\cite{pdg_2024}
 
-\red{Do I need log priors or not?}
+Modern physics experiments generate an extreme amount of data, and the SKAO will be no exception. While processing the data will will be difficult because of it's sheer size, an additional obstacle is the complexity inherent in the $21~\si{cm}$ signal, which is highly non-Gaussian. This motivates the use of machine learning to extract physics information from the data. Since there are many possible models which could be applied to the data, there is need for a metric that evaluate's a model's quality. 
 
-Their priors used on each of these parameters are shown in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means $\Omega_b = 0.04897$, $\sigma_8 = 0.8102$, $h= 0.6766$, and
-$n_s= 0.9665$.  
+As an introduction to the methods used in this field, this section covers the concept of neural posterior approximation, some theory behind the class of models analyzed in this thesis as well as a summary of metric from information theory, and how they can evaluate a model's quality.
 
-The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters and the neutral hydrogen fraction. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The dataset is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
-
-\red{See comments on redshift range in Benedicts paper}
-
-\begin{table}[htbp]
-\centering
-\caption{Parameters used for the simulations}
-\label{tab:sim_params}
-\begin{tabular}{p{6cm} l l}
-
-\toprule
-Name & Symbol & Prior \\
-\midrule
-Matter density & $\Omega_m$ & $\mathcal{U}(0.2, 0.4)$ \\
-Warm dark matter mass & $\omega_{\text{WDM}}$ & $\mathcal{U}(0.3, 10)~\si{\keV}$ \\
-Minimum virial temperature & $T_{\text{vir}}$ & $\mathcal{U}(10^4, 10^{5.3})~\si{\kelvin}$ \\
-Ionization efficiency & $\zeta$ & $\mathcal{U}(10, 250)$ \\
-Specific X-ray luminosity & $L_X$ & $\mathcal{U}(10^{38}, 10^{42})~\si{\erg\per\second\per\solarMass\times\year}$ \\
-X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{U}(100, 1500)~\si{\eV}$  \\
-
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{The network architecture}
-
-\red{Insert sentence introducing this section. Also, find better section title}
-
-A CNN learns a compression of lightcones to a much lower-dimensional latent space. A normalizing flow learns a mapping conditioned on this latent space to the target distribution. 
-
-\red{Something about representation learning?}
-
-Examples for target distributions include the parameters used for the simulations, or a simple physical summary statistic of the image data.
-
-\red{Which construction is PIE-INN based on? Is it completely new?}
-
-One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
-
-It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
-
-Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is
+Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
 \begin{align}
-    \mathcal{L}_{\text{NPE}} = - \E_{(x,\theta) \sim p(x,\theta)} \Biggl[ \frac{|g(\theta|s(x))|^2}{2} + 
-    \log \left| \det \left( \frac{\partial g(\theta|s(x))}{\partial \theta} \right) \right|\Biggr].
+    \mathbb{I}(\text{L};\text{D}) 
+    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
+    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
 \end{align}
 
-\begin{figure}[]
-    \centering
-    \begin{subfigure}{0.6\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
-        \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
-        \label{fig:21cmPIE-INN_architecture}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.35\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
-        \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
-        \label{fig:EoRFlow_flow_architecture}
-    \end{subfigure}
+In a Bayesian inference task, processing these data would typically be done by choosing:
+\begin{enumerate}
+    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
+    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
+\end{enumerate}
+Given data d, one then calculates the posterior distribution:
+\begin{align}
+    p(p|d) \sim p(d|p) p(p).
+\end{align}
+In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
 
-    \caption{Overall caption for both figures}
-\end{figure}
+\red{The disadvantage of this method is that one looses... }
 
+\red{This doesnt work as well out-of-dataset}
 
-\red{Some introductory sentence...}
+An advantage is that unlike with the traditional Bayesian methods, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
 
-Table~\ref{tab:cnn_architecture} shows the network architectures of the CNN and the NF for both inference cases \red{Shape values still taken from Caroline's paper, check these still!} In the CNN, the first convolutional layer is designed to learn patterns in the redshift direction. An aggressive stride is used to alter the dimensionality of the next layers. The kernel for hidden layers is set to (3x3x2) and max pooling is only applied in spacial dimensions. Finally, all information is compressed into a 128-dimensonal feature vector, with global average pooling, which is in turn transformed into an $N_B$-dimensional output vector with a simple MLP. In case the CNN is pretrained, an additional MLP head can be attached, which maps the $N_B$-dimensional output to a $6$-dimensional output. The head can be removed for the rest of training. This has the benefit of leaving the rest of the architecture untouched. The CNF gets the CNNs $N_B$-dimensional output as conditional input and learns to transform the feature space to a gaussian of the same dimension. It is used in two variants depending on the inference task, the heavier of the two architectures containing more coupling layers and more nodes per layer. 
-% \begin{table}[htbp]
-% \centering
-% \caption{CNN network architecture}
-% \label{tab:cnn_architecture}
-% \begin{tabular}{l l}
+As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
 
-% \toprule
-% Layer &  shape \\
-% \midrule
-% Input Layer  & (140,140,1916,1) \\
-% 3x3x75 Conv3D  & (138,138,23,32) \\
-% 3x3x2 Conv3D  & (136,136,22,32) \\
-% 2x2x1 Max Pooling  & (68,68,22,32) \\
-% 3x3x2 Conv3D  & (66,66,21,64) \\
-% 1x1x0 Zero Padding  & (68,68,21,64) \\
-% 3x3x2 Conv3D  & (66,66,20,64) \\
-% 2x2x1 Max Pooling  & (33,33,20,64) \\
-% 3x3x2 Conv3D  & (31,31,19,128) \\
-% 1x1x0 Zero Padding  & (33,33,19,128) \\
-% 3x3x2 Conv3D  & (31,31,18,128) \\
-% Global Average Pooling  & (128) \\
-% Dense  & (128) \\
-% Dense  & (128) \\
-% Dense  & (128) \\
-% Dense  & ($N_B$) \\
-% \midrule
-% (Dense)& (128) \\
-% (Dense)& (128) \\
-% (Dense)& (6) \\
+\subsection{An architecture for complex data}
 
-% \bottomrule
-% Number of Parameters: \red{651,526}
-% \end{tabular}
-% \end{table}
+An architecture that has proven to be successful in recent SBI approaches \red{some citations here} combines two neural networks in the following principle:
+\begin{enumerate}
+    \item   The image data are used as input for a convolutional neural network (CNN), which compresses these into a much lower-dimensional summary.
+    \item   This summary is mapped to whichever feature is being inferred by a conditional normalizing flow (CNF).
+\end{enumerate}
+The idea is that the CNN learns to efficiently encode any relevant physics information, while the flow learns to interpret the CNN's output and map it to the inferred quantity. These two networks are introduced in the following.
 
-% \begin{table}[htbp]
-% \centering
-% \caption{Flow network architecture}
-% \label{tab:flow_architecture}
-% \begin{tabular}{l l}
+\subsubsection*{Convolutional Neural Networks}
 
-% \toprule
-% Feature &  shape \\
-% \midrule
-% Input layer & $N_B$ \\
-% Coupling layers & 8 \\
-% Nodes & 256 \\
-% Subnet depth & 3 \\
+CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. An early version was successfully implemented in 1983 with Fukushima's ”Neucognitron”~\red{Neocognitron citation}. An architecture implementing backpropagation was LeCun's ”LeNet”~\red{LeNet citation}.
 
-% \bottomrule
-% Number of Parameters: \red{651,526}
-% \end{tabular}
-% \end{table}
+To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will first be discussed in 1D. The generalization to higher dimensions will be discussed afterwards.
 
-\begin{table}[htbp]
-\centering
+Let $X$ denote the \red{data space} and $Y$ the feature space. 
 
-\begin{minipage}[t][12.45cm]{0.48\textwidth}
-\centering
-\caption{CNN network architecture}
-\label{tab:cnn_architecture}
-\begin{tabular}{l l}
-\toprule
-Layer & Shape \\
-\midrule
-Input Layer  & (140,140,1916,1) \\
-3x3x75 Conv3D  & (138,138,23,32) \\
-3x3x2 Conv3D  & (136,136,22,32) \\
-2x2x1 Max Pooling  & (68,68,22,32) \\
-3x3x2 Conv3D  & (66,66,21,64) \\
-1x1x0 Zero Padding  & (68,68,21,64) \\
-3x3x2 Conv3D  & (66,66,20,64) \\
-2x2x1 Max Pooling  & (33,33,20,64) \\
-3x3x2 Conv3D  & (31,31,19,128) \\
-1x1x0 Zero Padding  & (33,33,19,128) \\
-3x3x2 Conv3D  & (31,31,18,128) \\
-Global Average Pooling  & (128) \\
-Dense  & (128) \\
-Dense  & (128) \\
-Dense  & (128) \\
-Dense  & ($N_B$) \\
-\midrule
-(Dense) & (128) \\
-(Dense) & (128) \\
-(Dense) & (6) \\
-\bottomrule
-\end{tabular}
+Let the input have dimensions $x \in \R^{C\times H \times W}$ where C the channel dimension, H the height dimension and W the width dimension. In case of an RGB image, this channel dimension would be three. 
 
-\vspace{0.3cm}
-Number of Parameters: \red{651,526}
-\end{minipage}
-\hfill
-\begin{minipage}[t][12.45cm]{0.48\textwidth}
-\centering
-\caption{Flow network architecture}
-\label{tab:flow_architecture}
-\textbf{Light network variant}
-\begin{tabular}{l l}
-\toprule
-Feature & Shape \\
-\midrule
-Input layer & $N_B$ \\
-Coupling layers & 8 \\
-Nodes & 256 \\
-Subnet depth & 3 \\
-\bottomrule
-\end{tabular}
+The CNN learns a function $f_\theta: X \rightarrow Y$. 
 
-\vspace{0.3cm}
-Number of Parameters: \red{651,526}
-\vfill
-\textbf{Heavy network variant}
-\begin{tabular}{l l}
-\toprule
-Feature & Shape \\
-\midrule
-Input layer & $N_B$ \\
-Coupling layers & 10 \\
-Nodes & 512 \\
-Subnet depth & 3 \\
-\bottomrule
-\end{tabular}
+As opposed to a simple MLP, the CNN offers the following advantages:
 
-\vspace{0.3cm}
-Number of Parameters: \red{651,526}
-\end{minipage}
+\red{Using summation convention}
 
-\end{table}
+\red{Not writing bias explicitly}
+
+A basic MLP consists of only one type of layer. If $h$ is the output of the previous layer, the current layer is defined by
+\begin{align}
+    z_i = \phi(W_{ij} h_j),
+\end{align}
+The CNN implements additional layers.
+
+A convolutional layer applies a convolution operaton:
+
+\red{Talk abt convolution vs cross-correlation here}
+
+\red{Is this def even correct? Not need different indices on h?}
+\begin{align}
+    z_i = \phi(\left[w \circledast h\right]_i) = \phi(\sum_k w_k h_{i+k})
+\end{align}
+where the dimensionality of the kernel $w\in \R^K$ is typically much lower than that of the data.
+
+A pooling layer applies a pooling operation:
+\begin{align}
+    z_i = \operatorname{pool} K_{ij}h_j
+\end{align}
+where $K$ defines a pooling window for each index $i$. Typical choices for $\operatorname{pool}$ are $\operatorname{maxpool}$, which chooses the maximum of all given values, or $\operatorname{meanpool}$, which calculates their mean.
+
+\red{The purpose of a pooling layer is to...}
+
+\red{Add normalization layers here}
+
+\red{Add info on stride params etc here}
+
+\red{Hier kann man schon ein bisschen mehr schreiben, this is all very basic. More info on the CNN specific to this project to come.}
+
+\red{Put it together here, potentially add image of total architecture.}
+
+\red{Also missing MSE loss function as usual loss}
+
+\subsubsection*{Conditional Normalizing Flows}
+
+A normalizing flow is a model that learns to transform a simple (often Gaussian) distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution.
+
+Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $x \sim p_x$ with $p_x$ the $n$-dim. target distribution. Let $f: \R^n \to \R^n$ a diffeomorphism, with $g = f^{-1}$ its inverse. The training objective is to find $g$, such that
+\begin{align}
+    u = g(x) \sim p_u, \qquad x \text{ sampled from } p_x.
+\end{align}
+The process of generating samples from the approximated distribution is the inverse of the above:
+\begin{align}
+x = f(u) \sim q_x, \qquad u \text{ sampled from } p_u.
+\end{align}
+For a given transformation, one computes $p_x(x)$ by applying the change of variables formula:
+\begin{align}
+q_x(x) = p_u(g(x)) \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
+\end{align}
+The NLL is the loss function used for optimization, which then becomes:
+\begin{align}
+    \mathcal{L}_{\text{NF}} = - \E_{x \sim p_x} \Biggl[ \frac{|g(x)|^2}{2} + 
+    \log \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right|\Biggr]
+\end{align}
+where the first term is a regularization for the latent (in this case Gaussian) space and the second stems from the transformation. See \red{cite Plehns book} for more details.
+
+The normalizing flow becomes expressive by allowing the transformation to be as complex as possible, while restricting it to a class of functions with efficiently computable Jacobian determinants makes it computationally tractable. In practice, one often models $g$ as a composition of simple neural networks, e.g. multilayer perceptrons. \red{How these are invertible...}
+
+\red{Next few lines could also just be skipped}
+
+Let $g_\theta = g_1 \circ g_2 \circ ... \circ g_k$ with $g_i: \R^n \to \R^n, x \mapsto g_i(x | \theta_i)$ and $k \in \N$. 
+
+Now the loss becomes
+\begin{align}
+    \text{NLL}_\theta =  \sum_{i=1}^{k} \log \left| \det J(g_i) \right| - \log p_u (g_\theta(x))
+\end{align}
+
+\red{How to ensure it is a probabilistic model?}
+
+\red{Come up with nicer notation for $g_i (\cdot | \theta_i)$}
 
 
+\red{Now what this specific Freia flow does. Research on website!}
 
-\subsection{Inference of the neutral hydrogen fraction}
+\red{Or maybe put exact architecture in appendix?}
 
-For inference of the neutral hydrogen fraction, the lightcones are preprocessed as in \red{reference yannics paper}: The \red{temperature fluctuation values} are min-max-normalized individually for each lightcone \red{Motivation from CNN?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. This allows the labels to first be truncated to 75 dimensions and then binned to 15-dimensional vectors. This step reduces the dimensionality of the inference problem. \red{Any additional reason for lightcone truncation?} An additional logit transformation is applied to the labels, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The total dataset has a size of \red{insert current size}.
+\red{What about the B-INN in Plehns book?}
 
-In order to model the conditional distribution $p(x|y)$, an ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. The CNN and flow are trained jointly. Both models are trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. 
+\subsection{Information Theory and Neural Estimators}
 
-\red{Talk about significant difficulties with training here, and data methods used to improve training speed. Also mention gradient accumulation.}
+The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
 
-Unlike the original distribution of simulation parameters, the distribution of reionization history vectors is not uniform. It therefore has to be modeled separately. It is modeled with a flow of the same architecture as the one from the conditional distribution, without any conditional input. An additional prior model adds uncertainty to the mutual information estimation. The idea behind choosing the same architecture to model the label distribution is that an \red{artefact} of the flow $q_\theta(x|y)$ leading to high variance in the MI estimation might be learned by $q_{\tilde{\theta}}(x)$ as well, thus leading to smaller variance in the final MI estimation.
+\subsubsection*{Some Basic Measures in Information Theory}
+Given a random variable $X \sim p$, the \textit{entropy} of $X$ is defined as:
+\begin{align}
+\mathbb{H}(X) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
+\end{align}
+If the logarithm is chosen as with base 2, one defines the unit of this quantity as bits. If one uses the natural logarithm, the entropy is measured in units of nats. 
 
-\subsection{Inference of the simulation parameters}
+Entropy is a measure of the uncertainty of a random variable. A high entropy corresponds to a lack of predictability of the random variable's outcome. As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. One therefore considers entropy to be a measure of the amount of information contained in the random variable's distribution.
 
-For inference of the simulation parameters, the data are preprocessed as in \red{reference benedicts paper}: The lightcones are kept in their original dimensionality and lightcones as well as labels are globally standardized.
+The generalization to conditional entropy is:
+\begin{align}
+    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right]
+\end{align} 
 
-\red{Talk about adjusting CNN architecture here}
+Another important metric in information theory is the \textit{Kullback-Leibler divergence}. Let $X \sim p$ and $Y \sim q$ be two random variables over the same sample space. The KL-divergence between $p$ and $q$ is defined as:
+\begin{align}
+\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0
+\end{align}
+The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
 
-The conditional distribution $p(x|y)$ is again modelled with an ensemble of models for different bottleneck dimensions. Training is done with AdamW optimization and the ReduceLROnPlateau scheduler. No scaler is needed. Using gradient accumulation with an effective batch size of $32$ causes training to fail, therefore gradient accumulation is not implemented. The model does not converge if the CNN and flow are trained jointly from the beginning, so a three-step training process is implemented. First, the CNN is pretrained on the labels with an MSE loss. Since this has to be done for varying bottleneck dimensions, an additional MLP head is added to the existing CNN architecture, mapping the $N_\text{dim}$ output to $6$ dimensions. Pretraining ends after 50 epochs. The CNN weights are then frozen and the MLP head is removed for the rest of training. The CNN outputs after pretraining are then used to pretrain the flow for 120 epochs. Afterwards, the CNN weights are unfrozen and the optimizers and schedulers of both models are reset. Both models are then trained jointly for another 80 epochs. 
+\red{Maybe a word about consequece of assymetry of D KL}
+
+Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to maximizing the negative log-likelihood, because
+\begin{align}
+    \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\theta) = 
+    -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
+    \bigl[ \log q_\theta \bigr] = \text{NLL} + \text{const}
+\end{align}
+
+Lastly, the \textit{mutual information} between two random variables $X$ and $Y$ is defined as:
+\begin{align}
+\mathbb{I}(X; Y)
+         &= \mathbb{D}_{\text{KL}}(p(X, Y) || p_X(X) p_Y(Y)) \geq 0.
+\end{align}
+An alternative formulation in terms of entropy is:
+\begin{align}
+    \mathbb{I}(X; Y) = \mathbb{H}(X) - \mathbb{H}(X | Y) 
+    = \mathbb{H}(Y) - \mathbb{H}(Y | X).
+\end{align}
+Mutual information is symmetric and nonnegative. It is zero iff X and Y are independent and becomes maximal iff $X = Y$. One interprets it's value as the amount of information obtained about one random variable while observing another.
+
+\red{Something about how MI is sensitive to higher moments, maybe this can tease why one needs X amount of samples in MI estimation?}
+
+\subsubsection*{Mutual Information Estimation}
+
+In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the \textit{data processing inequality}, which in this context can be phrased as follows:
+
+Let $X$, $Y$ and $Z$ be random variables where $X$ is the original data, $Y$ is a learned summary of $X$ and $Z$ is a label associated with $X$. These form a Markov chain $X \rightarrow Y \rightarrow Z$, where $Z$ is only inferred from $Y$. Then $Z$ cannot contain more information about $X$ than $Y$, so
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}(X;Z)
+\end{align}
+A good representation keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. \red{Mit Formel unterstützen}
+
+\red{It also captures more information than just covariance!}
+
+\red{Something on summary statistics?}
+
+In practice, this necessitates an estimation of mutual information between the representation and the target distribution. 
+
+In the setting of variational inference, one can use the learned posterior to estimate mutual information in a natural way, described in the following:
+\begin{align}
+    \mathbb{I}(X; Y) &= \int_{\mathcal{X}\times\mathcal{Y}} p(x, y) \log \frac{p(x|y)}{p(x)}~\label{eq:MI_int},
+\end{align}
+where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\ref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}
+% ~\cite{Barber_2003}:
+\begin{align}
+    \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_{P(X,Y)} \left[ \log q_\theta(x|y) - \log p(x) \right]
+\end{align}
+This is computable, because the distribution of the prior $p(x)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(x)$ can also be estimated separately, which introduces more uncertainty in the above estimate.
+
+Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on the true mutual information:
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}_{\text{BA}}(X;Y)
+\end{align}
+
+\red{Estimating the error of this estimate from the true value?}
+
+\red{Maybe something about the bias of the estimator oder so...}
+
+\red{Why estimating MI in high dimensions is hard, and quantify!}
+
+\red{Also another method of approximation, maybe Donsker-Varadahn (MINE) ?}
+
+\red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
+

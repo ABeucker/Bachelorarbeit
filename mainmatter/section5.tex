@@ -7,30 +7,11 @@ Training is performed on one NVIDIA A30 GPU.
 
 \subsection{The dataset}
 
-Simulating the data used for inference is not part of this project. An existing dataset is used. The data were simulated with \red{21cmFast, cite the paper somewhere!}. The parameters varied in the simulation are:
-\begin{itemize}
-    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
-    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
-    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
-    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
-    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
-    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
-\end{itemize}
-
-\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
-
-\red{Do I need log priors or not?}
-
-Their priors used on each of these parameters are shown in table~\ref{tab:sim_params}. \red{Add 2018 Planck estimates here instead?}. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means $\Omega_b = 0.04897$, $\sigma_8 = 0.8102$, $h= 0.6766$, and
-$n_s= 0.9665$.  
-
-The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters and the neutral hydrogen fraction. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The dataset is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
-
-\red{See comments on redshift range in Benedicts paper}
+Simulating the data used for inference is not part of this project. An existing dataset is used. The data were simulated with \red{21cmFast, cite the paper somewhere!}. The simulation parameters and their priors are shown in table~\ref{tab:sim_params}. Parameters were sampled uniformly from their priors for simulations. \red{Add 2018 Planck estimates here instead?}. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means $\Omega_b = 0.04897$, $\sigma_8 = 0.8102$, $h= 0.6766$, and $n_s= 0.9665$.  
 
 \begin{table}[htbp]
 \centering
-\caption{Parameters used for the simulations}
+\caption{Parameters and priors used for the simulations}
 \label{tab:sim_params}
 \begin{tabular}{p{6cm} l l}
 
@@ -47,6 +28,14 @@ X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{
 \bottomrule
 \end{tabular}
 \end{table}
+
+The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters and the neutral hydrogen fraction. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The distribution of these $x_\text{XI}$-labels is not uniform. 
+
+The dataset is preprocessed as follows: The temperature offset values are min-max-normalized individually for each lightcone \red{Motivation from CNN?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. This allows the neutral hydrogen fraction label to first be truncated to 75 dimensions and then binned to 15-dimensional vectors, reducing the dimensionality of the inference problem. \red{Any additional reason for lightcone truncation?} An additional logit transformation is applied to this vector, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The simulation parameters, which span many different order of magnitude, are min-max normalized globally. The total dataset has a size of approximately $690~\si{GB}$ and is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
+
+\red{See comments on redshift range in Benedicts paper}
+
+\red{Do I need log priors or not?}
 
 \subsection{The network architecture}
 
@@ -226,9 +215,7 @@ Number of Parameters: \red{651,526}
 
 \subsection{Inference of the neutral hydrogen fraction}
 
-For inference of the neutral hydrogen fraction, the lightcones are preprocessed as in \red{reference yannics paper}: The \red{temperature fluctuation values} are min-max-normalized individually for each lightcone \red{Motivation from CNN?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. This allows the labels to first be truncated to 75 dimensions and then binned to 15-dimensional vectors. This step reduces the dimensionality of the inference problem. \red{Any additional reason for lightcone truncation?} An additional logit transformation is applied to the labels, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The total dataset has a size of \red{insert current size}.
-
-In order to model the conditional distribution $p(x|y)$, an ensemble of models is trained for each bottleneck dimension. Each ensemble consists of multiple training runs at different weight initializations, i.e. different seeds. The CNN and flow are trained jointly. Both models are trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. 
+The CNN and flow are trained jointly. Both models are trained using an optimizer, a scheduler and a joint scaler. The optimization method is AdamW, the scheduler method is ReduceLROnPlateau and torch's GradScaler ensures more stable backpropagation. A summary of all the hyperparameters and their chosen values can be found in \red{Cite Appendix}. \red{Maybe talk about Optuna?}. 
 
 \red{Talk about significant difficulties with training here, and data methods used to improve training speed. Also mention gradient accumulation.}
 
@@ -236,8 +223,5 @@ Unlike the original distribution of simulation parameters, the distribution of r
 
 \subsection{Inference of the simulation parameters}
 
-For inference of the simulation parameters, the data are preprocessed as in \red{reference benedicts paper}: The lightcones are kept in their original dimensionality and lightcones as well as labels are globally standardized.
-
-\red{Talk about adjusting CNN architecture here}
 
 The conditional distribution $p(x|y)$ is again modelled with an ensemble of models for different bottleneck dimensions. Training is done with AdamW optimization and the ReduceLROnPlateau scheduler. No scaler is needed. Using gradient accumulation with an effective batch size of $32$ causes training to fail, therefore gradient accumulation is not implemented. The model does not converge if the CNN and flow are trained jointly from the beginning, so a three-step training process is implemented. First, the CNN is pretrained on the labels with an MSE loss. Since this has to be done for varying bottleneck dimensions, an additional MLP head is added to the existing CNN architecture, mapping the $N_\text{dim}$ output to $6$ dimensions. Pretraining ends after 50 epochs. The CNN weights are then frozen and the MLP head is removed for the rest of training. The CNN outputs after pretraining are then used to pretrain the flow for 120 epochs. Afterwards, the CNN weights are unfrozen and the optimizers and schedulers of both models are reset. Both models are then trained jointly for another 80 epochs. 

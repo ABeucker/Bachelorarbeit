@@ -6,7 +6,7 @@
 
 Training is performed on one NVIDIA-A30 GPU. Due to long training times and therefore expensive training, only specific bottleneck dimensions are analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) are tested. One trained model and its resulting mutual information estimates are referred to as one sample. One batch of models with same bottleneck dimension but different seeds is referred to as one ensemble. 
 
-For both inference cases, training is done for 250 epochs, after which every observed model has reaches it's best validation performance, begins to overfit and plateaus in both training and validation performance. This raises the question of which epoch is to be chosen for the evaluation of mutual information. Three possible decision rules are tested: 
+For both inference cases, training is done for 250 epochs, after which every observed model has reached it's best validation performance, begins to overfit and plateaus in both training and validation losses. This raises the question of which epoch is to be chosen for the evaluation of mutual information. Three possible decision rules are tested: 
 \begin{enumerate}
     \item   The model with the best validation performance ("best validation rule").
     \item   The model for which training and validation loss are last within $5\%$ of each other ("$5\%$-rule").
@@ -18,7 +18,7 @@ The final estimates on the conditional entropy as well as the mutual information
     \hat{\mathbb{H}}_C &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s)\bigr] \\
     \hat{\mathbb{I}} &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s) - q_\phi (l)\bigr] 
 \end{align}
-Compared to the rest of training, this metric is inexpensive to evaluate, so it is done every epoch, which enables the visualization of estimated CE and MI during training.
+Compared to the rest of training, these metrics is inexpensive to evaluate, so it is done every epoch, which enables the visualization of estimated CE and MI during training.
 
 Two sources of error in the final estimations are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the \textit{model error}. This is estimated from the standard error and confirmed by bootstrap analysis, see below. When comparing results across seeds, an additional \textit{seed error} must be considered, which is also estimated from the standard error. 
 
@@ -28,22 +28,21 @@ The average training time for this model is \red{insert}. The bottleneck dimensi
 
 As an example, the training and validation losses for an ensemble with bottleneck dimension $N_\text{dim}=15$ are shown in figure~\ref{fig:train_val_bottle_15}. Vertical lines indicate the epoch with best validation performance. Dotted lines indicate the epoch where training and validation loss are last within \red{X percent} of each other. The corresponding estimated conditional entropy per epoch is shown in figure~\ref{fig:ce_bottle_15}. The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}.  
 
-From these figures one can observe the following: All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit. The $5\%$ decision rule imposes the strictes decision choice, while model choice by best validation performance allows the model to learn longer before estimating the final CE-value. These observations apply to all models analyzed.
-\begin{figure}[h!]
+From these figures one can observe the following: All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit. The $5\%$ decision rule imposes the strictes decision choice, while model choice by best validation performance allows the model to learn longer before estimating the final CE value. This observation generalizes to all other models trained.
+\begin{figure}[h]
     \centering
-    
     \caption{Train and Validation Losses for $N_B=15$}
     \includegraphics[width=\linewidth]{graphics/ensemble_15/joint_losses_excluded.png}
     \label{fig:train_val_bottle_15}
     
-    \vspace{-0.7cm}
+    \vspace{0cm}
     
-    \includegraphics[width=\linewidth]{graphics/ensemble_15/conditional_entropy_standard_excluded.png}
     \caption{Conditional Entropy per Epoch for $N_B=15$}
+    \includegraphics[width=\linewidth]{graphics/ensemble_15/conditional_entropy_standard_excluded.png}
     \label{fig:ce_bottle_15}
     
 \end{figure}
-In order to compare the training processes, table~\ref{tab:training_stability} summarizes losses, epochs until convergence and seed variance for different bottleneck dimensions. One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation losses across seeds. This indicates a higher training instability for models with smaller bottleneck dimension.(\red{Table almost ready, results coming soon})
+In order to compare the training processes, table~\ref{tab:training_stability} summarizes losses, epochs until convergence and seed variance for different bottleneck dimensions. One observes a higher seed variance for models with smaller bottleneck dimensions. There is also a higher variability in their training and validation loss across seeds. This indicates a higher training instability for models with smaller bottleneck dimension.(\red{Table almost ready, results coming soon})
 \begin{table}[htbp]
 \centering
 \caption{Results on training stability}
@@ -64,157 +63,56 @@ Bottleneck & Average best epoch & Average best val loss \\
 
 \red{What I want: graph showing training time per bottleneck dimension vs graph showing absolute best val performance. But do I really want the second of the two?}
 
-The model error on the conditional entropy estimate grows with increasing training steps. Some reionization histories are attributed with very low likelihood, such that the distribution of $\log q_\theta (\text{label}_i|\text{summary}_i)$ has a heavy left-sided tail. This is in parts because of the distribution of the labels themselves. 
+In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{} shows a histogram plot of condtional probabilities of the test set, as well as probabilities given by the separately trained prior flow model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\theta (\text{label}_i|\text{summary}_i)$, and the estimate of mutual information is obtained in the same way once all $p(l_i)$ have been subtracted. 
 
-
-
-Table~\ref{tab:CE_all_res} shows the estimated conditional entropy for each model. All entropy values are given in nats. \red{observations...}
-
+In this way, an estimate of conditional entropy and mutual information is obtained for every sample. As an example, the results of final MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}.
 \begin{table}[htbp]
 \centering
-\caption{CE estimates across bottleneck dims $N_B$ in nats}
-\begin{tabular}{c | c c c}
-\toprule
-\diagbox{$N_{\text{dim}}$}{Seed} & 12 & 14 & 30 \\
-\midrule
-4  & $38.88 \pm 0.89$ & - &  $37.68 \pm 0.42$ \\
-6  & $36.75 \pm 0.40$ & - & $40.25 \pm 0.70$ \\
-15 & $39.64 \pm 0.52$ & $40.15 \pm 0.59$ & $40.61 \pm 0.37$ \\
-16 & $39.81 \pm 0.38$ & $40.17 \pm 0.50$ &  $39.72 \pm 0.68$ \\
-25 & - & - & $40.22 \pm 0.57$  \\
-
-\bottomrule
-\end{tabular}
-\label{tab:CE_all_res}
-\end{table}
-
-\begin{table}[htbp]
-\centering
-\caption{MI estimates across bottleneck dims $N_\text{dim}$ in nats}
-\begin{tabular}{c | c c c c}
-\toprule
-\diagbox{$N_{\text{dim}}$}{Seed} & 12 & 14 & 30 \\
-\midrule
-4  & $6.00 \pm 0.73$ & - &  $4.76 \pm 0.31$ \\
-6  & $3.87 \pm 0.30 $ & - & $7.24 \pm 0.61$ \\
-15 & $6.70 \pm 0.45$ & $7.25 \pm 0.48$ & $7.74 \pm 0.25$ \\
-16 & $6.94 \pm 0.29$ & $7.31 \pm 0.39$ &  $6.81 \pm 0.57$ \\
-25 & - & - & $7.34 \pm 0.47$  \\
-
-\bottomrule
-\end{tabular}
-\label{tab:MI_all_res}
-\end{table}
-A separate normalizing flow is trained on the label distribution. The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
-
-As an example, a histogram plot of the distributions $\log q_\theta (\text{label}_i|\text{summary}_i)$ and $\log \tilde{q}_\theta (\text{label}_i)$ is shown in figure~\red{insert figure}. 
-
-The final estimates of conditiona entropy with errors as shown in table~\ref{tab:CE_results}. The total estimated errors as well as separate seed and model errors are listed.
-\begin{table}[htbp]
-\centering
-\caption{Final Esimation of CE per Bottleneck Dimension in nats}
-\label{tab:CE_results}
-\begin{tabular}{l c c c c}
-\toprule
-
-Bottleneck & CE & Seed error & Model error & No. samples\\
-\midrule
-4  & $38.26 \pm 0.49$ & $0.36$ & $0.34$ & $2$ \\
-6  & $38.47 \pm 1.02$ & $0.99$ & $0.27$ & $2$ \\
-15 & $40.10 \pm 0.25$ & $0.17$ & $0.19$ & $3$ \\
-16 & $39.88 \pm 0.26$ & $0.11$ & $0.23$ & $3$ \\
-25 & $40.20 \pm 0.58$ &   -    & $0.58$ & $1$ \\
-
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[htbp]
-\centering
-\caption{Final Esimation of MI per Bottleneck Dimension in nats}
-\label{tab:CE_results}
-\begin{tabular}{l c c c c}
-\toprule
-
-Bottleneck & MI & Seed error & Model error & No. samples\\
-\midrule
-4  & $5.39 \pm 0.45$ & $0.35$ & $0.28$ & $2$ \\
-6  & $5.58 \pm 1.01$ & $0.99$ & $0.22$ & $2$ \\
-15 & $7.23 \pm 0.22$ & $0.16$ & $0.14$ & $3$ \\
-16 & $7.02 \pm 0.21$ & $0.10$ & $0.19$ & $3$ \\
-25 & $7.31 \pm 0.49$ &   -    & $0.49$ & $1$ \\
-
-\bottomrule
-\end{tabular}
-\end{table}
-These results can be described as follows: One does observe a general trend of increasing mutual information for increased bottleneck dimension, though the increase is not monotonous. Seed and model error are similar in magnitude, though with exceptions in case of failed training runs. 
-
-
-\begin{table}[htbp]
-\centering
-\caption{Final estimates $x_\text{HI}$ inference}
-\label{tab:x_hi_results}
+\caption{Final estimates $x_\text{HI}$ inference, $5\%$ selection rule}
 \begin{tabular}{l |c |c |c}
 \toprule
 
 $N_B$ & CE [nats]& MI [nats]& No. samples\\
 \midrule
-4  & $38.28 \pm 0.35  \pm 0.32$ & $5.39 \pm 0.35  \pm 0.28$ & $2$ \\
-6  & $38.47 \pm 0.99  \pm 0.27$ & $5.58 \pm 0.99  \pm 0.22$ & $2$ \\
-8  & $40.29 \pm 0.36  \pm 0.34$ & $7.40 \pm 0.36  \pm 0.25$ & $2$ \\
-15 & $40.12 \pm 0.16  \pm 0.18$ & $7.23 \pm 0.16  \pm 0.14$ & $3$ \\
-16 & $39.91 \pm 0.10  \pm 0.23$ & $7.02 \pm 0.10  \pm 0.19$ & $3$ \\
-25 & $39.91 \pm 0.29  \pm 0.38$ & $7.02 \pm 0.29  \pm 0.31$ & $2$ \\
-30 & $38.98 \pm -     \pm 0.80$ & $6.09 \pm -     \pm 0.69$ & $1$ \\
+4  & $38.28 \pm 0.35 \pm 0.32$ & $5.39 \pm 0.35 \pm 0.28$ & $2$ \\
+6  & $38.47 \pm 0.99 \pm 0.27$ & $5.58 \pm 0.99 \pm 0.22$ & $2$ \\
+8  & $40.29 \pm 0.36 \pm 0.34$ & $7.40 \pm 0.36 \pm 0.25$ & $2$ \\
+15 & $40.12 \pm 0.16 \pm 0.18$ & $7.23 \pm 0.16 \pm 0.14$ & $3$ \\
+16 & $39.91 \pm 0.10 \pm 0.23$ & $7.02 \pm 0.10 \pm 0.19$ & $3$ \\
+25 & $39.91 \pm 0.29 \pm 0.38$ & $7.02 \pm 0.29 \pm 0.31$ & $2$ \\
+30 & $38.98 \pm -    \pm 0.80$ & $6.09 \pm -    \pm 0.69$ & $1$ \\
 
 \bottomrule
 \end{tabular}
+\label{tab:final_xHI_5_pct}
 \end{table}
+The final results for all selection rules are visualized in the following. Figure~\ref{fig:final_xHI_5_pct} displays final estimates of mutual information using the $5\%$ selection rule. One can observe a general increase in the estimate of mutual information for bottleneck dimensions, with the exception of the models for $N_B=8$. The insignificant increase in mutual information between $N_B=25$ and $N_B=30$ points towards a saturation in the mutual information for higher bottleneck dimensions.
+\begin{figure}[h]
+    \centering
+    \caption{Final estimates $x_\text{HI}$ inference, $5\%$ selection rule}
+    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_constrained_best_val.png}
+    \label{fig:final_xHI_5_pct}
+\end{figure}
+Figure~\ref{fig:final_xHI_best_val}
+\begin{figure}[h]
+    \centering
+    \caption{Final estimates $x_\text{HI}$ inference, $5\%$ selection rule}
+    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_best_val.png}
+    \label{fig:final_xHI_best_val}
+\end{figure}
+
+A separate normalizing flow is trained on the label distribution. The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
+
+
+
+These results can be described as follows: One does observe a general trend of increasing mutual information for increased bottleneck dimension, though the increase is not monotonous. Seed and model error are similar in magnitude, though with exceptions in case of failed training runs. 
+
+
 
 As shown in table~\red{trained performance table}, models with a smaller bottleneck dimension require more epochs to learn, though as seen in table~\ref{tab:x_hi_results}, they might still perform equally with regards to the information they contain about the feature distribution. However, they might only be able to do this because they are overfitting on the training set, the information they learn coming at the cost of worse out-of-dataset generalization. As an alternative to choosing the model based on best validation performance, one can instead choose the model for which training and validation losses were last within \red{X percent} of each other, thus constraining the models to better generalization. The resulting estimates for CE and MI are shown in table~\ref{tab:x_hi_results_constraints}. The estimates of CE and MI are generally lower than before, however their trend is closer to that expected, again with the exception of the model trained at $N_B = 8$. \red{Are errors really smaller in all cases though?}
-\begin{table}[htbp]
-\centering
-\caption{Final estimates $x_\text{HI}
-$ inference under constraints}
-\label{tab:x_hi_results_constraints}
-\begin{tabular}{l |c |c |c}
-\toprule
 
-Bottleneck & CE [nats]& MI [nats]& No. samples\\
-\midrule
-4  & $36.16 \pm 0.51$ & $3.27 \pm 0.50$ & $2$ \\
-6  & $36.92 \pm 0.36$ & $4.02 \pm 0.34$ & $2$ \\
-8  & $39.40 \pm 0.28$ & $6.51 \pm 0.23$ & $2$ \\
-15 & $38.16 \pm 0.41$ & $5.27 \pm 0.40$ & $3$ \\
-16 & $38.20 \pm 0.38$ & $5.31 \pm 0.37$ & $3$ \\
-25 & $38.93 \pm 0.45$ & $6.04 \pm 0.41$ & $2$ \\
-30 & $39.04 \pm 0.45$ & $6.15 \pm 0.34$ & $1$ \\
-
-\bottomrule
-\end{tabular}
-\end{table}
 Another decision rule is to choose the last epoch that the model was evaluated on. The idea is that conditional entropy values become much more stable towards the end of training, as seen in figure~\ref{fig:ce_bottle_15}. This mitigates bias stemming from one „lucky” epoch. The resulting estimates of CE and MI are shown in table~\ref{tab:x_hi_results_last_epoch}. In particular, the estimates for $N_B = 8$ are then in line with expectations.
-\begin{table}[htbp]
-\centering
-\caption{Final estimates $x_\text{HI}
-$ inference on last-epoch models}
-\label{tab:x_hi_results_last_epoch}
-\begin{tabular}{l |c |c |c}
-\toprule
 
-Bottleneck & CE [nats]& MI [nats]& No. samples\\
-\midrule
-4  & $37.92  \pm 0.44$ & $5.02  \pm 0.40$ & $2$ \\
-6  & $38.10  \pm 0.97$ & $5.21  \pm 0.95$ & $2$ \\
-8  & $39.34  \pm 0.78$ & $6.45  \pm 0.73$ & $2$ \\
-15 & $39.50  \pm 0.37$ & $6.61  \pm 0.34$ & $3$ \\
-16 & $39.57  \pm 0.35$ & $6.68  \pm 0.31$ & $3$ \\
-25 & $39.24  \pm 0.63$ & $6.34  \pm 0.57$ & $2$ \\
-30 & $38.33  \pm 0.98$ & $5.44  \pm 0.87$ & $1$ \\
-
-\bottomrule
-\end{tabular}
-\end{table}
 
 \subsection{Results for inference of simulation parameters}
 

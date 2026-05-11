@@ -1,7 +1,5 @@
 \section{Results}
 
-\green{Still gathering some more results, but MI estimations won't change much anymore probably.}
-
 \red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
 
 \red{A word on bootstrap error calculations for comparison}
@@ -14,6 +12,8 @@ Each model is trained for 250 epochs, with an average runtime of \red{insert ave
 For each training run, the CE/MI estimation is done on the model with the best validation performance. 
 
 Two sources of error in the estimation are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the \textit{model error}. This is estimated from the standard deviation and confirmed by bootstrap analysis, see below. When comparing results across seeds, an additional \textit{seed error} must be considered, which is also estimated from the standard deviation of the results. 
+
+\subsection{Results for inference of $x_\text{HI}$}
 
 As an example, the training and validation losses for an ensemble of runs with bottleneck dimension $N_\text{dim}=15$ are shown in figure~\ref{fig:train_val_bottle_15}. Vertical lines indicate the epoch with best validation performance. \red{Observations...} The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. 
 \begin{figure}
@@ -175,7 +175,7 @@ Bottleneck & CE [nats]& MI [nats]& No. samples\\
 \bottomrule
 \end{tabular}
 \end{table}
-Another decision rule is to choose the last epoch that the model was evaluated on. The idea is that conditional entropy values become much more stable towards the end of training, as seen in figure~\ref{fig:ce_bottle_15}. This mitigates bias stemming from one „lucky” epoch. The resulting estimates of CE and MI are shown in table~\ref{tab:x_hi_results_last_epoch}.
+Another decision rule is to choose the last epoch that the model was evaluated on. The idea is that conditional entropy values become much more stable towards the end of training, as seen in figure~\ref{fig:ce_bottle_15}. This mitigates bias stemming from one „lucky” epoch. The resulting estimates of CE and MI are shown in table~\ref{tab:x_hi_results_last_epoch}. In particular, the estimates for $N_B = 8$ are then in line with expectations.
 \begin{table}[htbp]
 \centering
 \caption{Final estimates $x_\text{HI}
@@ -198,10 +198,13 @@ Bottleneck & CE [nats]& MI [nats]& No. samples\\
 \end{tabular}
 \end{table}
 
+\subsection{Results for inference of simulation parameters}
+
+The final estimates of CE and MI when choosing models based on best validation performance are shown in table~\ref{tab:param_results_best_val}.
 \begin{table}[htbp]
 \centering
 \caption{Final estimates 6-parameter inference}
-\label{tab:param_results}
+\label{tab:param_results_best_val}
 \begin{tabular}{l c c c c}
 \toprule
 

@@ -22,6 +22,17 @@
 
 \usepackage[left=25mm,right=25mm,top=25mm,bottom=25mm]{geometry}
 
+% \usepackage[a4paper, total={15.5cm, 22cm}]{geometry}
+
+
+% \usepackage{geometry}
+%  \geometry{
+%  a4paper,
+%  total={170mm,257mm},
+%  left=20mm,
+%  top=20mm,
+%  }
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.5em}
 
@@ -43,39 +54,39 @@
 % =========================================================
 \usepackage{titlesec}
 
-% Chapter
-\titleformat{\chapter}
-  {\normalfont\bfseries\LARGE}
-  {\thechapter}
-  {1em}
-  {}
+% % Chapter
+% \titleformat{\chapter}
+%   {\normalfont\bfseries\LARGE}
+%   {\thechapter}
+%   {1em}
+%   {}
 
-\titlespacing*{\chapter}{0pt}{-10pt}{20pt}
+% \titlespacing*{\chapter}{0pt}{-10pt}{20pt}
 
-% Section
-\titleformat{\section}
-  {\normalfont\bfseries\Large}
-  {\thesection}
-  {1em}
-  {}
+% % Section
+% \titleformat{\section}
+%   {\normalfont\bfseries\Large}
+%   {\thesection}
+%   {1em}
+%   {}
 
-\titlespacing*{\section}{0pt}{12pt}{6pt}
+% \titlespacing*{\section}{0pt}{12pt}{6pt}
 
-% Subsection
-\titleformat{\subsection}
-  {\normalfont\bfseries\large}
-  {\thesubsection}
-  {1em}
-  {}
+% % Subsection
+% \titleformat{\subsection}
+%   {\normalfont\bfseries\large}
+%   {\thesubsection}
+%   {1em}
+%   {}
 
-\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+% \titlespacing*{\subsection}{0pt}{10pt}{4pt}
 
-% Subsubsection
-\titleformat{\subsubsection}
-  {\normalfont\bfseries\normalsize}
-  {\thesubsubsection}
-  {1em}
-  {}
+% % Subsubsection
+% \titleformat{\subsubsection}
+%   {\normalfont\bfseries\normalsize}
+%   {\thesubsubsection}
+%   {1em}
+%   {}
 
 % =========================================================
 % HEADERS & FOOTERS
@@ -86,15 +97,21 @@
 \fancyhf{}
 
 % chapter on even pages, section on odd pages
-\fancyhead[LE]{\leftmark}
-\fancyhead[RO]{\rightmark}
+\fancyhead[LE, RO]{\leftmark}
+% \fancyhead[RO]{\rightmark}
 \fancyhead[RE,LO]{\thepage}
 
-\renewcommand{\headrulewidth}{0.4pt}
+% \renewcommand{\headrulewidth}{0.4pt}
 
 % keep marks clean
 % \renewcommand{\chaptermark}[1]{\markboth{Chapter \thechapter\ #1}{}}
-\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+% \renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+
+% define section marks only
+\renewcommand{\sectionmark}[1]{%
+    \markboth{\thesection\ #1}{}
+}
+
 
 % =========================================================
 % FIGURES & TABLES
@@ -142,10 +159,10 @@
   citecolor=black,
   urlcolor=blue
 ]{hyperref}
-\usepackage[nameinlink,noabbrev]{cleveref}  % grouped references
-\crefrangeformat{figure}{[#3#1#4--#5#2#6]}
-\crefmultiformat{figure}
-  {[#2#1#3]}
-  {,[#2#1#3]}
-  {,[#2#1#3]}
-  {,[#2#1#3]}
+% \usepackage[nameinlink,noabbrev]{cleveref}  % grouped references
+% \crefrangeformat{figure}{[#3#1#4--#5#2#6]}
+% \crefmultiformat{figure}
+%   {[#2#1#3]}
+%   {,[#2#1#3]}
+%   {,[#2#1#3]}
+%   {,[#2#1#3]}

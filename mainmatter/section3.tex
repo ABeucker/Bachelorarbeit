@@ -215,7 +215,7 @@ In the setting of variational inference, one can use the learned posterior to es
 \begin{align}
     \mathbb{I}(X; Y) &= \int_{\mathcal{X}\times\mathcal{Y}} p(x, y) \log \frac{p(x|y)}{p(x)}~\label{eq:MI_int},
 \end{align}
-where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\cref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}
+where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\ref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}
 % ~\cite{Barber_2003}:
 \begin{align}
     \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_{P(X,Y)} \left[ \log q_\theta(x|y) - \log p(x) \right]

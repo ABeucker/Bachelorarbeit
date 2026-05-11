@@ -134,8 +134,8 @@ These results can be described as follows: One does observe a general trend of i
 
 \begin{table}[htbp]
 \centering
-\caption{Final Estimations}
-\label{tab:CE_results}
+\caption{Final estimates $x_\text{HI}$ inference}
+\label{tab:x_hi_results}
 \begin{tabular}{l |c |c |c}
 \toprule
 
@@ -153,10 +153,13 @@ $N_B$ & CE [nats]& MI [nats]& No. samples\\
 \end{tabular}
 \end{table}
 
+As shown in table~\red{trained performance table}, models with a smaller bottleneck dimension require more epochs to learn, though as seen in table~\ref{tab:x_hi_results}, they might still perform equally with regards to the information they contain about the feature distribution. However, they might only be able to do this because they are overfitting on the training set, the information they learn coming at the cost of worse out-of-dataset generalization. As an alternative to choosing the model based on best validation performance, one can instead choose the model for which training and validation losses were last within \red{X percent} of each other, thus constraining the models to better generalization. The resulting estimates for CE and MI are shown in table~\ref{tab:x_hi_results_constraints}. The estimates of CE and MI are generally lower than before, however their trend is closer to that expected, again with the exception of the model trained at $N_B = 8$. \red{Are errors really smaller in all cases though?}
+
 \begin{table}[htbp]
 \centering
-\caption{Final estimations using constraints}
-\label{tab:CE_results}
+\caption{Final estimates $x_\text{HI}
+$ inference under constraints}
+\label{tab:x_hi_results_constraints}
 \begin{tabular}{l |c |c |c}
 \toprule
 
@@ -176,8 +179,8 @@ Bottleneck & CE [nats]& MI [nats]& No. samples\\
 
 \begin{table}[htbp]
 \centering
-\caption{CE estimations for 6-parameter inference}
-\label{tab:CE_results_6}
+\caption{Final estimates 6-parameter inference}
+\label{tab:param_results}
 \begin{tabular}{l c c c c}
 \toprule
 

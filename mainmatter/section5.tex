@@ -4,16 +4,18 @@
 
 \red{A word on bootstrap error calculations for comparison}
 
-Each model is trained for 250 epochs, with an average runtime of \red{insert average runtime}. Due to these training times, only specific bottleneck dimensions are analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) are tested. The held-out test set consisting of $10\%$ of the total dataset ($500$ samples) is used to obtain estimates on the conditional entropy as well as the mutual information:
+Due to long training times, only specific bottleneck dimensions are analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) are tested. The held-out test set consisting of $10\%$ of the total dataset ($500$ samples) is used to obtain estimates on the conditional entropy as well as the mutual information:
 \begin{align}
     \hat{\mathbb{H}}_C &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s)\bigr] \\
     \hat{\mathbb{I}} &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s) - q_\phi (l)\bigr] 
 \end{align}
-For each training run, the CE/MI estimation is done on the model with the best validation performance. 
+\red{A word on different choices of epoch, or is this too early here?}
 
 Two sources of error in the estimation are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the \textit{model error}. This is estimated from the standard deviation and confirmed by bootstrap analysis, see below. When comparing results across seeds, an additional \textit{seed error} must be considered, which is also estimated from the standard deviation of the results. 
 
 \subsection{Results for inference of $x_\text{HI}$}
+
+Each model is trained for 250 epochs, with an average runtime of \red{insert average runtime}. \red{Need more info here...}
 
 As an example, the training and validation losses for an ensemble of runs with bottleneck dimension $N_\text{dim}=15$ are shown in figure~\ref{fig:train_val_bottle_15}. Vertical lines indicate the epoch with best validation performance. \red{Observations...} The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. 
 \begin{figure}

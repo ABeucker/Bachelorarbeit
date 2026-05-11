@@ -200,21 +200,21 @@ Bottleneck & CE [nats]& MI [nats]& No. samples\\
 
 \subsection{Results for inference of simulation parameters}
 
-The final estimates of CE and MI when choosing models based on best validation performance are shown in table~\ref{tab:param_results_best_val}.
+The final estimates of CE and MI when choosing models based on best validation performance are shown in table~\ref{tab:param_results_best_val}. In comparison with the inference of $x_\text{HI}$, values of \red{conditional entropy} are much smaller. In most cases, the information increase with bottleneck dimension is statistically significant. Mutual information appears to saturate after $N_B=7$.
 \begin{table}[htbp]
 \centering
 \caption{Final estimates 6-parameter inference}
 \label{tab:param_results_best_val}
-\begin{tabular}{l c c c c}
+\begin{tabular}{l| c| c| c}
 \toprule
 
-Bottleneck & CE [nats]& Seed error & Model error & No. samples\\
+$N_B$ & CE [nats]& MI [nats] & No. samples\\
 \midrule
-3 & $11.66 \pm 0.14$ & - & $0.14$ & $1$ \\
-5 & $13.12 \pm 0.33$ & - & $0.33$ & $1$ \\
-6 & $13.33 \pm 0.21$ & - & $0.21$ & $1$ \\
-7 & $13.93 \pm 0.13$ & - & $0.13$ & $1$ \\
-9 & $13.92 \pm 0.21$ & - & $0.21$ & $1$ \\
+3 & $11.66 \pm 0.14$ & - & $1$ \\
+5 & $13.12 \pm 0.33$ & - & $1$ \\
+6 & $13.33 \pm 0.21$ & - & $1$ \\
+7 & $13.93 \pm 0.13$ & - & $1$ \\
+9 & $13.92 \pm 0.21$ & - & $1$ \\
 
 \bottomrule
 \end{tabular}

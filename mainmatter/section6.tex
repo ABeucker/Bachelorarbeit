@@ -1,5 +1,7 @@
 \section{Results and Discussion}
 
+\red{Will have a few sentences on general results here}
+
 \red{Might be nice to evaluate some metric for inference performance that Yannic used as well, to show that I recovered the results.}
 
 \red{A word on bootstrap error calculations for comparison}
@@ -60,12 +62,37 @@ Bottleneck & Epoch by $5\%$ rule & Epoch by best validation rule \\
 \end{table}
 
 \subsubsection*{Estimates of conditional entropy and mutual information}
-In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{fig:distr_q_log} shows a histogram plot of conditional probabilities of the test set, and~\ref{} shows the probabilities from the separetely trained prior model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\theta (\text{label}_i|\text{summary}_i)$, and the estimate of mutual information is obtained in the same way once all $p(l_i)$ have been subtracted. These results are marked in the respective figures.
-\begin{figure}[h]
+In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{fig:distr_q_log} shows a histogram plot of conditional probabilities of the test set, and~\ref{fig:distr_q_log_comparison} shows the probabilities from the separetely trained prior model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\theta (\text{label}_i|\text{summary}_i)$, and the estimate of mutual information is obtained in the same way once all $p(l_i)$ have been subtracted. These results are marked in the respective figures.
+% \begin{figure}[h]
+%     \centering
+%     \caption{Histogram showcasing estimation of CE}
+%     \includegraphics[width=0.48\linewidth]{graphics/final_plots/distribution_q_log.png}
+%     \label{fig:distr_q_log}
+% \end{figure}
+% \begin{figure}[h]
+%     \centering
+%     \caption{Histogram showcasing estimation of MI}
+%     \includegraphics[width=0.48\linewidth]{graphics/final_plots/distribution_q_log_comparison.png}
+%     \label{fig:distr_q_log_comparison}
+% \end{figure}
+
+\begin{figure}[htbp]
     \centering
-    \caption{Histogram plot of conditional probabilities}
-    \includegraphics[width=0.75\linewidth]{graphics/final_plots/distribution_q_log.png}
-    \label{fig:distr_q_log}
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \caption{Estimation of conditional entropy}
+        \includegraphics[width=\linewidth]{graphics/final_plots/distribution_q_log.png}
+        \label{fig:distr_q_log}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \caption{Estimation of mutual information}
+        \includegraphics[width=\linewidth]{graphics/final_plots/distribution_q_log_comparison.png}
+        \label{fig:distr_q_log_comparison}
+    \end{subfigure}
+    \caption{Histogram plots used to evaluate CE and MI}
 \end{figure}
 
 In this way, an estimate of conditional entropy and mutual information is obtained for every epoch. As an example, the estimated conditional entropy per epoch is shown in figure~\ref{fig:ce_bottle_15}. Again, vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit.

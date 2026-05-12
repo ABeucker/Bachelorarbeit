@@ -9,6 +9,19 @@ Training is performed on one NVIDIA A30 GPU.
 
 Simulating the data used for inference is not part of this project. An existing dataset is used. The data were simulated with \red{21cmFast, cite the paper somewhere!}. The simulation parameters and their priors are shown in table~\ref{tab:sim_params}. Parameters were sampled uniformly from their priors for simulations. \red{Add 2018 Planck estimates here instead?}. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means $\Omega_b = 0.04897$, $\sigma_8 = 0.8102$, $h= 0.6766$, and $n_s= 0.9665$.  
 
+\begin{itemize}
+    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
+    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
+    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
+    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
+    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
+    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
+\end{itemize}
+
+\red{How reioniazation history is calculated}
+\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
+
+
 \begin{table}[htbp]
 \centering
 \caption{Parameters and priors used for the simulations}

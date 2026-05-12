@@ -1,54 +1,106 @@
-\section{Machine Learning Background}
+\section{Machine Learning Background}~\label{sec:ml_background}
 
+\red{As an introduction to the methods used in this field, this section covers the concept of neural posterior approximation, some theory behind the class of models analyzed in this thesis as well as a summary of metric from information theory, and how they can evaluate a model's quality.}
 
-
-
-There are multiple difficulties in interpreting the $21~\si{cm}$ signal. Traditional Gaussian summary statistics do not capture enough of the signal's structure, reflecting the fact that the processes being observed are highly nonlinear. This also entails that the likelihood of the $21~\si{cm}$ signal is intractible. Additionally, the foreground contamination for ground-based observatories such as the SKA will be significant. 
-
-These challenges of non-Gaussianity and foreground noise motivate the use of neural networks for the analysis of SKA data. \red{Another sentence on NNs here.} Neural networks are nowadays commonly used in Bayesian inference, which attempts to reconcile prior knowledge and empirical data in order to find optimal parameters describing, for example, our universe. 
-
-The issue of an intractible likelihood is tackled with so-called simulation-based inference. The idea behind SBI is to train a NN on simulated data, were the inference parameters are known. Once the model is trained, inference is amortized: the model can perform inference on real data with the pre-trained model inexpensively. The prerequisite is, of course, that the model generalizes well from the training data to the real data. This approach has successfully bin implemented in \red{ergänzen}.
-
-Not all models are equally good for a given problem and as a consequence, the choice of model introduces bias to the inference. In an attempt to find a principled way to choose a model, one can use methods developed in information theory, which can here be used to quantify the quality of a model. 
-
-In this thesis, a model typically used in parameter inference for simulated SKA-data will be analyzed with the methods of information theory.
-% ~\cite{pdg_2024}
-
-Modern physics experiments generate an extreme amount of data, and the SKAO will be no exception. While processing the data will will be difficult because of it's sheer size, an additional obstacle is the complexity inherent in the $21~\si{cm}$ signal, which is highly non-Gaussian. This motivates the use of machine learning to extract physics information from the data. Since there are many possible models which could be applied to the data, there is need for a metric that evaluate's a model's quality. 
-
-As an introduction to the methods used in this field, this section covers the concept of neural posterior approximation, some theory behind the class of models analyzed in this thesis as well as a summary of metric from information theory, and how they can evaluate a model's quality.
-
-Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics, which map the data to a lower-dimensional space with known interpretation. These will be denoted as $s_{\text{phys}}(\text{D})$. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\theta(\text{D})$, which is hopefully more informative, though less interpretable:
-\begin{align}
-    \mathbb{I}(\text{L};\text{D}) 
-    \geq \mathbb{I}(\text{L};s_\theta(\text{D})) 
-    > \mathbb{I}(\text{L};s_{\text{phys}}(\text{D})) 
-\end{align}
-
-In a Bayesian inference task, processing these data would typically be done by choosing:
-\begin{enumerate}
-    \item   a likelihood $p(\text{D}|\text{P})$ describing how observed data arised from a specific set of parameters,
-    \item   a prior $p(\text{P})$ describing beliefs about the parameter distribution before seeing data.
-\end{enumerate}
-Given data d, one then calculates the posterior distribution:
-\begin{align}
-    p(p|d) \sim p(d|p) p(p).
-\end{align}
-In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(d_{\text{obs}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior directly. This is known as \textit{likelihood-free inference}. When the posterior is approximated using a neural network, one also speaks of \textit{neural posterior approximation}.
-
-\red{The disadvantage of this method is that one looses... }
-
-\red{This doesnt work as well out-of-dataset}
-
-An advantage is that unlike with the traditional Bayesian methods, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as \textit{amortized inference}. A downside is the fact that one needs data to train the posterior, which is often not available.
-
-As a solution, one can simulate data and train a posterior on this simulated data. This is known as \textit{simulation-based inference} (SBI). Once trained, the posterior can be evaluated on the observed data. The downside is that the choice of the model as well as the choice of the simulator introduce bias to the final estimation and it is unclear wether the model generalizes to real-world data.
+In the following, $x$ denotes a data sample, and $\theta$ a corresponding parameter. Probability densities are denoted $p$, and their approximations with $q$. Functions $s$ denote objects that summarize data, so $s(x)$ is such a summary. Neural networks are denoted with an index $\phi or \psi$, so $q_\phi$ is an estimate of a probability distribution done with a neural network, and $s_\psi$ is a summary done by a neural network.
 
 \subsection{Neural posterior estimation}
+In a Bayesian inference task, processing these data would typically be done by choosing:
+\begin{enumerate}
+    \item   a likelihood $p(x|\theta)$ describing how observed data arised from a specific set of parameters,
+    \item   a prior $p(\theta)$ describing beliefs about the parameter distribution before seeing data.
+\end{enumerate}
+Given data d, one then calculates the posterior distribution using Bayes' theorem:
+\begin{align}
+    p(\theta|x) \sim p(x|\theta) p(\theta).
+\end{align}
+In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(x_{\text{observed}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior separately, such that given $x_{\text{observed}}$, one can at least sample from the posterior: $\theta \sim q(\theta | x_{\text{observed}})$. This is known as likelihood-free inference. When the posterior is approximated using a neural network $q_\phi(\theta |x)$, one also speaks of neural posterior estimation (NPE).
 
-\red{Introduce NPE as the WAY SBI is done here}
+An advantage is that unlike with the traditional Bayesian methods, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as amortized inference. In order to train the model, data is needed, and this is where simulators are implemented. The posterior model is trained on simulated data and once trained, one can sample parameters by $\theta \sim q_\phi(\theta | x_{\text{observed}})$. In this way, NPE becomes a way of implementing simulation-based inference.
+
+\subsection{Information Theory and Neural Estimators}
+Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics $s_\text{phys}(x)$, which map the data to a lower-dimensional space with known interpretation. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\phi(x)$, and the procedure is then called representation learning. The summarry is hopefully more informative of the parameter of interest, though potentially less interpretable. If $\mathbb{I}$ is a measure of informativeness between the data and the parameters, this increased informativeness can be expressed as:
+\begin{align}
+    \mathbb{I}(\theta;x) 
+    \geq \mathbb{I}(\theta;s_\phi(x)) 
+    > \mathbb{I}(\theta;s_{\text{phys}}(x)).
+\end{align}
+The necessitates a measure of informativeness for use in representation learning, which is introduced in this section.
+
+\subsubsection*{Some Basic Measures in Information Theory}
+Given a random variable $X$ distributed as $p$, $X \sim p$, the entropy of $X$ is defined as:
+\begin{align}
+\mathbb{H}(X) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
+\end{align}
+If the logarithm is chosen with base 2, one defines the unit of this quantity as bits. If one uses the natural logarithm, the entropy is measured in units of nats. 
+
+Entropy is a measure of the uncertainty of a random variable. A high entropy corresponds to a lack of predictability of the random variable's outcome. As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. One therefore considers entropy to be a measure of the amount of information contained in the random variable's distribution.
+
+The generalization to conditional entropy is:
+\begin{align}
+    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right]
+\end{align} 
+
+Another important metric in information theory is the Kullback-Leibler divergence. Let $X \sim p$ and $Y \sim q$ be two random variables over the same sample space. The KL-divergence between $p$ and $q$ is defined as:
+\begin{align}
+\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0
+\end{align}
+The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
+
+Since the KL-divergence is assymmetric, one distinguishes $\mathbb{D}_{\text{KL}}(p || q)$ as the forwards KL between $p$ and $q$, and $\mathbb{D}_{\text{KL}}(q || p)$ as the backwards KL between $p$ and $q$. Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to maximizing the negative log-likelihood, because
+\begin{align}
+    \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\phi) = 
+    -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
+    \bigl[ \log q_\phi \bigr] = \text{NLL} + \text{const}
+\end{align}
+
+Lastly, the mutual information between two random variables $X$ and $Y$ is defined as:
+\begin{align}
+\mathbb{I}(X; Y)
+         &= \mathbb{D}_{\text{KL}}(p(X, Y) || p_X(X) p_Y(Y)) \geq 0.
+\end{align}
+An alternative formulation in terms of entropy is:
+\begin{align}
+    \mathbb{I}(X; Y) = \mathbb{H}(X) - \mathbb{H}(X | Y) 
+    = \mathbb{H}(Y) - \mathbb{H}(Y | X).
+\end{align}
+Mutual information is symmetric and nonnegative. It is zero if and only if $X$ and $Y$ are independent and becomes maximal if and only if $X = Y$. One interprets its value as the amount of information obtained about one random variable while observing another. Since it is defined as an expectation over the joint distribution of the two variables $X$ and $Y$, it is sensitive to higher moments of these distributions, and cannot be captured simply be e.g. their variance.
+
+\subsubsection*{Mutual Information Estimation}
+In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the data processing inequality, which in this context can be phrased as follows:
+
+Let $X$, $Y$ and $Z$ denote random variables. These are processed as $X \rightarrow Y \rightarrow Z$, in the sense that a sample from $X$ is processed to produce a sample from $Y$, which in turn is processed to produce a sample from $Z$, without any additional knowledge of $X$. Then $Z$ cannot contain more information about $X$ than $Y$, so
+\begin{align}
+    \mathbb{I}(X;Y) \geq \mathbb{I}(X;Z).
+\end{align}
+This applied in the context of SBI and NPE, where the parameters of interest $\theta$ are part of the first random variable, the simulated data $x$ part of the second and the summarized data $s_\phi(x)$ part of the third. The data processing inequality then reads:
+\begin{align}
+    \mathbb{I}(\theta;x) 
+    \geq \mathbb{I}(\theta;s_\phi(x)),
+\end{align}
+and this explains why mutual information is the needed measure of informativeness mentioned in the beginning of this section. A good summary keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. The summary distribution is also referred to as the bottleneck.
+
+\red{Something on information bottleneck method?}
+
+In practice, mutual information between the bottleneck $Z$ and the parameter distribution $\Theta$ can only be estimated. In the setting of NPE, one can use the learned posterior to estimate mutual information in a natural way, described in the following. The mutual information between the bottleneck and the parameter distributions is defined as
+\begin{align}
+    \mathbb{I}(\Theta; Z) &= \int p(\theta, z) \log \frac{p(\theta|z)}{p(\theta)}~\label{eq:MI_int},
+\end{align}
+where the distribution $p(\theta|z)$ is now estimated by a learned $q_\phi(\theta|z)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\phi)$. The Monte-Carlo approximation of eq.~\ref{eq:MI_int} using this distribution is referred to as the Barber-Agakov estimate~\cite{Barber_2003}:
+\begin{align}
+    \hat{\mathbb{I}}(\Theta;Z) = \mathbb{I}_{\text{BA}}(\Theta;Z) = \E_{P(\Theta,Z)} \left[ \log q_\phi(\theta|z) - \log p(\theta) \right].
+\end{align}
+This is computable, because the distribution of the prior $p(z)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(z)$ can also be estimated separately, which however introduces more uncertainty in the above estimate.
+
+Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on the true mutual information:
+\begin{align}
+    \mathbb{I}(\Theta;Z) \geq \mathbb{I}_{\text{BA}}(\Theta;Z)
+\end{align}
 
 \subsection{An architecture for complex data}
+
+The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
+
 
 An architecture that has proven to be successful in recent SBI approaches \red{some citations here} combines two neural networks in the following principle:
 \begin{enumerate}
@@ -147,99 +199,5 @@ Now the loss becomes
 
 \red{Come up with nicer notation for $g_i (\cdot | \theta_i)$}
 
-
 \red{Now what this specific Freia flow does. Research on website!}
-
-\red{Or maybe put exact architecture in appendix?}
-
-\red{What about the B-INN in Plehns book?}
-
-\subsection{Information Theory and Neural Estimators}
-
-The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
-
-\subsubsection*{Some Basic Measures in Information Theory}
-Given a random variable $X \sim p$, the \textit{entropy} of $X$ is defined as:
-\begin{align}
-\mathbb{H}(X) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
-\end{align}
-If the logarithm is chosen as with base 2, one defines the unit of this quantity as bits. If one uses the natural logarithm, the entropy is measured in units of nats. 
-
-Entropy is a measure of the uncertainty of a random variable. A high entropy corresponds to a lack of predictability of the random variable's outcome. As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. One therefore considers entropy to be a measure of the amount of information contained in the random variable's distribution.
-
-The generalization to conditional entropy is:
-\begin{align}
-    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right]
-\end{align} 
-
-Another important metric in information theory is the \textit{Kullback-Leibler divergence}. Let $X \sim p$ and $Y \sim q$ be two random variables over the same sample space. The KL-divergence between $p$ and $q$ is defined as:
-\begin{align}
-\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0
-\end{align}
-The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
-
-\red{Maybe a word about consequece of assymetry of D KL}
-
-Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to maximizing the negative log-likelihood, because
-\begin{align}
-    \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\theta) = 
-    -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
-    \bigl[ \log q_\theta \bigr] = \text{NLL} + \text{const}
-\end{align}
-
-Lastly, the \textit{mutual information} between two random variables $X$ and $Y$ is defined as:
-\begin{align}
-\mathbb{I}(X; Y)
-         &= \mathbb{D}_{\text{KL}}(p(X, Y) || p_X(X) p_Y(Y)) \geq 0.
-\end{align}
-An alternative formulation in terms of entropy is:
-\begin{align}
-    \mathbb{I}(X; Y) = \mathbb{H}(X) - \mathbb{H}(X | Y) 
-    = \mathbb{H}(Y) - \mathbb{H}(Y | X).
-\end{align}
-Mutual information is symmetric and nonnegative. It is zero iff X and Y are independent and becomes maximal iff $X = Y$. One interprets it's value as the amount of information obtained about one random variable while observing another.
-
-\red{Something about how MI is sensitive to higher moments, maybe this can tease why one needs X amount of samples in MI estimation?}
-
-\subsubsection*{Mutual Information Estimation}
-
-In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the \textit{data processing inequality}, which in this context can be phrased as follows:
-
-Let $X$, $Y$ and $Z$ be random variables where $X$ is the original data, $Y$ is a learned summary of $X$ and $Z$ is a label associated with $X$. These form a Markov chain $X \rightarrow Y \rightarrow Z$, where $Z$ is only inferred from $Y$. Then $Z$ cannot contain more information about $X$ than $Y$, so
-\begin{align}
-    \mathbb{I}(X;Y) \geq \mathbb{I}(X;Z)
-\end{align}
-A good representation keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. \red{Mit Formel unterstützen}
-
-\red{It also captures more information than just covariance!}
-
-\red{Something on summary statistics?}
-
-In practice, this necessitates an estimation of mutual information between the representation and the target distribution. 
-
-In the setting of variational inference, one can use the learned posterior to estimate mutual information in a natural way, described in the following:
-\begin{align}
-    \mathbb{I}(X; Y) &= \int_{\mathcal{X}\times\mathcal{Y}} p(x, y) \log \frac{p(x|y)}{p(x)}~\label{eq:MI_int},
-\end{align}
-where the distribution $p(x|y)$ is estimated by a learned $q_\theta(x|y)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\theta)$. The Monte-Carlo approximation of~\ref{eq:MI_int} using this distribution is referrred to as the \textit{Barber-Agakov estimate}
-% ~\cite{Barber_2003}:
-\begin{align}
-    \hat{\mathbb{I}}(X;Y) = \mathbb{I}_{\text{BA}}(X;Y) = \E_{P(X,Y)} \left[ \log q_\theta(x|y) - \log p(x) \right]
-\end{align}
-This is computable, because the distribution of the prior $p(x)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(x)$ can also be estimated separately, which introduces more uncertainty in the above estimate.
-
-Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on the true mutual information:
-\begin{align}
-    \mathbb{I}(X;Y) \geq \mathbb{I}_{\text{BA}}(X;Y)
-\end{align}
-
-\red{I will have a small part on expected results here.}
-
-\red{Estimating the error of this estimate from the true value?}
-
-\red{Maybe something about the bias of the estimator oder so...}
-
-\red{Why estimating MI in high dimensions is hard, and quantify!}
-
-\red{Maybe something on limitations on the interpretation of these metrics. Could also tease limitations in high dimensions, or give intuition for amount of data needed.}
 

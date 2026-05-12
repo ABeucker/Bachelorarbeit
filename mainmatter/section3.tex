@@ -1,14 +1,6 @@
 \section{Physics of the 21cm Signal}
 
-\red{I am currently still fighting with the citations, that will hopefully soon be resolved.}
 
-The current cosmological standard model predicts the epoch of Cosmic Dawn (CD) and the subsequent Epoch of Reionization (EoR) as mechanisms for star and structure formation and the following ionization of the intergalactic medium (IGM) at a redshift range of roughly $z \sim [5-20]$. A number of sources from multi-messenger astronomer have contributed to this current model: Scattering of CMB photons on free electrons during and after reionization can be detected once IGM became ionized significantly enough. This places the beginning of EoR at $z \sim 8$, though with a large uncertainty
-% ~\cite{Schosser_2026}. 
-Lymann-alpha forests in the spectra of distant quasars and galaxies are used to estimate the neutral hydrogen fraction at low redshifts, placing the end of the EoR at around \red{add here }\red{citation}. The JWST with an observational range of $z \sim \red{...}$ measures earliest galaxies and will be able to additionally constrain the speed of galaxy evolution.~\cite{pdg_2024}
-
-A comparatively new probe is that of the $21~\si{cm}$ hyperfine transition line of neutral hydrogen, which constitutes a background spectrum similar to that of the CMB. It is the only known probe with which the Dark Ages could be studied and also the one to study CD to the highest redshifts. First experiments have measured \red{reionization profiles in terms of power spectra and signals of possible dark matter presence} \red{cite}. Much better results are expected from the Square Kilometer Array (SKA) Observatory, which is a radio telescope currently in construction which will image the $21~\si{cm}$ line of the IGM at a redshift range of $z \sim [6-30]$ with unprecedented accuracy. Hopes are that this signal can be used to significantly improve the current understanding of the reionization history and structure formation and possibly act as a new dark matter probe.
-
-\red{Still need some more subsections to explain the other parameters being examined}
 
 \subsection{The cosmological setting}
 
@@ -122,27 +114,51 @@ Equation of state & $w$ & -1 & & Planck 2018 \\
 \red{Small overview of existing studies of timeline of universe, why there is a gap in EoR}
 
 \red{Maybe cite more recent paper that explains why studying this exact regime of redshifts}
+
 \subsection{The origin of the 21cm signal}
 
-The two possible electron spin states of neutral hydrogen in the $1s$ state have slightly different energy levels. The transition is forbidden, the excited state having a mean lifetime of $\sim 11\cdot 10^6~\si{yr}$. The parallel state carries slightly more energy, the offset being approximately $\Delta E \approx 10^{-6}~\si{eV}$, which corresponds to $\nu \approx 1.42~\si{GHz}$, or $\lambda = 21~\si{cm}$. 
+\red{Need a source for this section.}
 
-In the following, the singlet state is denoted with index $0$ and the triplet state with index $1$. Then the index $01$ denotes excitation, and $10$ de-excitation.
+\red{Maybe some more details on IGM at these redshifts?}
 
-\red{Maybe some more details on ISM at these redshifts?}
+The two electron spin states of neutral hydrogen in the $1s$ state have slightly different energy levels. This hyperfine structure originates from the parallel (triplet state) and antiparallel (singlet state) orientation of electron spin with respect to the nuclues. The transition between states is forbidden, the excited state having a mean lifetime of $\sim 11\cdot 10^6~\si{yrs}$. The triplet state carries slightly more energy, the energy difference being $\Delta E \approx 10^{-6}~\si{eV}$, which corresponds to a frequency of $\nu \approx 1.42~\si{GHz}$, or a wavelength of $\lambda \approx 21~\si{cm}$. 
 
-The $21~\si{cm}$ signal at redshift ranges $z \sim [6-30]$ corresponds to a frequency range of $\nu\sim [46-200]~\si{MHz}$. 
+Neutral hydrogen gas made up most of baryonic matter during CD and EoR, and $21~\si{cm}$ photons emitted during these epochs can be measured today. A $21~\si{cm}$ photon emitted at some point during CD or EoR is redshifted by the time it reaches the earth. At redshift ranges $z \sim 6-30$ , it is now measured on a range of $\nu\sim 46-200~\si{MHz}$, or $\lambda\sim 1.5-6.5~\si{m}$. This wavelength range belongs to the regime of radio astronomy and is covered by the SKA-Low setup, which is sensitive to frequencies $\nu \sim (50-350)~\si{MHz}$. \red{Caroline's comment: lower than 6?}. \red{https://www.skao.int/en/science-users/118/ska-telescope-specifications}
 
-This range is covered by the SKA-Low setup, which is sensitive in the $\nu \sim (50-350)~\si{MHz}$ range. \red{https://www.skao.int/en/science-users/118/ska-telescope-specifications}
+There are various mechanisms that lead to changes in this spin state of neutral hydrogen in the IGM. Those mechanisms that are consequences of the quantum mechanical properties of the atom are measured by Einstein coefficients, which are introduced in the following. The singlet state is denoted with index $0$ and the triplet state with index $1$. Then the index $01$ denotes excitation, and $10$ de-excitation. \red{Indices in quotations?}
 
-This range belongs to the regieme of radio astronomy. Various background signals disturb the measurement of the $21~\si{cm}$ line in this frequency range:
-\begin{itemize}
-    \item   The CMB spectrum
-    \item   Astrophysical sources
-    \item   Foreground noise 
-\end{itemize}
-Modelling noice of astrophysical sources and of the foreground is in practice the greatest challenge, but the correction for the CMB spectrum can be given in the following.
+$A_{10}$ describes spontaneous emission and can be given as a rate. For neutral hydrogen, one finds $A_{10}\approx 2.85\cdot 10^{-15}~\si{s}^{-1}$.
 
-The $21~\si{cm}$ signal is given in terms of brightness offset temperature $\delta T_B$ which is calculated from the specific intensity measured by a radio telescope, assuming the Rayleigh-Jeans regieme. Let $\nu$ be the frequency at which the $21~\si{cm}$ signal is to be observed. The signal is then composed of the background CMB radiation and the radiation emitted from clouds of neutral hydrogen, minus the CMB radiation absorbed in the neutral hydrogen cloud. This is expressed as 
+$B_{01/10}$ describes absorption/stimulated emission. For neutral hydrogen, one finds $B_{10} = A_{10}(c^2 /2h\nu^3)$ and $B_{10}g_1 = B_{01}g_0$, where $\nu$ is the $21~\si{cm}$ line frequency given above and g is the spin degeneracy factor of each state. In terms of the $21~\si{cm}$ it is used to describe the interaction of neutral hydrogen clouds with CMB radiation.
+
+Two other effects also lead to the (de-)excitation of neutral hydrogen in the IGM, and their rates are described by \red{"effective"} coefficients. C denotes those processes driven by collision interactions with other hydrogen atoms, free electrons and protons, and P those from scattering with Lyman-$\alpha$ photons. In equilibrium, both define a kinetic temperature $T_K$ and effective color temperature $T_c$: \red{How are they density dependent?}
+\begin{align}
+    \frac{C_{01}}{C_{10}} &= \frac{g_1}{g_0} e^{-\frac{T_*}{T_K}}\\
+    \frac{P_{01}}{P_{10}} &= \frac{g_1}{g_0} e^{-\frac{T_*}{T_c}}
+\end{align}
+where again $T_K,T_c \gg T_*$ and the exponential can be expressed in first-order Taylor expansion.
+
+On a large scale, the relative populations $n_0$ and $n_1$ of neutral hydrogen atoms in different spin states are described by (or determine) the spin temperature $T_S$:
+\begin{align}
+    \frac{n_1}{n_0} 
+    = \frac{g_1}{g_0} \exp \biggl(-\frac{E_{10}}{k_B T_S}\biggr) 
+    \equiv \frac{g_1}{g_0} \exp \biggl(-\frac{T_\star}{T_S}\biggr),~\label{eq:Boltzmann}
+\end{align} 
+As a reminder, the $g_i$ are spin degeneracy factors and $E_{10}$ the energy difference between spin states. An estimate of $T_S$ allows an estimate of the relative populations. \red{For astrophysical environments}, $T_S \gg T_*$ and as such $n_1 \approx 3n_0$ is a working approximation. 
+
+An estimate of $T_S$ is then obtained by a rate balancing of the aforementioned Einstein coefficients:
+\begin{align}
+    n_1 (A_{10} + B_{10}I_\gamma +C_{10}+P_{10})=n_0(B_{01}I_\gamma + C_{01}+P_{01})~\label{eq:rate_balancing}
+\end{align}
+where $I_\gamma$ is the specific intensity of CMB photons at the frequency of the $21~\si{cm}$ line \red{always saying line...}. The CMB background is the source closest resembling a blackbody spectrum, which is in this frequency range described by the Rayleigh-Jeans law, with which $I_\gamma$ can be written in terms of a temperature at the frequency of the $21~\si{cm}$ line. Plugging everything into~\ref{eq:rate_balancing} yields the following approximation to $T_S$:
+\begin{align}
+    T_S^{-1} &= \frac{T_\gamma^{-1} + x_c T_K^{-1} + x_\alpha T_C^{-1}}{1+x_c+x_\alpha}\\
+    x_c &= \frac{C_{10}}{A_{10}}\frac{h\nu}{k_B T_\gamma}\\
+    x_\alpha &= \frac{P_{10}}{A_{10}}\frac{h\nu}{k_B T_\gamma},
+\end{align}
+This raises the question of what the measured $21~\si{cm}$ looks like, given this estimate of $T_S$. 
+
+The $21~\si{cm}$ signal is given in terms of brightness offset temperature $\delta T_B$ which is calculated from the specific intensity measured by the radio telescope, assuming the Rayleigh-Jeans regime. Let $\nu$ be the frequency at which the $21~\si{cm}$ signal is to be observed. The signal is then composed of the background CMB radiation and the radiation emitted from clouds of neutral hydrogen, minus the CMB radiation absorbed in the neutral hydrogen cloud. This is expressed as 
 \begin{align}
     \frac{dI}{ds} = -\alpha(\nu) I_\gamma + \alpha(\nu) I_S~\label{eq:specific_intensity}
 \end{align}
@@ -155,7 +171,7 @@ The observered specific intensity $I_B$ is obtained by solving the radiative tra
 \end{align}
 where $\tau$ is the so-called optical depth. This carries the interpretation that for an optically thick material, $\tau >> 1$, the signal is dominated by the $21~\si{cm}$ signal and for an optically thin material,  $\tau << 1$, by CMB radiation. 
 
-In the Rayleigh-Jeans regieme, this observed specific intensity is proportional to the temperature. Adding the redshift correction for the CMB temperature, this yields
+In the Rayleigh-Jeans regime, this observed specific intensity is proportional to the temperature. Adding the redshift correction for the CMB temperature, this yields
 \begin{align}
     T_{B0}(1+z) = T_S (1-\exp^{-\tau})+T_0 (1+z)\exp^{-\tau}. 
 \end{align}
@@ -229,6 +245,16 @@ From the expression in equation~\ref{eq:brightness_offset_final}, it becomes cle
 \end{figure}
 
 \red{Will still have some comments on the figure}
+
+
+Various background signals disturb the measurement of the $21~\si{cm}$ line in this frequency range:
+\begin{itemize}
+    \item   The CMB spectrum
+    \item   Astrophysical sources
+    \item   Foreground noise 
+\end{itemize}
+Modelling noice of astrophysical sources and of the foreground is in practice the greatest challenge, but the correction for the CMB spectrum can be given in the following.
+
 
 \subsection{Simulating the 21cm signal}
 

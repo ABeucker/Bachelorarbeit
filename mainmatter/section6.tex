@@ -42,20 +42,20 @@ In all cases, training and validation losses improve while still improving begin
 In order to compare the model selection rules, table~\ref{tab:training_stability} summarizes the average amount of epochs it takes for a model to reach the epochs chosen by the $5\%$ and best validation decision rules. Choosing models by the $5\%$ rule results in a higher variance in the selected epoch for models with larger bottleneck dimensions, while choosing models by the best validation rule results in a higher variance in the selected epochs for models with smaller bottleneck dimensions. The $5\%$ decision rule imposes the strictes decision choice, while model choice by best validation performance allows the model to learn longer before making a CE/MI estimate. For both selection rules, architectures with $N_B=4$ train the longest before being chosen, but there is no strong pattern for the choice of model for the other $N_B$. 
 \begin{table}[htbp]
 \centering
-\caption{Models selected for different selection rules}
+\caption{Epochs selected for different selection rules}
 \label{tab:training_stability}
-\begin{tabular}{l l l}
+\begin{tabular}{l| l l}
 \toprule
 
-Bottleneck & Epoch by $5\%$ rule & Epoch by best validation rule \\
+ & $5\%$ rule & Best validation rule \\
 \midrule
-4  & $129\pm21$ & $174\pm25$ \\
-6  & $98.5\pm0.5$  & $162\pm5$ \\
-8  & $126\pm7$ & $169\pm17$ \\
-15 & $102\pm4$ & $151\pm7$ \\
-16 & $103\pm25$ & $156\pm6$ \\
-25 & $116\pm19$ & $173.5\pm0.5$ \\
-30 & $109\pm -$ & $144\pm -$ \\
+$N_B=4$  & $129\pm21$ & $174\pm25$ \\
+$N_B=6$  & $98.5\pm0.5$  & $162\pm5$ \\
+$N_B=8$  & $126\pm7$ & $169\pm17$ \\
+$N_B=15$ & $102\pm4$ & $151\pm7$ \\
+$N_B=16$ & $103\pm25$ & $156\pm6$ \\
+$N_B=25$ & $116\pm19$ & $173.5\pm0.5$ \\
+$N_B=30$ & $109\pm -$ & $144\pm -$ \\
 
 \bottomrule
 \end{tabular}
@@ -89,7 +89,7 @@ In this way, an estimate of conditional entropy and mutual information is obtain
     \label{fig:ce_bottle_15}
 \end{figure}
 
-The estimated of CE and MI are done for all ensembles and for all selection rules. As an example, the results of final CE and MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}. Seed and model errors are similar in magnitude and as such none will be neglected. In all following figures displaying final results only the combined error is shown.
+The estimates of CE and MI are done for all ensembles and for all selection rules. As an example, the results of final CE and MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}. Seed and model errors are similar in magnitude and as such none will be neglected. In all following figures displaying final results only the combined error is shown.
 
 \red{Comments on difference between these values staying constant?}
 \begin{table}[htbp]
@@ -98,7 +98,7 @@ The estimated of CE and MI are done for all ensembles and for all selection rule
 \begin{tabular}{l |c |c |c}
 \toprule
 
-$N_B$ & CE [nats] ($\sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & MI [nats] ($\sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$)& No. samples\\
+$N_B$ & CE [nats] ($\pm \sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & MI [nats] ($\pm \sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$)& No. samples\\
 \midrule
 4  & $36.16~(\pm 0.49 \pm 0.14$) & $3.27~(\pm 0.49 \pm 0.10)$ & $2$ \\
 6  & $36.92~(\pm 0.32 \pm 0.17$) & $4.02~(\pm 0.32 \pm 0.13)$ & $2$ \\
@@ -177,7 +177,7 @@ The estimates of conditional entropy are obtained in the same way as previously,
 \begin{tabular}{l| c| c}
 \toprule
 
-$N_B$ & MI [nats] ($\sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & No. samples\\
+$N_B$ & MI [nats] ($\pm \sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & No. samples\\
 \midrule
 3 & $11.66 \pm 0.14$ & $2$ \\
 5 & $13.12 \pm 0.33$ & $2$ \\

@@ -65,7 +65,6 @@ Bottleneck & Epoch by $5\%$ rule & Epoch by best validation rule \\
 In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{fig:distr_q_log} shows a histogram plot of conditional probabilities of the test set, and~\ref{fig:distr_q_log_comparison} shows the probabilities from the separetely trained prior model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\phi (\theta_i|z_i)$, and the estimate of mutual information is obtained in the same way once all $\log q_\psi(\theta_i)$ have been subtracted. These results are marked in the respective figures.
 \begin{figure}[htbp]
     \centering
-    
     \begin{subfigure}{0.48\textwidth}
         \centering
         \caption{Estimation of conditional entropy}
@@ -81,7 +80,8 @@ In order to visualize how conditional entropy and mutual information are determi
     \end{subfigure}
     \caption{Histogram plots used to evaluate CE and MI}
 \end{figure}
-In this way, an estimate of conditional entropy and mutual information is obtained for every epoch. As an example, the estimated conditional entropy per epoch is shown in figure~\ref{fig:ce_bottle_15}. Again, vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. The epochs chosen by $5\%$ rule for seeds 12 and 30 coincide. All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit.
+
+In this way, an estimate of conditional entropy and mutual information is obtained for every epoch. As an example, the estimated conditional entropy per epoch is shown in figure~\ref{fig:ce_bottle_15}. Again, vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. The epochs chosen by $5\%$ rule for seeds 12 and 30 coincide. All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit. This qualitative behaviour is observed for all architectures and it is the same for estimates of MI as well. All resulting plots can be found in the appendix \red{reference appendix}.
 \begin{figure}[h]
     \centering
     \caption{Conditional Entropy per Epoch for $N_B=15$}
@@ -89,59 +89,51 @@ In this way, an estimate of conditional entropy and mutual information is obtain
     \label{fig:ce_bottle_15}
 \end{figure}
 
-
-
-As an example, the results of final MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}. Seed and model errors are similar in magnitude and as such none will be neglected. In the following results, only the combined error is shown.
-
-
-
-
-\red{This table needs to be updated}
+The estimated of CE and MI are done for all ensembles and for all selection rules. As an example, the results of final CE and MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}. Seed and model errors are similar in magnitude and as such none will be neglected. In all following figures displaying final results only the combined error is shown.
 
 \red{Comments on difference between these values staying constant?}
 \begin{table}[htbp]
 \centering
-\caption{Final estimates $x_\text{HI}$ inference, $5\%$ selection rule}
+\caption{Final CE and MI estimates based on $5\%$ selection rule}
 \begin{tabular}{l |c |c |c}
 \toprule
 
-$N_B$ & CE [nats]& MI [nats]& No. samples\\
+$N_B$ & CE [nats] ($\sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & MI [nats] ($\sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$)& No. samples\\
 \midrule
-4  & $38.28 \pm 0.35 \pm 0.32$ & $5.39 \pm 0.35 \pm 0.28$ & $2$ \\
-6  & $38.47 \pm 0.99 \pm 0.27$ & $5.58 \pm 0.99 \pm 0.22$ & $2$ \\
-8  & $40.29 \pm 0.36 \pm 0.34$ & $7.40 \pm 0.36 \pm 0.25$ & $2$ \\
-15 & $40.12 \pm 0.16 \pm 0.18$ & $7.23 \pm 0.16 \pm 0.14$ & $3$ \\
-16 & $39.91 \pm 0.10 \pm 0.23$ & $7.02 \pm 0.10 \pm 0.19$ & $3$ \\
-25 & $39.91 \pm 0.29 \pm 0.38$ & $7.02 \pm 0.29 \pm 0.31$ & $2$ \\
-30 & $38.98 \pm -    \pm 0.80$ & $6.09 \pm -    \pm 0.69$ & $1$ \\
+4  & $36.16~(\pm 0.49 \pm 0.14$) & $3.27~(\pm 0.49 \pm 0.10)$ & $2$ \\
+6  & $36.92~(\pm 0.32 \pm 0.17$) & $4.02~(\pm 0.32 \pm 0.13)$ & $2$ \\
+8  & $39.40~(\pm 0.16 \pm 0.24$) & $6.51~(\pm 0.16 \pm 0.17)$ & $2$ \\
+15 & $38.16~(\pm 0.39 \pm 0.13$) & $5.27~(\pm 0.39 \pm 0.09)$ & $3$ \\
+16 & $38.20~(\pm 0.35 \pm 0.15$) & $5.31~(\pm 0.35 \pm 0.11)$ & $3$ \\
+25 & $38.93~(\pm 0.34 \pm 0.29$) & $6.04~(\pm 0.34 \pm 0.22)$ & $2$ \\
+30 & $39.04~(\pm -    \pm 0.45$) & $6.15~(\pm -    \pm 0.34)$ & $1$ \\
 
 \bottomrule
 \end{tabular}
 \label{tab:final_xHI_5_pct}
 \end{table}
-The final results for all selection rules are now visualized. Figure~\ref{fig:final_xHI_5_pct} displays final estimates of mutual information using the $5\%$ selection rule. One can observe a general increase in the estimate of mutual information for bottleneck dimensions, with the exception of the models for $N_B=8$. The insignificant increase in mutual information between $N_B=25$ and $N_B=30$ points towards a saturation in the mutual information for higher bottleneck dimensions.
+The final results for all selection rules are now visualized. Figure~\ref{fig:final_xHI_5_pct} displays final CE estimates using the $5\%$ selection rule. One can observe a general increase in the estimate of conditional entropy for larger bottleneck dimensions, with the exception of the models for $N_B=8$. The insignificant increase in conditional entropy between $N_B=25$ and $N_B=30$ points towards a saturation in the conditional entropy for higher bottleneck dimensions.
 \begin{figure}[h]
     \centering
-    \caption{Final estimates $x_\text{HI}$ inference, $5\%$ selection rule}
-    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_constrained_best_val.png}
+    \caption{Final CE estimates for $x_\text{HI}$ inference, $5\%$ rule}
+    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_ce_estimates_constrained_best_val.png}
     \label{fig:final_xHI_5_pct}
 \end{figure}
-Figure~\ref{fig:final_xHI_best_val} shows the final MI estimates for the best validation selection rule. This selection rule favors models in later stages of training. Models can therefore learn longer and this is the reason why the resulting MI estimates are on average higher. The models have also often begun to overfit, resulting in larger errors than for the previous method. Models with bottleneck dimensions close to the feature distribution appear to be less prone to this mechanism. Models with bottleneck dimensions farther from that of the feature distribution appear to have learnt less by the time the reach their best validation performance, again with exception of the model for $N_B=8$.
+Figure~\ref{fig:final_xHI_best_val} shows the final CE estimates for the best validation selection rule. This selection rule favors models in later stages of training. Models can therefore learn longer and this is the reason why the resulting CE estimates are on average higher. The models have also often begun to overfit, resulting in larger errors than for the previous method. Models with bottleneck dimensions close to the feature distribution are less prone to large errors. Models with bottleneck dimensions farther from that of the feature distribution have learnt less by the time the reach their best validation performance, again with exception of the model for $N_B=8$. 
 \begin{figure}[h]
     \centering
-    \caption{Final estimates $x_\text{HI}$ inference, best validation selection rule}
-    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_best_val.png}
+    \caption{Final CE estimates for $x_\text{HI}$ inference, best validation rule}
+    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_ce_estimates_best_val.png}
     \label{fig:final_xHI_best_val}
 \end{figure}
-Figure~\ref{fig:final_xHI_last_epoch} shows the final MI estimates for the last epoch selection rule. The curve and its characteristics are similar to that of the one for the best validation selection rule. It is notable that the model for $N_B=8$ is estimated to have learned less than the ones for $N_B=15,16$, a feature which other selection rules do not have. 
+Figure~\ref{fig:final_xHI_last_epoch} shows the final CE estimates for the last epoch selection rule. The curve and its characteristics are similar to that of the one for the best validation selection rule. It is notable that the model for $N_B=8$ is estimated to have learned less than the ones for $N_B=15,16$, a feature which other selection rules do not have. As this rule chooses models which are stronly overfitting, the model error increases, such that the errors on the final estimates are larger than for the other selection rules. 
 \begin{figure}[h]
     \centering
-    \caption{Final estimates $x_\text{HI}$ inference, last epoch selection rule}
-    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_last_epoch.png}
+    \caption{Final CE estimates for $x_\text{HI}$ inference, last epoch rule}
+    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_ce_estimates_last_epoch.png}
     \label{fig:final_xHI_last_epoch}
 \end{figure}
-Given 
-
+The method of choosing models based on the $5\%$ rule has proven to yield the most robust estimates of conditional entropy. 
 
 As shown in table~\red{trained performance table}, models with a smaller bottleneck dimension require more epochs to learn, though as seen in table~\ref{tab:x_hi_results}, they might still perform equally with regards to the information they contain about the feature distribution. Taking the fact that smaller models perform worse in the $5\%$ selection rule but not necessarily so when choosing by best validation performance, this indicates the equal performance comes from overfitting on the training set, coming at the cost of worse out-of-dataset generalization.
 

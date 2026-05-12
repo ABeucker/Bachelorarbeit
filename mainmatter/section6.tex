@@ -62,20 +62,7 @@ Bottleneck & Epoch by $5\%$ rule & Epoch by best validation rule \\
 \end{table}
 
 \subsubsection*{Estimates of conditional entropy and mutual information}
-In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{fig:distr_q_log} shows a histogram plot of conditional probabilities of the test set, and~\ref{fig:distr_q_log_comparison} shows the probabilities from the separetely trained prior model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\theta (\text{label}_i|\text{summary}_i)$, and the estimate of mutual information is obtained in the same way once all $p(l_i)$ have been subtracted. These results are marked in the respective figures.
-% \begin{figure}[h]
-%     \centering
-%     \caption{Histogram showcasing estimation of CE}
-%     \includegraphics[width=0.48\linewidth]{graphics/final_plots/distribution_q_log.png}
-%     \label{fig:distr_q_log}
-% \end{figure}
-% \begin{figure}[h]
-%     \centering
-%     \caption{Histogram showcasing estimation of MI}
-%     \includegraphics[width=0.48\linewidth]{graphics/final_plots/distribution_q_log_comparison.png}
-%     \label{fig:distr_q_log_comparison}
-% \end{figure}
-
+In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{fig:distr_q_log} shows a histogram plot of conditional probabilities of the test set, and~\ref{fig:distr_q_log_comparison} shows the probabilities from the separetely trained prior model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\phi (\theta_i|z_i)$, and the estimate of mutual information is obtained in the same way once all $\log q_\psi(\theta_i)$ have been subtracted. These results are marked in the respective figures.
 \begin{figure}[htbp]
     \centering
     
@@ -94,8 +81,7 @@ In order to visualize how conditional entropy and mutual information are determi
     \end{subfigure}
     \caption{Histogram plots used to evaluate CE and MI}
 \end{figure}
-
-In this way, an estimate of conditional entropy and mutual information is obtained for every epoch. As an example, the estimated conditional entropy per epoch is shown in figure~\ref{fig:ce_bottle_15}. Again, vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit.
+In this way, an estimate of conditional entropy and mutual information is obtained for every epoch. As an example, the estimated conditional entropy per epoch is shown in figure~\ref{fig:ce_bottle_15}. Again, vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. The epochs chosen by $5\%$ rule for seeds 12 and 30 coincide. All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit.
 \begin{figure}[h]
     \centering
     \caption{Conditional Entropy per Epoch for $N_B=15$}

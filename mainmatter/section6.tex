@@ -133,30 +133,62 @@ Figure~\ref{fig:final_xHI_last_epoch} shows the final CE estimates for the last 
     \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_ce_estimates_last_epoch.png}
     \label{fig:final_xHI_last_epoch}
 \end{figure}
-The method of choosing models based on the $5\%$ rule has proven to yield the most robust estimates of conditional entropy. 
 
-As shown in table~\red{trained performance table}, models with a smaller bottleneck dimension require more epochs to learn, though as seen in table~\ref{tab:x_hi_results}, they might still perform equally with regards to the information they contain about the feature distribution. Taking the fact that smaller models perform worse in the $5\%$ selection rule but not necessarily so when choosing by best validation performance, this indicates the equal performance comes from overfitting on the training set, coming at the cost of worse out-of-dataset generalization.
-
-
+\red{Small summary here}
 
 \subsection{Estimates for models of the simulation parameters}
+The 6-parameter inference problem is easier: both model selection rules yield a final MI estimate that monotonously increases with bottleneck dimension $N_B$. Since the prior distribution is known, the estimate of MI comes with no additional bias towards the CE estimate. As such, in the following only MI estimates will be given.
 
-The final estimates of CE and MI when choosing models based on best validation performance are shown in table~\ref{tab:param_results_best_val}. In comparison with the inference of $x_\text{HI}$, values of \red{conditional entropy} are much smaller. In most cases, the information increase with bottleneck dimension is statistically significant. Mutual information appears to saturate after $N_B=7$.
+\subsubsection*{Training the model}
+The average training time for this model is \red{insert}. Since the CNF is a significantly lighter architecture than the CNN, the CNN pretraining and finetuning stages both have a similar epoch time, while in the CNF pretraining stage, the outputs of the CNN can be reused across epochs. Since the processing of an entire image is much more expensive than that of the CNN output, the pretraining of the flow is accomplished in less than $10~\si{min}$ in all cases. This make this training setup significantly faster than that used for inference of neutral hydrogen.
+
+The bottleneck dimensions analyzed are $N_B \in \{3,4,5,6,7,8,9\}$, each for two different seeds. As an example, the training and validation losses for an ensemble with bottleneck dimension $N_\text{dim}=6$ are shown in figure~\ref{fig:train_val_6_p_bottle_6}. The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. The first plot shows the CNN pretraining stage, during which the MSE error drops to around a third its initial value and begins plateauing. The CNF loss quickly drops during its pretraining and has reached a plateau when finetuning begins. Do to the new learning rates used for finetuning, the CNF loss might initially rise at the beginning of finetuning. However in all cases, the finetuning stage does eventually lead to a further improvement in CNF loss. For some $N_B$, a significant spike in training and validation losses is observed during finetuning, which leads to instability of results achieved with the $5\%$ selection rule.
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.7\textwidth}
+        \centering
+        \caption{MSE Losses for CNN pretraining}
+        \includegraphics[width=\linewidth]{graphics/6_param_inference/6_param_ensembles/cnn_losses_6.png}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.7\textwidth}
+        \centering
+        \caption{Flow Losses for CNF pretraining and finetuning}
+        \includegraphics[width=\linewidth]{graphics/6_param_inference/6_param_ensembles/flow_losses_6.png}
+    \end{subfigure}
+    \caption{Training and validation losses for $N_B=6$}
+    \label{fig:train_val_6_p_bottle_6}
+\end{figure}
+
+To show how the $5\%$ decision rule fails in this case, figure ~\ref{fig:finetuning_bottle_6} shows training and validation losses for the ensemble $N_B=7$, where again vertical lines indicate the epoch chosen by best validation rule and dotted lines that chosen by the $5\%$ rule. The model selected by the $5\%$ decision rule leads to a potentially underestimated MI, since earlier models fulfilling a $5\%$ relative distance in training and validation losses performed better in both losses. 
+\begin{figure}[h]
+    \centering
+    \caption{Model selection in finetuning for $N_B=7$}
+    \includegraphics[width=0.75\linewidth]{graphics/6_param_inference/6_param_ensembles/joint_losses_7.png}
+    \label{fig:finetuning_bottle_6}
+\end{figure}
+
+\subsubsection*{Estimates of conditional entropy and mutual information}
+The estimates of conditional entropy are obtained in the same way as previously, and since the prior is known, there is no additional bias in estimating mutual information. Hence only MI estimates are shown in this section. In order to compare seed and model errors, table~\ref{tab:final_mi_6_p_5_perc} shows 
 \begin{table}[htbp]
 \centering
-\caption{Final estimates 6-parameter inference}
-\label{tab:param_results_best_val}
-\begin{tabular}{l| c| c| c}
+\caption{Final MI for 6-parameter inference, $5\%$ rule}
+\label{tab:final_mi_6_p_5_perc}
+\begin{tabular}{l| c| c}
 \toprule
 
-$N_B$ & CE [nats]& MI [nats] & No. samples\\
+$N_B$ & MI [nats] ($\sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & No. samples\\
 \midrule
-3 & $11.66 \pm 0.14$ & - & $1$ \\
-5 & $13.12 \pm 0.33$ & - & $1$ \\
-6 & $13.33 \pm 0.21$ & - & $1$ \\
-7 & $13.93 \pm 0.13$ & - & $1$ \\
-9 & $13.92 \pm 0.21$ & - & $1$ \\
+3 & $11.66 \pm 0.14$ & $2$ \\
+5 & $13.12 \pm 0.33$ & $2$ \\
+6 & $13.33 \pm 0.21$ & $2$ \\
+7 & $13.93 \pm 0.13$ & $2$ \\
+9 & $13.92 \pm 0.21$ & $2$ \\
 
 \bottomrule
 \end{tabular}
 \end{table}
+
+
+
+\red{Models with $N_B$ = $N_\text{param}$ seem to have smallest errors and in general behave the most reliably.}

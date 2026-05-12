@@ -63,9 +63,19 @@ Bottleneck & Average best epoch & Average best val loss \\
 
 \red{What I want: graph showing training time per bottleneck dimension vs graph showing absolute best val performance. But do I really want the second of the two?}
 
-In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{} shows a histogram plot of condtional probabilities of the test set, as well as probabilities given by the separately trained prior flow model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\theta (\text{label}_i|\text{summary}_i)$, and the estimate of mutual information is obtained in the same way once all $p(l_i)$ have been subtracted. 
+In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{fig:distr_q_log} shows a histogram plot of conditional probabilities of the test set, as well as probabilities given by the separately trained prior flow model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\theta (\text{label}_i|\text{summary}_i)$, and the estimate of mutual information is obtained in the same way once all $p(l_i)$ have been subtracted.
+\begin{figure}[h]
+    \centering
+    \caption{Histogram plot of conditional probabilities}
+    \includegraphics[width=0.75\linewidth]{graphics/final_plots/distribution_q_log.png}
+    \label{fig:distr_q_log}
+\end{figure}
 
-In this way, an estimate of conditional entropy and mutual information is obtained for every sample. As an example, the results of final MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}.
+In this way, an estimate of conditional entropy and mutual information is obtained for every sample. As an example, the results of final MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}. Seed and model errors are similar in magnitude.
+
+\red{This table needs to be updated}
+
+\red{Comments on difference between these values staying constant?}
 \begin{table}[htbp]
 \centering
 \caption{Final estimates $x_\text{HI}$ inference, $5\%$ selection rule}
@@ -93,25 +103,25 @@ The final results for all selection rules are visualized in the following. Figur
     \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_constrained_best_val.png}
     \label{fig:final_xHI_5_pct}
 \end{figure}
-Figure~\ref{fig:final_xHI_best_val}
+Figure~\ref{fig:final_xHI_best_val} shows the final MI estimates for the best validation selection rule. This selection rule favors models in later stages of training. Models can therefore learn longer and this is the reason why the resulting MI estimates are on average higher. The models have also often begun to overfit, resulting in larger errors than for the previous method. Models with bottleneck dimensions close to the feature distribution appear to be less prone to this mechanism. Models with bottleneck dimensions farther from that of the feature distribution appear to have learnt less by the time the reach their best validation performance, again with exception of the model for $N_B=8$.
 \begin{figure}[h]
     \centering
-    \caption{Final estimates $x_\text{HI}$ inference, $5\%$ selection rule}
+    \caption{Final estimates $x_\text{HI}$ inference, best validation selection rule}
     \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_best_val.png}
     \label{fig:final_xHI_best_val}
 \end{figure}
+Figure~\ref{fig:final_xHI_last_epoch} shows the final MI estimates for the last epoch selection rule. The curve and its characteristics are similar to that of the one for the best validation selection rule. It is notable that the model for $N_B=8$ is estimated to have learned less than the ones for $N_B=15,16$, a feature which other selection rules do not have. 
+\begin{figure}[h]
+    \centering
+    \caption{Final estimates $x_\text{HI}$ inference, last epoch selection rule}
+    \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_mi_estimates_last_epoch.png}
+    \label{fig:final_xHI_last_epoch}
+\end{figure}
+Given 
 
-A separate normalizing flow is trained on the label distribution. The model with best validation performance is chosen for the following analysis. It's distribution of $\log \tilde{q}_\theta (\text{label}_i)$ also showcases a heavy left-sided tail. 
 
+As shown in table~\red{trained performance table}, models with a smaller bottleneck dimension require more epochs to learn, though as seen in table~\ref{tab:x_hi_results}, they might still perform equally with regards to the information they contain about the feature distribution. Taking the fact that smaller models perform worse in the $5\%$ selection rule but not necessarily so when choosing by best validation performance, this indicates the equal performance comes from overfitting on the training set, coming at the cost of worse out-of-dataset generalization.
 
-
-These results can be described as follows: One does observe a general trend of increasing mutual information for increased bottleneck dimension, though the increase is not monotonous. Seed and model error are similar in magnitude, though with exceptions in case of failed training runs. 
-
-
-
-As shown in table~\red{trained performance table}, models with a smaller bottleneck dimension require more epochs to learn, though as seen in table~\ref{tab:x_hi_results}, they might still perform equally with regards to the information they contain about the feature distribution. However, they might only be able to do this because they are overfitting on the training set, the information they learn coming at the cost of worse out-of-dataset generalization. As an alternative to choosing the model based on best validation performance, one can instead choose the model for which training and validation losses were last within \red{X percent} of each other, thus constraining the models to better generalization. The resulting estimates for CE and MI are shown in table~\ref{tab:x_hi_results_constraints}. The estimates of CE and MI are generally lower than before, however their trend is closer to that expected, again with the exception of the model trained at $N_B = 8$. \red{Are errors really smaller in all cases though?}
-
-Another decision rule is to choose the last epoch that the model was evaluated on. The idea is that conditional entropy values become much more stable towards the end of training, as seen in figure~\ref{fig:ce_bottle_15}. This mitigates bias stemming from one „lucky” epoch. The resulting estimates of CE and MI are shown in table~\ref{tab:x_hi_results_last_epoch}. In particular, the estimates for $N_B = 8$ are then in line with expectations.
 
 
 \subsection{Results for inference of simulation parameters}

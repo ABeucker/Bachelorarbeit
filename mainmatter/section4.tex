@@ -36,7 +36,7 @@ If the logarithm is chosen with base 2, one defines the unit of this quantity as
 
 Entropy is a measure of the uncertainty of a random variable. A high entropy corresponds to a lack of predictability of the random variable's outcome. As an example, the entropy of the uniform distribution is maximal, while that of the delta distribution is zero. One therefore considers entropy to be a measure of the amount of information contained in the random variable's distribution.
 
-The generalization to conditional entropy is:
+The generalization to conditional entropy (CE) is:
 \begin{align}
     \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right].
 \end{align} 
@@ -64,7 +64,7 @@ An alternative formulation in terms of entropy is:
 \end{align}
 Mutual information is symmetric and nonnegative. It is zero if and only if $X$ and $Y$ are independent and becomes maximal if and only if $X = Y$. One interprets its value as the amount of information obtained about one random variable while observing another. Since it is defined as an expectation over the joint distribution of the two variables $X$ and $Y$, it is sensitive to higher moments of these distributions, and cannot be captured simply be e.g. their variance.
 
-\subsubsection*{Mutual Information Estimation}
+\subsubsection*{Mutual Information Estimation}~\label{subsubsec:mi_estimate}
 In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the data processing inequality, which in this context can be phrased as follows:
 
 Let $X$, $Y$ and $Z$ denote random variables. These are processed as $X \rightarrow Y \rightarrow Z$, in the sense that a sample from $X$ is processed to produce a sample from $Y$, which in turn is processed to produce a sample from $Z$, without any additional knowledge of $X$. Then $Z$ cannot contain more information about $X$ than $Y$, so

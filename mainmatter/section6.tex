@@ -6,31 +6,33 @@
 
 \red{A word on bootstrap error calculations for comparison}
 
-Training is performed on one NVIDIA-A30 GPU. Due to long training times and therefore expensive training, only specific bottleneck dimensions are analyzed. Along with varying bottleneck dimensions, a number of different weight initializations (seeds) are tested. One trained model and its resulting mutual information estimates are referred to as one sample. One batch of models with same bottleneck dimension but different seeds is referred to as one ensemble. 
+Training is performed on one NVIDIA-A30 GPU. Due to long training times and therefore expensive training, only specific bottleneck dimensions are analyzed. In order to quantify the ensemble error, i.e. the error in MI estimation stemming from different weight initializations (seeds), an ensemble of models is trained for each bottleneck dimension. One trained model and its resulting mutual information estimates are referred to as one sample.
 
-For both inference cases, training is done for 250 epochs, after which every observed model has reached it's best validation performance, begins to overfit and plateaus in both training and validation losses. This raises the question of which epoch is to be chosen for the evaluation of mutual information. Three possible decision rules are tested: 
+For both inference cases, after 250 epochs every observed model has reached its best validation performance, begins to overfit and plateaus in both training and validation losses. This raises the question of a principled choice of which epoch is to be chosen for the evaluation of mutual information. Three possible selection rules are tested:
 \begin{enumerate}
     \item   $5\%$ rule: The model for which training and validation loss are last within $5\%$ of each other.
     \item   Best validation rule: The model with the best validation performance.
     \item   Last epoch rule: The last epoch the model was trained on before training ends.
 \end{enumerate}
-These rules are justified as follows: The $5\%$ rule allows to choose a model based on training performance while preventing overfitting. The exact value of allowed relative difference is of course an additional hyperparameter. The best validation rule is standard practice in choosing a model after training and the hope is that such a model performs best on the test set as well. The last epoch rule can be justified retrospectively: Because the training process for this model is quite instable before it reaches it's plateau, with individual models performing significantly better or worse on the validation set, it allows to choose the model from the most stable part of the training process.
+These rules are justified as follows: The $5\%$ rule allows to choose a model based on training performance while preventing overfitting. The exact value of allowed relative difference is of course an additional hyperparameter. The best validation rule is standard practice in choosing a model after training and the hope is that such a model performs best on the test set as well. The last epoch rule can be justified retrospectively: Because the training process for these architectures is quite unstable before it reaches it's plateau, with individual models performing significantly better or worse on the validation set, it allows to choose the model from the most stable part of the training process. When analyzing the conditional entropy and mutual information curves for different $N_B$ in the following, the dimension $N_B$ where information saturation is reached is referred to as the optimal dimension, though a truly optimal representation is of course never achieved.
 
-The final estimates on the conditional entropy as well as the mutual information are done on the held-out test set consisting of $10\%$ of the total dataset ($500$ samples), according to:
+The final estimates on the conditional entropy as well as the mutual information are done on the held-out test set consisting of $10\%$ of the total dataset ($500$ samples), according to the estimate of mutual information and conditional entropy defined in section~\ref{subsubsec:mi_estimate}.
 \begin{align}
-    \hat{\mathbb{H}}_C &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s)\bigr] \\
-    \hat{\mathbb{I}} &= -\E_{p(l,s)} \bigl[\log q_\theta (l|s) - q_\phi (l)\bigr] 
+    \hat{\mathbb{H}}_C &= -\E_{p(\theta,s(x))} \bigl[\log q_\phi (\theta|s(x))\bigr]~\label{eq:final_ce_estimate} \\
+    \hat{\mathbb{I}} &= -\E_{p(\theta,s(x))} \bigl[\log q_\phi (\theta|s(x)) - p(\theta)\bigr],~\label{eq:final_mi_estimate}
 \end{align}
-Compared to the rest of training, these metrics is inexpensive to evaluate, so it is done every epoch, which enables the visualization of estimated CE and MI during training. In the case of the inference of the neutral hydrogen fraction, the separate estimate of the prior leads to an additional bias in the final MI estimate. For this reason, the interpretation of results is preferably done on the estimates of CE, though an estimate of MI is also always given.
+where the previously established notation is used. If the prior is modelled separately, it is replaced with $q_\psi(\theta)$.
 
-Two sources of error in the final estimations are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the \textit{model error}. This is estimated from the standard error and confirmed by bootstrap analysis, see below. When comparing results across seeds, an additional \textit{seed error} must be considered, which is also estimated from the standard error. 
+Compared to the rest of training, these are inexpensive to evaluate, so it is done every epoch, which enables the visualization of estimated CE and MI during training. For the inference of the neutral hydrogen fraction, the separate estimate of the prior leads to an additional bias in the final MI estimate. For this reason, the interpretation of results is preferably done on the estimates of CE, though an estimate of MI is also always given.
+
+Two sources of error in the final estimates are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the aleatoric error. When comparing results across seeds, an additional epistemic ensemble error must be considered, which is also estimated from the standard error. 
+
+One major source of difficulty in training is the size of the dataset. Since training has to be performed many times, the training speed of the architectures has to be significantly increased. This is achieved by changing the data format to that of numpy's memory-mapped files\footnote{See e.g. https://numpy.org/doc/stable/reference/generated/numpy.memmap.html.} and implementing sequential data loading. Highest training speeds are achieved when using a self-written implementation of multiprocessing.
 
 \subsection{Estimates for models of the neutral hydrogen fraction}
 When evaluating CE and MI on models based on the $5\%$ rule, the expected behavior of these metrics is in most parts recovered: The estimates of CE and MI increase with larger bottleneck dimension $N_B$, with the exception of an outlier model for $N_B=8$. The other selection rules do not show this behavior. 
 \subsubsection*{Training the model}
-The average training time for this model is \red{insert}. The bottleneck dimensions analyzed are $N_B \in \{4,6,8,15,16,26,30\}$, each for two or three different seeds. As an example, the training and validation losses for an ensemble with bottleneck dimension $N_\text{dim}=15$ are shown in figure~\ref{fig:train_val_bottle_15}. Vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. 
-
-In all cases, training and validation losses improve while still improving begin to diverge. Soon thereafter the best validation loss is reached and all models then reach a plateau in both training and validation loss. This behavior is observed for all architectures trained on the neutral hydrogen fraction. It is important to note that training of the ensemble for $N_\text{dim}=15$ is comparatively stable, with training and validation losses converging to very similar values across seeds. This indicates that the model reaches similar regions in the loss landscape, independent of the inizialization. This is not the case for all models, and training for smaller bottlenecks in particular is less stable.
+The average training time for this model is $22.3~\si{h}$, with no significant deviation for varying bottleneck dimensions. The bottleneck dimensions analyzed are $N_B \in \{4,6,8,15,16,25,30\}$, each ensemble for two or three different seeds. As an example, the training and validation losses for an ensemble with bottleneck dimension $N_B=15$ are shown in fig.~\ref{fig:train_val_bottle_15}. Vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. 
 \begin{figure}[h]
     \centering
     \caption{Train and Validation Losses for $N_B=15$}
@@ -38,8 +40,10 @@ In all cases, training and validation losses improve while still improving begin
     \label{fig:train_val_bottle_15}
 \end{figure}
 
+In all cases, training and validation losses improve and continue to improve after overfitting begins. Soon thereafter the best validation loss is reached and all models then reach a plateau in both training and validation loss. This behavior is observed for all architectures trained on the neutral hydrogen fraction. It is important to note that training of the ensemble for $N_B=15$ is comparatively stable, with training and validation losses converging to very similar values across seeds. This indicates that the model reaches similar regions in the loss landscape, independent of the inizialization. This is not the case for all models, and training for smaller bottlenecks in particular is less stable.
+
 \subsubsection*{Comparing model selection rules}
-In order to compare the model selection rules, table~\ref{tab:training_stability} summarizes the average amount of epochs it takes for a model to reach the epochs chosen by the $5\%$ and best validation decision rules. Choosing models by the $5\%$ rule results in a higher variance in the selected epoch for models with larger bottleneck dimensions, while choosing models by the best validation rule results in a higher variance in the selected epochs for models with smaller bottleneck dimensions. The $5\%$ decision rule imposes the strictes decision choice, while model choice by best validation performance allows the model to learn longer before making a CE/MI estimate. For both selection rules, architectures with $N_B=4$ train the longest before being chosen, but there is no strong pattern for the choice of model for the other $N_B$. 
+In order to compare the model selection rules, table~\ref{tab:training_stability} summarizes the average amount of epochs it takes for a model to reach the epochs chosen by the $5\%$ and best validation selection rules. Choosing models by the $5\%$ rule results in a higher variance in the selected epoch for models with larger bottleneck dimensions, while choosing models by the best validation rule results in a higher variance in the selected epochs for models with smaller bottleneck dimensions. The $5\%$ selection rule imposes the strictes selection choice, while model choice by best validation performance allows the model to learn longer before making a CE/MI estimate. For both selection rules, architectures with $N_B=4$ train the longest before being chosen, but there is no strong pattern for the choice of epoch for the other $N_B$. 
 \begin{table}[htbp]
 \centering
 \caption{Epochs selected for different selection rules}
@@ -62,7 +66,7 @@ $N_B=30$ & $109\pm -$ & $144\pm -$ \\
 \end{table}
 
 \subsubsection*{Estimates of conditional entropy and mutual information}
-In order to visualize how conditional entropy and mutual information are determined for a specific model, figure~\ref{fig:distr_q_log} shows a histogram plot of conditional probabilities of the test set, and~\ref{fig:distr_q_log_comparison} shows the probabilities from the separetely trained prior model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\phi (\theta_i|z_i)$, and the estimate of mutual information is obtained in the same way once all $\log q_\psi(\theta_i)$ have been subtracted. These results are marked in the respective figures.
+In order to visualize how conditional entropy and mutual information are determined for a specific model, fig.~\ref{fig:distr_q_log} shows a histogram plot of log conditional probabilities $\log q_\phi (\theta_i|s(x_i))$ as given by the flow evaluated on the test set on a fiducial model, and~\ref{fig:distr_q_log_comparison} shows the log probabilities from the separetely trained prior model. The estimate of conditional entropy and its error is then the mean and standard error of all $\log q_\phi (\theta_i|z_i)$, and the estimate of mutual information is obtained in the same way once all $\log q_\psi(\theta_i)$ have been subtracted, as recorded in eq.~\ref{eq:final_ce_estimate} and eq.~\ref{eq:final_mi_estimate}, respectively. The results are marked in the respective figures. Due to the fact that some histogram plots of conditional probability show significant kurtosis, all error estimates in all analyzed models are confirmed by bootstrap analysis. No significant deviation in the estimated errors is found.
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.48\textwidth}
@@ -81,7 +85,7 @@ In order to visualize how conditional entropy and mutual information are determi
     \caption{Histogram plots used to evaluate CE and MI}
 \end{figure}
 
-In this way, an estimate of conditional entropy and mutual information is obtained for every epoch. As an example, the estimated conditional entropy per epoch is shown in figure~\ref{fig:ce_bottle_15}. Again, vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. The epochs chosen by $5\%$ rule for seeds 12 and 30 coincide. All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit. This qualitative behaviour is observed for all architectures and it is the same for estimates of MI as well. All resulting plots can be found in the appendix \red{reference appendix}.
+An estimate of conditional entropy and mutual information is obtained for every epoch. As an example, the estimated conditional entropy per epoch is shown in fig.~\ref{fig:ce_bottle_15}. Again, vertical lines indicate the epoch chosen by best validation rule and dotted lines indicate the epoch chosen by the $5\%$ rule. The epochs chosen by $5\%$ rule for seeds 12 and 30 coincide. All models reach a saturated estimate of the conditional entropy once the model plateaus in its training and validation performance. The standard error of the CE estimate is larger in the training phase during which the model begins to overfit, since some test samples are asssigned with very low probability and the kurtosis in the histogram of log conditional probabilities increases. This qualitative behaviour is observed for all architectures and it is the same for estimates of MI as well. All resulting plots can be found in the appendix \red{reference appendix}.
 \begin{figure}[h]
     \centering
     \caption{Conditional Entropy per Epoch for $N_B=15$}
@@ -89,7 +93,7 @@ In this way, an estimate of conditional entropy and mutual information is obtain
     \label{fig:ce_bottle_15}
 \end{figure}
 
-The estimates of CE and MI are done for all ensembles and for all selection rules. As an example, the results of final CE and MI estimates with their associated model and seed errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}. Seed and model errors are similar in magnitude and as such none will be neglected. In all following figures displaying final results only the combined error is shown.
+The estimates of CE and MI are done for all ensembles and for all selection rules. As an example, the results of final CE and MI estimates with their associated aleatoric and ensemble errors based on the $5\%$ selection rule are shown in table~\ref{tab:final_xHI_5_pct}. All other tables are shown in the appendix.\red{reference}. Aleatoric and ensemble errors are similar in magnitude and as such none will be neglected. In all following figures displaying final results only the combined error is shown.
 
 \red{Comments on difference between these values staying constant?}
 \begin{table}[htbp]
@@ -98,7 +102,7 @@ The estimates of CE and MI are done for all ensembles and for all selection rule
 \begin{tabular}{l |c |c |c}
 \toprule
 
-$N_B$ & CE [nats] ($\pm \sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & MI [nats] ($\pm \sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$)& No. samples\\
+$N_B$ & CE [nats] ($\pm \sigma_{\mathrm{ens}} \pm \sigma_{\mathrm{al}}$) & MI [nats] ($\pm \sigma_{\mathrm{ens}} \pm \sigma_{\mathrm{al}}$)& No. samples\\
 \midrule
 4  & $36.16~(\pm 0.49 \pm 0.14$) & $3.27~(\pm 0.49 \pm 0.10)$ & $2$ \\
 6  & $36.92~(\pm 0.32 \pm 0.17$) & $4.02~(\pm 0.32 \pm 0.13)$ & $2$ \\
@@ -112,21 +116,24 @@ $N_B$ & CE [nats] ($\pm \sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & M
 \end{tabular}
 \label{tab:final_xHI_5_pct}
 \end{table}
-The final results for all selection rules are now visualized. Figure~\ref{fig:final_xHI_5_pct} displays final CE estimates using the $5\%$ selection rule. One can observe a general increase in the estimate of conditional entropy for larger bottleneck dimensions, with the exception of the models for $N_B=8$. The insignificant increase in conditional entropy between $N_B=25$ and $N_B=30$ points towards a saturation in the conditional entropy for higher bottleneck dimensions.
-\begin{figure}[h]
+
+The final results for all selection rules are now visualized. Fig.~\ref{fig:final_xHI_5_pct} displays final CE estimates using the $5\%$ selection rule. One can observe a general increase in the estimate of conditional entropy for larger bottleneck dimensions, with the exception of the models for $N_B=8$. The insignificant increase in conditional entropy between $N_B=25$ and $N_B=30$ points towards a saturation in the conditional entropy for higher bottleneck dimensions. An alternative interpretation is that the optimal summary is already found at bottleneck dimensions lower than $N_B=15$, as expected for the highly correlated neutral hydrogen fraction labels, though this fails to explain the behaviour of $N_B=15,16$.
+\begin{figure}[htbp]
     \centering
     \caption{Final CE estimates for $x_\text{HI}$ inference, $5\%$ rule}
     \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_ce_estimates_constrained_best_val.png}
     \label{fig:final_xHI_5_pct}
 \end{figure}
-Figure~\ref{fig:final_xHI_best_val} shows the final CE estimates for the best validation selection rule. This selection rule favors models in later stages of training. Models can therefore learn longer and this is the reason why the resulting CE estimates are on average higher. The models have also often begun to overfit, resulting in larger errors than for the previous method. Models with bottleneck dimensions close to the feature distribution are less prone to large errors. Models with bottleneck dimensions farther from that of the feature distribution have learnt less by the time the reach their best validation performance, again with exception of the model for $N_B=8$. 
-\begin{figure}[h]
+
+Fig.~\ref{fig:final_xHI_best_val} shows the final CE estimates for the best validation selection rule. This selection rule favors models in later stages of training. Models can therefore learn longer and this is the reason why the resulting CE estimates are on average higher. The models have also often begun to overfit, resulting in larger errors than for the previous method. Models with bottleneck dimensions close to the feature distribution are less prone to large errors. Models with bottleneck dimensions farther from that of the feature distribution have learnt less by the time the reach their best validation performance, again with exception of the model for $N_B=8$. 
+\begin{figure}[htbp]
     \centering
     \caption{Final CE estimates for $x_\text{HI}$ inference, best validation rule}
     \includegraphics[width=0.75\linewidth]{graphics/final_plots/final_ce_estimates_best_val.png}
     \label{fig:final_xHI_best_val}
 \end{figure}
-Figure~\ref{fig:final_xHI_last_epoch} shows the final CE estimates for the last epoch selection rule. The curve and its characteristics are similar to that of the one for the best validation selection rule. It is notable that the model for $N_B=8$ is estimated to have learned less than the ones for $N_B=15,16$, a feature which other selection rules do not have. As this rule chooses models which are stronly overfitting, the model error increases, such that the errors on the final estimates are larger than for the other selection rules. 
+
+Fig.~\ref{fig:final_xHI_last_epoch} shows the final CE estimates for the last epoch selection rule. The curve and its characteristics are similar to that of the one for the best validation selection rule. It is notable that the model for $N_B=8$ is estimated to have learned less than the ones for $N_B=15,16$, a feature which other selection rules do not have. As this rule chooses models which are stronly overfitting, the aleatoric error increases, such that the errors on the final estimates are larger than for the other selection rules. 
 \begin{figure}[h]
     \centering
     \caption{Final CE estimates for $x_\text{HI}$ inference, last epoch rule}
@@ -134,15 +141,15 @@ Figure~\ref{fig:final_xHI_last_epoch} shows the final CE estimates for the last 
     \label{fig:final_xHI_last_epoch}
 \end{figure}
 
-\red{Small summary here}
+In summary, the $5\%$ selection rule provides estimates of CE and MI with the smallest errors and behavior closest to that expected. The other selection rules lead to larger errors and lower CE/MI estimates for models with a larger bottleneck dimension. However, using the $5\%$ selection rule the optimal bottleneck dimension cannot be resolved, since the best performing dimensions is $N_B=8$, but models with larger $N_B$ show in increasing trend in informativeness with increasing $N_B$. The last epoch selection is ruled out by returning the worst results.
 
 \subsection{Estimates for models of the simulation parameters}
-The 6-parameter inference problem is easier: both model selection rules yield a final MI estimate that monotonously increases with bottleneck dimension $N_B$. Since the prior distribution is known, the estimate of MI comes with no additional bias towards the CE estimate. As such, in the following only MI estimates will be given.
+The 6-parameter inference problem is easier: the $5\%$ selection rule yields a final MI estimate that monotonously increases with bottleneck dimension $N_B$, with one exception likely do training instability. The best validation rule yields smaller errors for some samples and an almost monotonously increasing MI estimate. The last epoch selection rule fails to reproduce these results. Since the prior distribution is known, the estimate of MI comes with no additional uncertainty towards the CE estimate. As such, in the following only MI estimates will be given.
 
 \subsubsection*{Training the model}
-The average training time for this model is \red{insert}. Since the CNF is a significantly lighter architecture than the CNN, the CNN pretraining and finetuning stages both have a similar epoch time, while in the CNF pretraining stage, the outputs of the CNN can be reused across epochs. Since the processing of an entire image is much more expensive than that of the CNN output, the pretraining of the flow is accomplished in less than $10~\si{min}$ in all cases. This make this training setup significantly faster than that used for inference of neutral hydrogen.
+The average training time for this model is $10.6~\si{h}$, with no significant difference across bottleneck dimensions. Since the CNF is a much lighter architecture than the CNN, the CNN pretraining and final finetuning stages both have a similar epoch time, while in the CNF pretraining stage, the outputs of the CNN can be reused across epochs. Since the processing of an entire image is much more expensive than that of the CNN output, the pretraining of the flow is accomplished in less than $10~\si{min}$ in all cases. This make this training setup faster than that used for inference of neutral hydrogen.
 
-The bottleneck dimensions analyzed are $N_B \in \{3,4,5,6,7,8,9\}$, each for two different seeds. As an example, the training and validation losses for an ensemble with bottleneck dimension $N_\text{dim}=6$ are shown in figure~\ref{fig:train_val_6_p_bottle_6}. The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. The first plot shows the CNN pretraining stage, during which the MSE error drops to around a third its initial value and begins plateauing. The CNF loss quickly drops during its pretraining and has reached a plateau when finetuning begins. Do to the new learning rates used for finetuning, the CNF loss might initially rise at the beginning of finetuning. However in all cases, the finetuning stage does eventually lead to a further improvement in CNF loss. For some $N_B$, a significant spike in training and validation losses is observed during finetuning, which leads to instability of results achieved with the $5\%$ selection rule.
+The bottleneck dimensions analyzed are $N_B \in \{3,4,5,6,7,9\}$, each for two different seeds. As an example, the training and validation losses for an ensemble with bottleneck dimension $N_B=6$ are shown in fig.~\ref{fig:train_val_6_p_bottle_6}. The loss plots for all other ensembles can be found in the appendix \red{Reference coming soon}. The first plot shows the CNN pretraining stage, during which the MSE error drops to around a third its initial value and begins plateauing. The CNF loss quickly drops during its pretraining and has reached a plateau when finetuning begins. Do to the new learning rates used for finetuning, the CNF loss might initially rise at the beginning of finetuning. However in all cases, the finetuning stage does eventually lead to a further improvement in CNF loss. For some $N_B$, a significant spike in training and validation losses is observed during finetuning, which leads to instability of results achieved with the $5\%$ selection rule.
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.7\textwidth}
@@ -160,7 +167,7 @@ The bottleneck dimensions analyzed are $N_B \in \{3,4,5,6,7,8,9\}$, each for two
     \label{fig:train_val_6_p_bottle_6}
 \end{figure}
 
-To show how the $5\%$ decision rule fails in this case, figure ~\ref{fig:finetuning_bottle_6} shows training and validation losses for the ensemble $N_B=7$, where again vertical lines indicate the epoch chosen by best validation rule and dotted lines that chosen by the $5\%$ rule. The model selected by the $5\%$ decision rule leads to a potentially underestimated MI, since earlier models fulfilling a $5\%$ relative distance in training and validation losses performed better in both losses. 
+To show how the $5\%$ selection rule fails in this case, figure ~\ref{fig:finetuning_bottle_6} shows training and validation losses for the ensemble $N_B=7$, where again vertical lines indicate the epoch chosen by best validation rule and dotted lines that chosen by the $5\%$ rule. The model selected by the $5\%$ selection rule leads to a potentially underestimated MI, since earlier models fulfilling a $5\%$ relative distance in training and validation losses performed better in both losses. Such issues can likely be ameliorated with longer training. 
 \begin{figure}[h]
     \centering
     \caption{Model selection in finetuning for $N_B=7$}
@@ -168,8 +175,8 @@ To show how the $5\%$ decision rule fails in this case, figure ~\ref{fig:finetun
     \label{fig:finetuning_bottle_6}
 \end{figure}
 
-\subsubsection*{Estimates of conditional entropy and mutual information}
-The estimates of conditional entropy are obtained in the same way as previously, and since the prior is known, there is no additional bias in estimating mutual information. Hence only MI estimates are shown in this section. In order to compare seed and model errors, table~\ref{tab:final_mi_6_p_5_perc} shows 
+\subsubsection*{Estimates of mutual information}
+The estimates of conditional entropy are obtained in the same way as previously, and since the prior is known, there is no additional uncertainty in estimating mutual information. Hence only MI estimates are shown in this section. In order to compare ensemble and aleatoric errors, table~\ref{tab:final_mi_6_p_5_perc} shows the final MI estimates using the $5\%$ selection rule. The results show the expected monotonous increase in MI, while the MI curve begins to saturate for higher $N_B$. The aleatoric error dominates, indicating higher training stability than for the inference of the neutral hydrogen fraction, likely due to the lower-dimensional parameter and bottleneck spaces. An exception is the model for $N_B=9$, where for one training run the $5\%$ rule is never fulfilled during finetuning. If discarding this run, the estimate of MI for $N_B=9$ is $\hat{\mathbb{I}}=(12.87 \pm 0.11)~\si{nats}$, further indicating that a saturated value of MI has been reached.
 \begin{table}[htbp]
 \centering
 \caption{Final MI for 6-parameter inference, $5\%$ rule}
@@ -177,18 +184,41 @@ The estimates of conditional entropy are obtained in the same way as previously,
 \begin{tabular}{l| c| c}
 \toprule
 
-$N_B$ & MI [nats] ($\pm \sigma_{\mathrm{seed}} \pm \sigma_{\mathrm{model}}$) & No. samples\\
+$N_B$ & MI [nats] ($\pm \sigma_{\mathrm{ens}} \pm \sigma_{\mathrm{al}}$) & No. samples\\
 \midrule
-3 & $11.66 \pm 0.14$ & $2$ \\
-5 & $13.12 \pm 0.33$ & $2$ \\
-6 & $13.33 \pm 0.21$ & $2$ \\
-7 & $13.93 \pm 0.13$ & $2$ \\
-9 & $13.92 \pm 0.21$ & $2$ \\
+3 & $11.4188 \pm 0.0001 \pm 0.1137$ & $2$ \\
+4 & $11.96 \pm 0.06 \pm 0.14$ & $2$ \\
+5 & $12.85 \pm 0.05 \pm 0.14$ & $2$ \\
+6 & $12.881 \pm 0.010 \pm 0.128$ & $2$ \\
+7 & $13.13 \pm 0.05 \pm 0.17$ & $2$ \\
+9 & $12.12 \pm 0.28 \pm 0.13$ & $2$ \\
 
 \bottomrule
 \end{tabular}
 \end{table}
 
+The final estimates of MI are now visualized again. Fig.~\ref{fig:final_theta_constrained_best_val} shows final results based on the $5\%$ selection rule, behaving as just discussed.
+\begin{figure}[h]
+    \centering
+    \caption{Final MI estimates for simulation parameter inference, $5\%$ rule}
+    \includegraphics[width=0.75\linewidth]{graphics/6_param_inference/6_param_ensembles/mean_ce_estimates_constrained_best_val.png}
+    \label{fig:final_theta_constrained_best_val}
+\end{figure}
 
+Fig.~\ref{fig:final_theta_best_val} shows the MI estimates based on the best validation rule. The errors on most estimates are smaller, which indicates that models selected by this rule have not overfit enough to significantly increase the error of the final prediction, while the $5\%$ rule might even be choosing models too early in training, leading to a higher error estimate. The MI curve shows a drop in MI for $N_B=6$, however it is able to capture the behaviour of the models for $N_B=9$ better than the $5\%$ rule.
+\begin{figure}[h]
+    \centering
+    \caption{Final MI estimates for simulation parameter inference, best validation rule}
+    \includegraphics[width=0.75\linewidth]{graphics/6_param_inference/6_param_ensembles/mean_ce_estimates_best_val.png}
+    \label{fig:final_theta_best_val}
+\end{figure}
 
-\red{Models with $N_B$ = $N_\text{param}$ seem to have smallest errors and in general behave the most reliably.}
+Lastly, fig.~\ref{fig:final_theta_last_epoch} shows final MI estimates by the last epoch rule, which produces the largest errors estimates and does not resemble the expected behaviour. Especially the models with $N_B=6,7$ appear to have significantly overfit that dataset by the time training ends. 
+\begin{figure}[h]
+    \centering
+    \caption{Final MI estimates for simulation parameter inference, last epoch rule}
+    \includegraphics[width=0.75\linewidth]{graphics/6_param_inference/6_param_ensembles/mean_ce_estimates_last_epoch.png}
+    \label{fig:final_theta_last_epoch}
+\end{figure}
+
+For the inference of the simulation parameters, the $5\%$ selection rule yields the results closest to expectations if not considering one failed $N_B=9$ sample and is therefore favored over the others. The best validation rules shows slightly less stable behaviour, though selecting models with less errors in their predictions. The last epoch rule is again ruled out for model selection.

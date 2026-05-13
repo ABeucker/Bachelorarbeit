@@ -38,12 +38,11 @@ Entropy is a measure of the uncertainty of a random variable. A high entropy cor
 
 The generalization to conditional entropy is:
 \begin{align}
-    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right]
+    \mathbb{H}(X|Y) =  -\mathbb{E}_{X, Y} \left[ \log p(X|Y) \right].
 \end{align} 
-
 Another important metric in information theory is the Kullback-Leibler divergence. Let $X \sim p$ and $Y \sim q$ be two random variables over the same sample space. The KL-divergence between $p$ and $q$ is defined as:
 \begin{align}
-\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0
+\mathbb{D}_{\text{KL}}(p || q) = \mathbb{E}_{X} \left[ \log p(X) - \log q(X) \right] \geq 0.
 \end{align}
 The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
 
@@ -51,9 +50,8 @@ Since the KL-divergence is assymmetric, one distinguishes $\mathbb{D}_{\text{KL}
 \begin{align}
     \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\phi) = 
     -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
-    \bigl[ \log q_\phi \bigr] = \text{NLL} + \text{const}
+    \bigl[ \log q_\phi \bigr] = \text{NLL} + \text{const}.
 \end{align}
-
 Lastly, the mutual information between two random variables $X$ and $Y$ is defined as:
 \begin{align}
 \mathbb{I}(X; Y)
@@ -73,20 +71,20 @@ Let $X$, $Y$ and $Z$ denote random variables. These are processed as $X \rightar
 \begin{align}
     \mathbb{I}(X;Y) \geq \mathbb{I}(X;Z).
 \end{align}
-This applied in the context of SBI and NPE, where the parameters of interest $\theta$ are part of the first random variable, the simulated data $x$ part of the second and the summarized data $s_\phi(x)$ part of the third. The data processing inequality then reads:
+This applied in the context of SBI and NPE, where the parameters of interest $\theta$ are part of the first random variable, the simulated data $x$ part of the second and the summarized data $z = s_\phi(x)$ part of the third. The data processing inequality then reads:
 \begin{align}
     \mathbb{I}(\theta;x) 
-    \geq \mathbb{I}(\theta;s_\phi(x)),
+    \geq \mathbb{I}(\theta;z),
 \end{align}
-and this explains why mutual information is the needed measure of informativeness mentioned in the beginning of this section. A good summary keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. The summary distribution is also referred to as the bottleneck.
+and this explains why mutual information is the measure of informativeness mentioned in the beginning of this section. A good summary keeps as much information about the original data as possible, subject to the constraint that it should contain less total information than the data itself, i.e. summarize it in some way. The part of the network in which the compression of data is the highest is often referred to as the bottleneck.
 
 \red{Something on information bottleneck method?}
 
-In practice, mutual information between the bottleneck $Z$ and the parameter distribution $\Theta$ can only be estimated. In the setting of NPE, one can use the learned posterior to estimate mutual information in a natural way, described in the following. The mutual information between the bottleneck and the parameter distributions is defined as
+In the setting of NPE, one can use the learned posterior to estimate mutual information between the bottleneck and the parameter distributions in a natural way. Even though the mutual information between the original data and the parameters remains inaccessible without a separate network, this allows the comparison of different summary networks and their informativeness about the parameters. The mutual information between the bottleneck and the parameter distributions is defined as
 \begin{align}
     \mathbb{I}(\Theta; Z) &= \int p(\theta, z) \log \frac{p(\theta|z)}{p(\theta)}~\label{eq:MI_int},
 \end{align}
-where the distribution $p(\theta|z)$ is now estimated by a learned $q_\phi(\theta|z)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\phi)$. The Monte-Carlo approximation of eq.~\ref{eq:MI_int} using this distribution is referred to as the Barber-Agakov estimate~\cite{Barber_2003}:
+where the distribution $p(\theta|z)$ is now estimated by a learned $q_\phi(\theta|z)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\phi)$. The Monte-Carlo approximation of eq.~\ref{eq:MI_int} using this distribution is referred to as the Barber-Agakov (BA) estimate~\cite{Barber_2003}:
 \begin{align}
     \hat{\mathbb{I}}(\Theta;Z) = \mathbb{I}_{\text{BA}}(\Theta;Z) = \E_{P(\Theta,Z)} \left[ \log q_\phi(\theta|z) - \log p(\theta) \right].
 \end{align}
@@ -94,72 +92,52 @@ This is computable, because the distribution of the prior $p(z)$ can in practice
 
 Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on the true mutual information:
 \begin{align}
-    \mathbb{I}(\Theta;Z) \geq \mathbb{I}_{\text{BA}}(\Theta;Z)
+    \mathbb{I}(\Theta;Z) \geq \mathbb{I}_{\text{BA}}(\Theta;Z).
 \end{align}
+Qualitatively, one expects mutual information to behave as follows: If the parameters being inferred are completely independent of one another, a perfect summary network would still require a bottleneck of the same dimensions as the parameter space in order to correctly infer the parameters. For lower-dimensional bottlenecks, one therefore expects an information loss. For higher-dimensional bottlenecks, one expects a saturation in mutual information, since the network does not require more dimensions in order to learn more about the required parameters. In practice, given noisy and imperfect data, realistic network performance and the fact that the BA-estimate only yields a lower bound of mutual information, the behaviour might be more ambiguous. In general, the network likely requires more dimensions to learn an informative summary, especially due to noise. If the parameters of interested are correlated, however, less dimensions might be required.
 
 \subsection{An architecture for complex data}
-
-The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
-
-
-An architecture that has proven to be successful in recent SBI approaches \red{some citations here} combines two neural networks in the following principle:
+% The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
+An architecture that has proven to be successful in recent SBI approaches (see~\cite{heneka_2022},~\cite{Pietschke_2025} or ~\cite{Schosser_2026}) combines two neural networks in the following principle:
 \begin{enumerate}
-    \item   The image data are used as input for a convolutional neural network (CNN), which compresses these into a much lower-dimensional summary.
+    \item   Image data are used as input for a convolutional neural network (CNN), which compresses these into a much lower-dimensional summary.
     \item   This summary is mapped to whichever feature is being inferred by a conditional normalizing flow (CNF).
 \end{enumerate}
-The idea is that the CNN learns to efficiently encode any relevant physics information, while the flow learns to interpret the CNN's output and map it to the inferred quantity. These two networks are introduced in the following.
+The idea is that the CNN learns to efficiently encode any relevant physics information, while the flow learns to interpret the CNN's output and map it to the inferred quantity. These two networks are introduced in the following. 
 
-\subsubsection*{Convolutional Neural Networks}
-
-CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. An early version was successfully implemented in 1983 with Fukushima's ”Neucognitron”~\red{Neocognitron citation}. An architecture implementing backpropagation was LeCun's ”LeNet”~\red{LeNet citation}.
-
-To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will first be discussed in 1D. The generalization to higher dimensions will be discussed afterwards.
-
-Let $X$ denote the \red{data space} and $Y$ the feature space. 
-
-Let the input have dimensions $x \in \R^{C\times H \times W}$ where C the channel dimension, H the height dimension and W the width dimension. In case of an RGB image, this channel dimension would be three. 
-
-The CNN learns a function $f_\theta: X \rightarrow Y$. 
-
-As opposed to a simple MLP, the CNN offers the following advantages:
-
-\red{Using summation convention}
-
-\red{Not writing bias explicitly}
-
-A basic MLP consists of only one type of layer. If $h$ is the output of the previous layer, the current layer is defined by
+Concerning notation: The summation convention is used and the bias term is implicit. For example, a multilayer perceptron (MLP) would be described as follows: A basic MLP consists of only one type of layer. If $h$ is the output of the previous layer, the current layer is defined by
 \begin{align}
     z_i = \phi(W_{ij} h_j),
 \end{align}
-The CNN implements additional layers.
+where $\phi$ will be used to denote an activation function and $W$ is the weight matrix.
+
+\subsubsection*{Convolutional Neural Networks}
+
+CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will first be discussed in 1D. The generalization to higher dimensions will be discussed afterwards.
+
+Let the input data have dimensions $x \in \R^{C\times H \times W}$ where C is the channel dimension, H the height dimension and W the width dimension. In case of an RGB image, this channel dimension would be three. The CNN learns a function $s_\phi(x)$ which summarizes the data. The CNN uses multiple new types of layers to achieve this:
 
 A convolutional layer applies a convolution operaton:
-
-\red{Talk abt convolution vs cross-correlation here}
-
-\red{Is this def even correct? Not need different indices on h?}
 \begin{align}
-    z_i = \phi(\left[w \circledast h\right]_i) = \phi(\sum_k w_k h_{i+k})
+    z_i = \phi(\left[w \circledast h\right]_i) \equiv \phi\biggl(\sum_k w_k h_{i+k}\biggr)
 \end{align}
-where the dimensionality of the kernel $w\in \R^K$ is typically much lower than that of the data.
+where the dimensionality of the kernel is fixed $w\in \R^K$ is typically much lower than that of the data. Since the kernel is used on all parts of the previous layer, it can learn features in a translation-independent way.
 
 A pooling layer applies a pooling operation:
 \begin{align}
     z_i = \operatorname{pool} K_{ij}h_j
 \end{align}
-where $K$ defines a pooling window for each index $i$. Typical choices for $\operatorname{pool}$ are $\operatorname{maxpool}$, which chooses the maximum of all given values, or $\operatorname{meanpool}$, which calculates their mean.
+where $K$ defines a pooling window for each index $i$. This results in neighboring points of $h_j$ to be included in the operation. Typical choices for $\operatorname{pool}$ are $\operatorname{maxpool}$, which chooses the maximum of all given values, or $\operatorname{meanpool}$, which calculates their mean. The pooling layer downsamples the previous layer and enables an extraction of features independent of length scales.
 
-\red{The purpose of a pooling layer is to...}
+During construction of the CNN one needs control of the geometry of the data in each layer, and a number of additional parameters are introduced to achieve this. A padding parameter $p$ controls the border of the output layer by describing how the kernel or pooling window interacts with the previous layer's border. A stride parameter $s$ allows the kernel or pooling window to operatore along the input layer by skipping every $s$'th pixel. In order to enable the CNN to learn more features one also typically adds more channels to the data as it flows through the CNN, and each channel is associated with it's own weights. 
 
-\red{Add normalization layers here}
-
-\red{Add info on stride params etc here}
-
-\red{Hier kann man schon ein bisschen mehr schreiben, this is all very basic. More info on the CNN specific to this project to come.}
-
-\red{Put it together here, potentially add image of total architecture.}
-
-\red{Also missing MSE loss function as usual loss}
+A typical CNN architecture consists of multiple interchanging convolutional and pooling layers, after which the output is flattened to a vector and connected by a few dense layers to the final output vector. An example is shown in fig.~\ref{fig:cnn_architecture} For a simple supervised learning task, the CNN could then be trained on an MSE loss to recover parameters originally associated with the image. 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{graphics/cnn_architecture.png}
+    \caption{Tpical CNN architecture, taken from~\cite{murphy_2022}}
+    \label{fig:cnn_architecture}
+\end{figure}
 
 \subsubsection*{Conditional Normalizing Flows}
 

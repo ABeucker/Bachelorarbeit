@@ -2,35 +2,16 @@
 
 \red{Models with $N_B$ = $N_\text{param}$ seem to have smallest errors and in general behave the most reliably.}
 
+The work in this thesis was an attempt to establish a robust method for estimating the mutual information between a bottleneck and a parameter distribution for neural poster estimation with normalizing flows. This has an application in representation learning, where the estimate of mutual information can be used to evaluate the informativeness of a summary network's output distribution. This was applied to the case of simulation-based inference in $21~\si{cm}$ physics, where simulated lightcone data can be compressed with a CNN, for a flow to infer a parameter of interest from this summary. 
 
-Possible interpretations of the results:
+The mutual information between the bottleneck and the parameter distribution was estimated for two cases, once for inference of the reionization history, and once for inference of the simulation parameters. For both cases, ensembles of models were trained for various bottleneck dimensions, for which training times of both models were significantly improved.
 
-The flow seems to be overcondident, because of the long negative tail in log probability plot. If choosing MI estimation from earlier epochs, get smaller error! This is due to observed overfitting and still improving performance.
+Next to errors stemming from training instability and a limited sample size, the source of the most ambiguity is that of model selection, since models can always be hand-picked to reproduce the expected results. It was shown that by selecting models based on their best validation performance, subject to the constraint that they do not overfit (demanding a $5\%$ relative distance of training and validation loss), the estimates of mutual information most closely resemble the expected results.
 
-The 500 samples are simply not enough to be a precice probe of the distributions being compared. On the other hand, could not have taken more from training set because this would have caused even more training instability. Especially the large seed error points towards this. In total, the 5000 samples seem to be borderline to successfully compare two distributions as high-dimensional as these...
+For the case of inference of the neutral hydrogen fraction, mutual information was shown to saturate for larger bottleneck dimensions, though the general trend of the data did not allow an estimate on an optimal bottleneck dimension. This is likely the case because the distributions being analyzed are high-dimensional and being probed with only $500$ samples, and because training was generally less stable than for the inference of the simulation parameters, the relative ensemble errors being much larger.
 
+Mutual information was also shown to saturate for larger bottleneck dimensions during inference of the simulation parameters, and the relative errors on the estimates were improved in comparison with the previous task. The $5\%$ selection rule was also shown to fail in one case, suggesting some improvement might be needed.
 
-Alternative interpretation:
+If applied to other cases, this method for estimating mutual information is best used when comparing models on a large range of bottleneck dimensions, since the resolution required to robustly constraint the final estimates between similar bottleneck dimensions needs a larger dataset or larger ensembles, both of which are expensive. Either way, robust estimates can only be obtained if performed on models which generalize well. An additional improvement might be find if instead using an $x\%$ decision rule for selecting models, where $x$ is a hyperparameter further tested to obtain more reliable results. Attempting to implement the method for even more complex parameter and bottleneck distributions will make robust estimates much more difficult. 
 
-The CNN learns the latent space. If the weights of the CNN aren't updated enough and the flow is doing too much of the heavy lifting, then the latent space structure might be hard to estimate, resulting in long negative tail.
-
-
-Check to see wether the extreme models are the reason for this, or if this is a problem with the flow.
-
-The seed uncertainty for this model is very high, given \red{some numbers here}. The high sensitivity towards weight initialization points towards unstable training. 
-
-One possible explanation for this instability could be the choice of hyperparameters. For example, a large learning rate might magnify an initially chaotic training process, causing the model to end in different minimia of the loss landscape. 
-
-Another possibility is the choice of architecture. For example, the flow might be too deep given the data. While one might expect the need for a deep architecture to infer 15-dimensional labels, these labels are likely highly correlated across dimensions \red{because of curve shape etc}, making the problem easier than naively expected. The fact that one observes an early saturation in mutual information across bottleneck sizes supports the latter statement.
-
-Of course, there is always the possibility of there being too little training data. Choosing larger parts of the training set for validation and testing indeed showed an increase in overfitting towards the end of training.
-
-\red{Also comment on error changed between CE and MI estiamte}
-
-\red{Something about consistency of MI estimate, since e.g. CE estimate is not larger zero from beginning. Maybe cite from paper?}
-
-\red{From paper: "In par-
-ticular, higher estimated MI between observations and learned representations do not seem to indi-
-cate improved predictive performance when the representations are used for downstream supervised
-learning tasks (Tschannen et al., 2019)."}
-
+A useful feature of this method is that it can easily be applied in other settings, when different summary networks are used. If the underlying flow model is kept the same, it can also be used to compare the differnce in informativeness across summary networks. There are many other options for summary networks, and one interesting alternative is that of a network which learns in a self-supervised manner, such as SKATR~\cite{Ayo_2025}. The self-supervised model's outputs are independent of the parameters being inferred and as such, multiple normalizing flows for different inference tasks could be trained on the same summary network. Comparing the informativeness of such a network with supervised models would be an interestng goal for the future.

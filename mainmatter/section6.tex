@@ -25,7 +25,7 @@ where the previously established notation is used. If the prior is modelled sepa
 
 Compared to the rest of training, these are inexpensive to evaluate, so it is done every epoch, which enables the visualization of estimated CE and MI during training. For the inference of the neutral hydrogen fraction, the separate estimate of the prior leads to an additional bias in the final MI estimate. For this reason, the interpretation of results is preferably done on the estimates of CE, though an estimate of MI is also always given.
 
-Two sources of error in the final estimates are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the aleatoric error. When comparing results across seeds, an additional epistemic ensemble error must be considered, which is also estimated from the standard error. 
+Two sources of error in the final estimates are considered. The error of the individual model, stemming from the variability of log probability values on the test set, is referred to as the aleatoric error. When comparing results across seeds, an additional epistemic ensemble error must be considered, which is also estimated from the standard error. The aleatoric error mostly depends on the size of the test set, while the quality of the estimated ensemble error is constrained be limited amount of samples per ensemble.
 
 One major source of difficulty in training is the size of the dataset. Since training has to be performed many times, the training speed of the architectures has to be significantly increased. This is achieved by changing the data format to that of numpy's memory-mapped files\footnote{See e.g. https://numpy.org/doc/stable/reference/generated/numpy.memmap.html.} and implementing sequential data loading. Highest training speeds are achieved when using a self-written implementation of multiprocessing.
 
@@ -98,7 +98,7 @@ The estimates of CE and MI are done for all ensembles and for all selection rule
 \red{Comments on difference between these values staying constant?}
 \begin{table}[htbp]
 \centering
-\caption{Final CE and MI estimates based on $5\%$ selection rule}
+\caption{Final CE and MI estimates for $x_\text{HI}$ inference based on $5\%$ selection rule}
 \begin{tabular}{l |c |c |c}
 \toprule
 
@@ -179,7 +179,7 @@ To show how the $5\%$ selection rule fails in this case, figure ~\ref{fig:finetu
 The estimates of conditional entropy are obtained in the same way as previously, and since the prior is known, there is no additional uncertainty in estimating mutual information. Hence only MI estimates are shown in this section. In order to compare ensemble and aleatoric errors, table~\ref{tab:final_mi_6_p_5_perc} shows the final MI estimates using the $5\%$ selection rule. The results show the expected monotonous increase in MI, while the MI curve begins to saturate for higher $N_B$. The aleatoric error dominates, indicating higher training stability than for the inference of the neutral hydrogen fraction, likely due to the lower-dimensional parameter and bottleneck spaces. An exception is the model for $N_B=9$, where for one training run the $5\%$ rule is never fulfilled during finetuning. If discarding this run, the estimate of MI for $N_B=9$ is $\hat{\mathbb{I}}=(12.87 \pm 0.11)~\si{nats}$, further indicating that a saturated value of MI has been reached.
 \begin{table}[htbp]
 \centering
-\caption{Final MI for 6-parameter inference, $5\%$ rule}
+\caption{Final MI for simulation parameter inference based on the $5\%$ rule}
 \label{tab:final_mi_6_p_5_perc}
 \begin{tabular}{l| c| c}
 \toprule
@@ -200,7 +200,7 @@ $N_B$ & MI [nats] ($\pm \sigma_{\mathrm{ens}} \pm \sigma_{\mathrm{al}}$) & No. s
 The final estimates of MI are now visualized again. Fig.~\ref{fig:final_theta_constrained_best_val} shows final results based on the $5\%$ selection rule, behaving as just discussed.
 \begin{figure}[h]
     \centering
-    \caption{Final MI estimates for simulation parameter inference, $5\%$ rule}
+    \caption{Final MI estimates for simulation parameter inference based on the $5\%$ rule}
     \includegraphics[width=0.75\linewidth]{graphics/6_param_inference/6_param_ensembles/mean_ce_estimates_constrained_best_val.png}
     \label{fig:final_theta_constrained_best_val}
 \end{figure}
@@ -208,7 +208,7 @@ The final estimates of MI are now visualized again. Fig.~\ref{fig:final_theta_co
 Fig.~\ref{fig:final_theta_best_val} shows the MI estimates based on the best validation rule. The errors on most estimates are smaller, which indicates that models selected by this rule have not overfit enough to significantly increase the error of the final prediction, while the $5\%$ rule might even be choosing models too early in training, leading to a higher error estimate. The MI curve shows a drop in MI for $N_B=6$, however it is able to capture the behaviour of the models for $N_B=9$ better than the $5\%$ rule.
 \begin{figure}[h]
     \centering
-    \caption{Final MI estimates for simulation parameter inference, best validation rule}
+    \caption{Final MI estimates for simulation parameter inference based on the best validation rule}
     \includegraphics[width=0.75\linewidth]{graphics/6_param_inference/6_param_ensembles/mean_ce_estimates_best_val.png}
     \label{fig:final_theta_best_val}
 \end{figure}
@@ -216,7 +216,7 @@ Fig.~\ref{fig:final_theta_best_val} shows the MI estimates based on the best val
 Lastly, fig.~\ref{fig:final_theta_last_epoch} shows final MI estimates by the last epoch rule, which produces the largest errors estimates and does not resemble the expected behaviour. Especially the models with $N_B=6,7$ appear to have significantly overfit that dataset by the time training ends. 
 \begin{figure}[h]
     \centering
-    \caption{Final MI estimates for simulation parameter inference, last epoch rule}
+    \caption{Final MI estimates for simulation parameter inference based on the last epoch rule}
     \includegraphics[width=0.75\linewidth]{graphics/6_param_inference/6_param_ensembles/mean_ce_estimates_last_epoch.png}
     \label{fig:final_theta_last_epoch}
 \end{figure}

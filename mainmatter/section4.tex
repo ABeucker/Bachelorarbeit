@@ -96,7 +96,7 @@ Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on t
 \end{align}
 Qualitatively, one expects mutual information to behave as follows: If the parameters being inferred are completely independent of one another, a perfect summary network would still require a bottleneck of the same dimensions as the parameter space in order to correctly infer the parameters. For lower-dimensional bottlenecks, one therefore expects an information loss. For higher-dimensional bottlenecks, one expects a saturation in mutual information, since the network does not require more dimensions in order to learn more about the required parameters. In practice, given noisy and imperfect data, realistic network performance and the fact that the BA-estimate only yields a lower bound of mutual information, the behaviour might be more ambiguous. In general, the network likely requires more dimensions to learn an informative summary, especially due to noise. If the parameters of interested are correlated, however, less dimensions might be required.
 
-\subsection{An architecture for complex data}
+\subsection{An architecture for complex data}~\label{subsec:architecture}
 % The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
 An architecture that has proven to be successful in recent SBI approaches (see~\cite{heneka_2022},~\cite{Pietschke_2025} or ~\cite{Schosser_2026}) combines two neural networks in the following principle:
 \begin{enumerate}
@@ -111,10 +111,7 @@ Concerning notation: The summation convention is used and the bias term is impli
 \end{align}
 where $\phi$ will be used to denote an activation function and $W$ is the weight matrix. This type of pre-activation $W_{ij} h_j$ (notice implicit bias!) is also known as an affine transformation.
 
-\red{Should I clarify dense layers, affine coupling layers?}
-
 \subsubsection*{Convolutional Neural Networks}
-
 CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will be discussed in 1D. The generalization to higher dimensions is straightforward.
 
 Let the input data have dimensions $x \in \R^m$. The CNN learns a function $s_\phi(x)$ which summarizes the data. It multiple types of layers to achieve this:
@@ -142,9 +139,6 @@ A typical CNN architecture consists of multiple interchanging convolutional and 
 \end{figure}
 
 \subsubsection*{Conditional Normalizing Flows}
-
-\red{Do I need subsec: 3.2?}
-
 \red{Need to agree on how sampling is written for expectation}
 
 A normalizing flow is a model that learns to transform a simple (often Gaussian) base distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution. The following is based on~\cite{plehn_2025}.
@@ -161,7 +155,7 @@ For a given transformation, one computes $p_\theta(\theta)$ by applying the chan
 \begin{align}
 q_\theta(\theta) = p_u(g(\theta)) \left| \det \left( \frac{\partial g(\theta)}{\partial \theta} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
 \end{align}
-One optimizes the flow by minimizing the forwards KL-divergence between the true and the approximated distribution, which as discussed in~\ref{subsubsec:meas_IT} is equivalent to minimizing the NLL:
+One optimizes the flow by minimizing the forwards KL-divergence between the true and the approximated distribution, which as discussed ins section~\ref{subsubsec:meas_IT} is equivalent to minimizing the NLL:
 \begin{align}
     \mathcal{L}_{\text{NF}} = - \E_{\theta \sim p_\theta} \Biggl[ \frac{|g(\theta)|^2}{2} + 
     \log \left| \det \left( \frac{\partial g(\theta)}{\partial \theta} \right) \right|\Biggr]~\label{eq:nf_loss}

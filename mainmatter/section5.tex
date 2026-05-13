@@ -4,20 +4,7 @@
 \red{Need specific values of learning rate etc for both models. Should this go in appendix?}
 
 \subsection{The dataset}
-For this project, an existing dataset simulated with 21cmFast~\cite{Mesinger_2010} is used. The simulation parameters and their priors are shown in table~\ref{tab:sim_params}. Parameters are sampled uniformly from their priors for simulations. \red{Add 2018 Planck estimates here instead?}. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements. This means $\Omega_b = 0.04897$, $\sigma_8 = 0.8102$, $h= 0.6766$, and $n_s= 0.9665$.  
-
-\begin{itemize}
-    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
-    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
-    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
-    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
-    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
-    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
-\end{itemize}
-
-\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
-
-
+For this project, an existing dataset simulated with 21cmFast~\cite{Mesinger_2010} is used. The simulation parameters and their priors are shown in table~\ref{tab:sim_params}. Parameters are sampled uniformly from their priors for simulations. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements~\cite{planck_2018}. This means the baryon density is $\Omega_b = 0.04897$, the matter fluctuation amplitude is $\sigma_8 = 0.8102$, the dimensionless Hubble parameter is $h= 0.6766$, and the scalar spectral index is $n_s= 0.9665$.  
 \begin{table}[htbp]
 \centering
 \caption{Parameters and priors used for the simulations}
@@ -38,57 +25,58 @@ X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{
 \end{tabular}
 \end{table}
 
-The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters and the neutral hydrogen fraction. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim [5,12]$ \red{find out spacial dimensions}. The neutral hydrogen fraction is calculated \red{from the lightcone} and stored as a 92-dimensional vector. The distribution of these $x_\text{XI}$-labels is not uniform. 
+Each of these parameters can be described as follows:
+\begin{itemize}
+    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
+    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
+    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
+    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
+    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
+    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
+\end{itemize}
 
-The dataset is preprocessed as follows: The temperature offset values are min-max-normalized individually for each lightcone \red{Motivation from CNN?} and the lightcone is truncated to $140\times 140\times 1916$ voxels. This allows the neutral hydrogen fraction label to first be truncated to 75 dimensions and then binned to 15-dimensional vectors, reducing the dimensionality of the inference problem. \red{Any additional reason for lightcone truncation?} An additional logit transformation is applied to this vector, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The simulation parameters, which span many different order of magnitude, are min-max normalized globally. The total dataset has a size of approximately $690~\si{GB}$ and is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
+\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
 
-\red{See comments on redshift range in Benedicts paper}
 
-\red{Do I need log priors or not?}
+The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters $\theta$ and an array of neutral hydrogen fractions $x_\text{HI}$. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim 5-35$ and a box size of $200~\si{Mpc}$, such that the resolution is $1.43~\si{Mpc}$. Since $\Omega_m$ changes the redshift range captured with the first $2350$ pixels of the simulated lightcone, this redshift range corresponds to the maximal redshift range a lightcone encompasses. The neutral hydrogen fractions are stored as 92-dimensional vectors. The distribution of these $x_\text{HI}$-labels is not uniform. To impose a realistic constraint, lightcones are only admitted to the dataset if the optical depth $\tau$ is within $5\sigma$ of the Planck~\cite{planck_2018} measurement and the IGM mean neutral fraction $\hat{x}_\text{HI}$ is below $0.01$ at redshift $z=5$.
+
+The dataset is preprocessed as follows: The temperature offset values are min-max-normalized individually for each lightcone, which later improves the CNN's performance. The lightcones are truncated to $140\times 140\times 1916$ voxels. This allows the neutral hydrogen fraction labels to first be truncated to 75 dimensions and then binned to 15-dimensional vectors, reducing the dimensionality of the inference problem. An additional logit transformation is applied to this vector, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The simulation parameters, which span many different orders of magnitude, are min-max normalized globally. The total dataset has a size of approximately $690~\si{GB}$ and is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
 
 \subsection{The network architecture}
+Section~\ref{subsec:architecture} the basic architecture used in the inference task. In this specific implementation, a lightcone is passed through the CNN, who's output is used as a conditional input to the CNF model to infer either the original simulation parameters or the neutral hydrogen fraction. The general architecture is visualized in~\ref{fig:21cmPIE-INN_architecture}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{graphics/pie-inn_architecture.png}
+    \caption{General architecture, taken from~\cite{Schosser_2026}}
+    \label{fig:21cmPIE-INN_architecture}
+\end{figure}
 
-\red{Insert sentence introducing this section. Also, find better section title}
-
-A CNN learns a compression of lightcones to a much lower-dimensional latent space. A normalizing flow learns a mapping conditioned on this latent space to the target distribution. 
-
-\red{Something about representation learning?}
-
-Examples for target distributions include the parameters used for the simulations, or a simple physical summary statistic of the image data.
-
-\red{Which construction is PIE-INN based on? Is it completely new?}
-
-One such construction is \textit{21cmPIE-INN}, which consists of a CNN acting as a compressing network and a normalizing flow mapping its output to six parameters used for the original simulations. The architecture is visualized in figure~\ref{fig:21cmPIE-INN_architecture}.
-
-It is also possible to learn e.g. the reionization history with variable resolution from the CNN's summary, as is done with the \textit{EoRFlow} architecture~\red{Citation here}. The flow implemented in EoRFlow is slightly more complex the the 21cmPIE-INN. It's architecture is visualized in figure~\ref{fig:EoRFlow_flow_architecture}.
-
-Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is
+The conditional input changes the loss function of the flow from eq~\ref{eq:nf_loss}. Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is:
 \begin{align}
     \mathcal{L}_{\text{NPE}} = - \E_{(x,\theta) \sim p(x,\theta)} \Biggl[ \frac{|g(\theta|s(x))|^2}{2} + 
     \log \left| \det \left( \frac{\partial g(\theta|s(x))}{\partial \theta} \right) \right|\Biggr].
 \end{align}
+% \begin{figure}[]
+%     \centering
+%     \begin{subfigure}{0.6\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
+%         \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
+%         \label{fig:21cmPIE-INN_architecture}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.35\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
+%         \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
+%         \label{fig:EoRFlow_flow_architecture}
+%     \end{subfigure}
 
-\begin{figure}[]
-    \centering
-    \begin{subfigure}{0.6\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{graphics/pie-inn_architecture.png}
-        \caption{Architecture of 21cmPIE-INN, taken from \red{citation}}
-        \label{fig:21cmPIE-INN_architecture}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.35\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{graphics/eorflow_flow_architecture.png}
-        \caption{Architecture of the flow used in EoRFlow, taken from \red{citation}}
-        \label{fig:EoRFlow_flow_architecture}
-    \end{subfigure}
+%     \caption{Overall caption for both figures}
+% \end{figure}
 
-    \caption{Overall caption for both figures}
-\end{figure}
-
-
-\red{Some introductory sentence...}
+The architecture for inference of the original simulation parameters is based on~\cite{Schosser_2026}, and that for 
+inference of the reionization history on~\cite{Pietschke_2025}. The flow implemented in the latter is slightly more complex.
 
 Table~\ref{tab:cnn_architecture} shows the network architectures of the CNN and the NF for both inference cases \red{Shape values still taken from Caroline's paper, check these still!} In the CNN, the first convolutional layer is designed to learn patterns in the redshift direction. An aggressive stride is used to alter the dimensionality of the next layers. The kernel for hidden layers is set to (3x3x2) and max pooling is only applied in spacial dimensions. Finally, all information is compressed into a 128-dimensonal feature vector, with global average pooling, which is in turn transformed into an $N_B$-dimensional output vector with a simple MLP. In case the CNN is pretrained, an additional MLP head can be attached, which maps the $N_B$-dimensional output to a $6$-dimensional output. The head can be removed for the rest of training. This has the benefit of leaving the rest of the architecture untouched. The CNF gets the CNNs $N_B$-dimensional output as conditional input and learns to transform the feature space to a gaussian of the same dimension. It is used in two variants depending on the inference task, the heavier of the two architectures containing more coupling layers and more nodes per layer. 
 % \begin{table}[htbp]

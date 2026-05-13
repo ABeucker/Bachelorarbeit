@@ -27,7 +27,7 @@ Traditionally, data as complex as those expected from SKA are analyzed using phy
 \end{align}
 The necessitates a measure of informativeness for use in representation learning, which is introduced in this section.
 
-\subsubsection*{Some Basic Measures in Information Theory}
+\subsubsection*{Some Basic Measures in Information Theory}~\label{subsubsec:meas_IT}
 Given a random variable $X$ distributed as $p$, $X \sim p$, the entropy of $X$ is defined as:
 \begin{align}
 \mathbb{H}(X) = -\mathbb{E}_{X} \left[ \log p(X) \right] \geq 0.
@@ -46,7 +46,7 @@ Another important metric in information theory is the Kullback-Leibler divergenc
 \end{align}
 The KL-divergence satisfies the identity axiom, $\mathbb{D}_{\text{KL}}(p || q) = 0 \Leftrightarrow p = q$. It is not symmetric and does not satisfy the triangle inequality and as such is not a metric. However, it does still carry an interpretation as a distance between two probability distributions: from the above expression it is clear that the more $q$ resembles $p$, the smaller the measured KL-divergence becomes. A smaller the KL-divergence between the two distributions means there is less information loss by using  $q$ to approximate $p$.
 
-Since the KL-divergence is assymmetric, one distinguishes $\mathbb{D}_{\text{KL}}(p || q)$ as the forwards KL between $p$ and $q$, and $\mathbb{D}_{\text{KL}}(q || p)$ as the backwards KL between $p$ and $q$. Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to maximizing the negative log-likelihood, because
+Since the KL-divergence is assymmetric, one distinguishes $\mathbb{D}_{\text{KL}}(p || q)$ as the forwards KL between $p$ and $q$, and $\mathbb{D}_{\text{KL}}(q || p)$ as the backwards KL between $p$ and $q$. Minimizing the forwards KL-divergence between the data distribution and the model distribution is equivalent to minimizing the negative log-likelihood (NLL), because
 \begin{align}
     \mathbb{D}_{\text{KL}}(p_{\text{data}} || q_\phi) = 
     -\mathbb{H}(p_{\text{data}}) - \E_{x \sim p_{\text{data}}} 
@@ -109,13 +109,15 @@ Concerning notation: The summation convention is used and the bias term is impli
 \begin{align}
     z_i = \phi(W_{ij} h_j),
 \end{align}
-where $\phi$ will be used to denote an activation function and $W$ is the weight matrix.
+where $\phi$ will be used to denote an activation function and $W$ is the weight matrix. This type of pre-activation $W_{ij} h_j$ (notice implicit bias!) is also known as an affine transformation.
+
+\red{Should I clarify dense layers, affine coupling layers?}
 
 \subsubsection*{Convolutional Neural Networks}
 
-CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will first be discussed in 1D. The generalization to higher dimensions will be discussed afterwards.
+CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will be discussed in 1D. The generalization to higher dimensions is straightforward.
 
-Let the input data have dimensions $x \in \R^{C\times H \times W}$ where C is the channel dimension, H the height dimension and W the width dimension. In case of an RGB image, this channel dimension would be three. The CNN learns a function $s_\phi(x)$ which summarizes the data. The CNN uses multiple new types of layers to achieve this:
+Let the input data have dimensions $x \in \R^m$. The CNN learns a function $s_\phi(x)$ which summarizes the data. It multiple types of layers to achieve this:
 
 A convolutional layer applies a convolution operaton:
 \begin{align}
@@ -131,7 +133,7 @@ where $K$ defines a pooling window for each index $i$. This results in neighbori
 
 During construction of the CNN one needs control of the geometry of the data in each layer, and a number of additional parameters are introduced to achieve this. A padding parameter $p$ controls the border of the output layer by describing how the kernel or pooling window interacts with the previous layer's border. A stride parameter $s$ allows the kernel or pooling window to operatore along the input layer by skipping every $s$'th pixel. In order to enable the CNN to learn more features one also typically adds more channels to the data as it flows through the CNN, and each channel is associated with it's own weights. 
 
-A typical CNN architecture consists of multiple interchanging convolutional and pooling layers, after which the output is flattened to a vector and connected by a few dense layers to the final output vector. An example is shown in fig.~\ref{fig:cnn_architecture} For a simple supervised learning task, the CNN could then be trained on an MSE loss to recover parameters originally associated with the image. 
+A typical CNN architecture consists of multiple interchanging convolutional and pooling layers, after which the output is flattened to a vector and connected by a few dense layers to the final output vector. An example is shown in fig~\ref{fig:cnn_architecture}. The final CNN takes an input $x \in \R^{C\times H \times W}$, where C is the channel dimension, H the height dimension and W the width dimension, and learns a summary $f(x) \in \R^n$. For a simple supervised learning task, the CNN could be trained on an MSE loss to recover parameters originally associated with the image. 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{graphics/cnn_architecture.png}
@@ -141,41 +143,29 @@ A typical CNN architecture consists of multiple interchanging convolutional and 
 
 \subsubsection*{Conditional Normalizing Flows}
 
-A normalizing flow is a model that learns to transform a simple (often Gaussian) distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution.
+\red{Do I need subsec: 3.2?}
 
-Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $x \sim p_x$ with $p_x$ the $n$-dim. target distribution. Let $f: \R^n \to \R^n$ a diffeomorphism, with $g = f^{-1}$ its inverse. The training objective is to find $g$, such that
+\red{Need to agree on how sampling is written for expectation}
+
+A normalizing flow is a model that learns to transform a simple (often Gaussian) base distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution. The following is based on~\cite{plehn_2025}.
+
+Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $\theta \sim p_\theta$ with $p_\theta$ the $n$-dimensional target distribution. Let $f: \R^n \to \R^n$ a diffeomorphism, with $g = f^{-1}$ its inverse. The training objective is to find $g$, such that
 \begin{align}
-    u = g(x) \sim p_u, \qquad x \text{ sampled from } p_x.
+    u = g(\theta) \sim p_u, \qquad \theta \text{ sampled from } p_\theta.
 \end{align}
 The process of generating samples from the approximated distribution is the inverse of the above:
 \begin{align}
-x = f(u) \sim q_x, \qquad u \text{ sampled from } p_u.
+\theta = f(u) \sim q_\theta, \qquad u \text{ sampled from } p_u.
 \end{align}
-For a given transformation, one computes $p_x(x)$ by applying the change of variables formula:
+For a given transformation, one computes $p_\theta(\theta)$ by applying the change of variables formula:
 \begin{align}
-q_x(x) = p_u(g(x)) \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
+q_\theta(\theta) = p_u(g(\theta)) \left| \det \left( \frac{\partial g(\theta)}{\partial \theta} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
 \end{align}
-The NLL is the loss function used for optimization, which then becomes:
+One optimizes the flow by minimizing the forwards KL-divergence between the true and the approximated distribution, which as discussed in~\ref{subsubsec:meas_IT} is equivalent to minimizing the NLL:
 \begin{align}
-    \mathcal{L}_{\text{NF}} = - \E_{x \sim p_x} \Biggl[ \frac{|g(x)|^2}{2} + 
-    \log \left| \det \left( \frac{\partial g(x)}{\partial x} \right) \right|\Biggr]
+    \mathcal{L}_{\text{NF}} = - \E_{\theta \sim p_\theta} \Biggl[ \frac{|g(\theta)|^2}{2} + 
+    \log \left| \det \left( \frac{\partial g(\theta)}{\partial \theta} \right) \right|\Biggr]~\label{eq:nf_loss}
 \end{align}
-where the first term is a regularization for the latent (in this case Gaussian) space and the second stems from the transformation. See \red{cite Plehns book} for more details.
+where the first term stems from the choice of a Gaussian latent space and the second from the jacobian in eq.~\ref{eq:nf_loss}.
 
-The normalizing flow becomes expressive by allowing the transformation to be as complex as possible, while restricting it to a class of functions with efficiently computable Jacobian determinants makes it computationally tractable. In practice, one often models $g$ as a composition of simple neural networks, e.g. multilayer perceptrons. \red{How these are invertible...}
-
-\red{Next few lines could also just be skipped}
-
-Let $g_\theta = g_1 \circ g_2 \circ ... \circ g_k$ with $g_i: \R^n \to \R^n, x \mapsto g_i(x | \theta_i)$ and $k \in \N$. 
-
-Now the loss becomes
-\begin{align}
-    \text{NLL}_\theta =  \sum_{i=1}^{k} \log \left| \det J(g_i) \right| - \log p_u (g_\theta(x))
-\end{align}
-
-\red{How to ensure it is a probabilistic model?}
-
-\red{Come up with nicer notation for $g_i (\cdot | \theta_i)$}
-
-\red{Now what this specific Freia flow does. Research on website!}
-
+The normalizing flow becomes expressive by allowing the transformation to be as complex as possible, while restricting it to a class of functions with efficiently computable Jacobian determinants makes it computationally tractable.

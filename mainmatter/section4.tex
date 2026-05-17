@@ -1,31 +1,31 @@
 \section{Machine Learning Background}
 
-\red{As an introduction to the methods used in this field, this section covers the concept of neural posterior approximation, some theory behind the class of models analyzed in this thesis as well as a summary of metric from information theory, and how they can evaluate a model's quality.}
+As an introduction to the methods used in this field, this section covers the concept of neural posterior approximation, a summary of information theory used for estimating mutual information, and some theory behind the class of models analyzed in this thesis.
 
-In the following, $x$ denotes a data sample, and $\theta$ a corresponding parameter. Probability densities are denoted $p$, and their approximations with $q$. Functions $s$ denote objects that summarize data, so $s(x)$ is such a summary. Neural networks are denoted with an index $\phi or \psi$, so $q_\phi$ is an estimate of a probability distribution done with a neural network, and $s_\psi$ is a summary done by a neural network.
+In the following, $x$ denotes a data sample, and $\theta$ a corresponding parameter. Probability densities are denoted $p$, and their approximations with $q$. Functions $s$ denote objects that summarize data, so $s(x)$ is such a summary. Neural networks are denoted with an index $\phi$ or $\psi$, so $q_\phi$ is an estimate of a probability distribution done with a neural network, and $s_\psi$ is a summary done by a neural network.
 
 \subsection{Neural posterior estimation}
-In a Bayesian inference task, processing these data would typically be done by choosing:
+In a Bayesian inference task, processing data would typically be done by choosing:
 \begin{enumerate}
-    \item   a likelihood $p(x|\theta)$ describing how observed data arised from a specific set of parameters,
+    \item   a likelihood $p(x|\theta)$ describing how observed data arise from a specific set of parameters,
     \item   a prior $p(\theta)$ describing beliefs about the parameter distribution before seeing data.
 \end{enumerate}
-Given data d, one then calculates the posterior distribution using Bayes' theorem:
+Given data x, one then calculates the posterior distribution using Bayes' theorem:
 \begin{align}
     p(\theta|x) \sim p(x|\theta) p(\theta).
 \end{align}
 In many applied cases, an analytic shape of the likelihood is not available. An example is when the data come from a complex simulator. Then one can sample from this simulator and as such from the likelihood, but the expression $p(x_{\text{observed}}|\theta)$ is not obtainable and as such, the posterior cannot be calculated. In such setting, an alternative is to model the posterior separately, such that given $x_{\text{observed}}$, one can at least sample from the posterior: $\theta \sim q(\theta | x_{\text{observed}})$. This is known as likelihood-free inference. When the posterior is approximated using a neural network $q_\phi(\theta |x)$, one also speaks of neural posterior estimation (NPE).
 
-An advantage is that unlike with the traditional Bayesian methods, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as amortized inference. In order to train the model, data is needed, and this is where simulators are implemented. The posterior model is trained on simulated data and once trained, one can sample parameters by $\theta \sim q_\phi(\theta | x_{\text{observed}})$. In this way, NPE becomes a way of implementing simulation-based inference.
+An advantage is that unlike with traditional Bayesian methods, the posterior does not have to be re-calculated given new data: the neural network simply has to be evaluated on the new dataset. In this way, the cost of obtaining the posterior was payed beforehand during training. This concept is known as amortized inference. In order to train the model, data is needed, and this is where simulators are implemented. The posterior model is trained on simulated data and once trained, one can sample parameters by $\theta \sim q_\phi(\theta | x_{\text{observed}})$. In this way, NPE becomes a way of implementing simulation-based inference.
 
-\subsection{Information Theory and Neural Estimators}
-Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics $s_\text{phys}(x)$, which map the data to a lower-dimensional space with known interpretation. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of a neural networks to learn a different summary $s_\phi(x)$, and the procedure is then called representation learning. The summarry is hopefully more informative of the parameter of interest, though potentially less interpretable. If $\mathbb{I}$ is a measure of informativeness between the data and the parameters, this increased informativeness can be expressed as:
+\subsection{Information theory and neural estimators}
+Traditionally, data as complex as those expected from SKA are analyzed using physics-inspired summary statistics $s_\text{phys}(x)$, which map the data to a lower-dimensional space with known interpretation. An example is the power spectrum. Such a summary comes with the benefit of interpretability, but the caveat is a potentially large information loss. This motivates the use of neural networks to learn a different summary $s_\phi(x)$, and the procedure is then called representation learning. This summary is hopefully more informative of the parameter of interest, though potentially less interpretable. If $\mathbb{I}$ is a measure of informativeness between two objects, this increased informativeness can be expressed as:
 \begin{align}
     \mathbb{I}(\theta;x) 
     \geq \mathbb{I}(\theta;s_\phi(x)) 
-    > \mathbb{I}(\theta;s_{\text{phys}}(x)).
+    \geq \mathbb{I}(\theta;s_{\text{phys}}(x)).
 \end{align}
-The necessitates a measure of informativeness for use in representation learning, which is introduced in this section.
+This necessitates a measure of informativeness for use in representation learning, which is introduced in this section.
 
 \subsubsection*{Some Basic Measures in Information Theory}~\label{subsubsec:meas_IT}
 Given a random variable $X$ distributed as $p$, $X \sim p$, the entropy of $X$ is defined as:
@@ -62,7 +62,7 @@ An alternative formulation in terms of entropy is:
     \mathbb{I}(X; Y) = \mathbb{H}(X) - \mathbb{H}(X | Y) 
     = \mathbb{H}(Y) - \mathbb{H}(Y | X).
 \end{align}
-Mutual information is symmetric and nonnegative. It is zero if and only if $X$ and $Y$ are independent and becomes maximal if and only if $X = Y$. One interprets its value as the amount of information obtained about one random variable while observing another. Since it is defined as an expectation over the joint distribution of the two variables $X$ and $Y$, it is sensitive to higher moments of these distributions, and cannot be captured simply be e.g. their variance.
+Mutual information is symmetric and nonnegative. It is zero if and only if $X$ and $Y$ are independent and becomes maximal if and only if $X = Y$. One interprets its value as the amount of information obtained about one random variable while observing another. Since it is defined as an expectation over the joint distribution of the two variables $X$ and $Y$, it is sensitive to higher moments of these distributions, and cannot be captured simply by e.g. their variance.
 
 \subsubsection*{Mutual Information Estimation}~\label{subsubsec:mi_estimate}
 In the context of representation learning, mutual information can be used as a measure of model quality. This is motivated by the data processing inequality, which in this context can be phrased as follows:
@@ -76,9 +76,7 @@ This applied in the context of SBI and NPE, where the parameters of interest $\t
     \mathbb{I}(\theta;x) 
     \geq \mathbb{I}(\theta;z),
 \end{align}
-and this explains why mutual information is the measure of informativeness mentioned in the beginning of this section. An optimal summary contains all needed information about the original data while being as low-dimensional as possible. Of course, a truly optimal summary is never found in practice. The part of the network in which the compression of data is the highest (in this case the output z) is often referred to as the bottleneck.
-
-\red{Something on information bottleneck method?}
+and this explains why mutual information is the measure of informativeness mentioned in the beginning of this section. An optimal summary contains all information needed about the original data while being as low-dimensional as possible. Of course, a truly optimal summary is never found in practice. The part of the network in which the compression of data is the highest (in this case the output z) is often referred to as the bottleneck.
 
 In the setting of NPE, one can use the learned posterior to estimate mutual information between the bottleneck and the parameter distributions in a natural way. Even though the mutual information between the original data and the parameters remains inaccessible without a separate network, this allows the comparison of different summary networks and their informativeness about the parameters. The mutual information between the bottleneck and the parameter distributions is defined as
 \begin{align}
@@ -86,7 +84,7 @@ In the setting of NPE, one can use the learned posterior to estimate mutual info
 \end{align}
 where the distribution $p(\theta|z)$ is now estimated by a learned $q_\phi(\theta|z)$, the optimization objective being to minimize the KL-divergence $\mathbb{D}_{\text{KL}}(p||q_\phi)$. The Monte-Carlo approximation of eq.~\ref{eq:MI_int} using this distribution is referred to as the Barber-Agakov (BA) estimate~\cite{Barber_2003}:
 \begin{align}
-    \hat{\mathbb{I}}(\Theta;Z) = \mathbb{I}_{\text{BA}}(\Theta;Z) = \E_{P(\Theta,Z)} \left[ \log q_\phi(\theta|z) - \log p(\theta) \right].
+    \hat{\mathbb{I}}(\Theta;Z) = \mathbb{I}_{\text{BA}}(\Theta;Z) = \E_{p(\Theta,Z)} \left[ \log q_\phi(\theta|z) - \log p(\theta) \right].
 \end{align}
 This is computable, because the distribution of the prior $p(z)$ can in practice either be ignored as a constant factor, or in case of SBI is chosen and therefore known. If this is not the case, $p(z)$ can also be estimated separately, which however introduces more uncertainty in the above estimate.
 
@@ -94,11 +92,10 @@ Because the KL-divergence is non-zero, the BA-estimate yields a lower bound on t
 \begin{align}
     \mathbb{I}(\Theta;Z) \geq \mathbb{I}_{\text{BA}}(\Theta;Z).
 \end{align}
-Qualitatively, one expects mutual information to behave as follows: If the parameters being inferred are completely independent of one another, a perfect summary network would still require a bottleneck of the same dimensions as the parameter space in order to correctly infer the parameters. For lower-dimensional bottlenecks, one therefore expects an information loss. For higher-dimensional bottlenecks, one expects a saturation in mutual information, since the network does not require more dimensions in order to learn more about the required parameters. In practice, given noisy and imperfect data, realistic network performance and the fact that the BA-estimate only yields a lower bound of mutual information, the behaviour might be more ambiguous. In general, the network likely requires more dimensions to learn an informative summary, especially due to noise. If the parameters of interested are correlated, however, less dimensions might be required.
+Qualitatively, one expects mutual information to behave as follows: If the parameters being inferred are completely independent of one another, a perfect summary network would still require a bottleneck of the same dimensions as the parameter space in order to correctly infer the parameters. For lower-dimensional bottlenecks, one therefore expects an information loss. For higher-dimensional bottlenecks, one expects a saturation in mutual information, since the network does not require more dimensions in order to learn more about the parameters. In practice, given noisy and imperfect data, realistic network performance and the fact that the BA-estimate only yields a lower bound of mutual information, the behaviour might be more ambiguous. In general, the network likely requires more dimensions to learn an informative summary, especially due to noise. If the parameters of interest are correlated, however, less dimensions might be required.
 
 \subsection{An architecture for complex data}~\label{subsec:architecture}
-% The model discussed in the previous section can be implemented with various different architectural choices. One important choice is that of the \textit{bottleneck size}, that is, the dimensionality of the CNN's output. This part of the model is referred to as the bottleneck because it is the point in which the data are compressed to the highest degree. While a larger bottleneck should be able to capture more information about the data, one needs a principled way to balance the increased model complexity with the increase in information captured by the model. One way to do this is to evaluate the \textit{mutual information} between the feature and the bottleneck space across different such bottleneck dimensions. Mutual information and it's estimation are introduced in the following sections.
-An architecture that has proven to be successful in recent SBI approaches (see~\cite{heneka_2022},~\cite{Pietschke_2025} or ~\cite{Schosser_2026}) combines two neural networks in the following principle:
+An architecture that has proven to be successful in recent $21~\si{cm}$ SBI approaches (see~\cite{heneka_2022},~\cite{Pietschke_2025} or ~\cite{Schosser_2026}) combines two neural networks in the following principle:
 \begin{enumerate}
     \item   Image data are used as input for a convolutional neural network (CNN), which compresses these into a much lower-dimensional summary.
     \item   This summary is mapped to whichever feature is being inferred by a conditional normalizing flow (CNF).
@@ -112,35 +109,31 @@ Concerning notation: The summation convention is used and the bias term is impli
 where $\phi$ will be used to denote an activation function and $W$ is the weight matrix. This type of pre-activation $W_{ij} h_j$ (notice implicit bias!) is also known as an affine transformation.
 
 \subsubsection*{Convolutional Neural Networks}
-CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will be discussed in 1D. The generalization to higher dimensions is straightforward.
+CNNs are inspired by the task of implementing neural networks in image analysis, i.e. on data with 2D spatial structure. To explain the novel concepts behind the CNN in comparison with a MLP, the CNN architecture will be discussed in 1D. The generalization to higher dimensions is straightforward. Let the input data have dimensions $x \in \R^m$. The CNN learns a function $s_\phi(x)$ which summarizes the data. It uses multiple types of layers to achieve this:
 
-Let the input data have dimensions $x \in \R^m$. The CNN learns a function $s_\phi(x)$ which summarizes the data. It multiple types of layers to achieve this:
-
-A convolutional layer applies a convolution operaton:
+A convolutional layer applies a convolution operation:
 \begin{align}
-    z_i = \phi(\left[w \circledast h\right]_i) \equiv \phi\biggl(\sum_k w_k h_{i+k}\biggr)
+    z_i = \phi(\left[w \circledast h\right]_i) \equiv \phi\biggl(\sum_k w_k h_{i+k}\biggr),
 \end{align}
-where the dimensionality of the kernel is fixed $w\in \R^K$ is typically much lower than that of the data. Since the kernel is used on all parts of the previous layer, it can learn features in a translation-independent way.
+where the dimensionality of the kernel $w\in \R^K$ is fixed and typically much lower than that of the data. Since the kernel is used on all parts of the previous layer, it can learn features in a translation-independent way.
 
 A pooling layer applies a pooling operation:
 \begin{align}
-    z_i = \operatorname{pool} K_{ij}h_j
+    z_i = \operatorname{pool} K_{ij}h_j,
 \end{align}
-where $K$ defines a pooling window for each index $i$. This results in neighboring points of $h_j$ to be included in the operation. Typical choices for $\operatorname{pool}$ are $\operatorname{maxpool}$, which chooses the maximum of all given values, or $\operatorname{meanpool}$, which calculates their mean. The pooling layer downsamples the previous layer and enables an extraction of features independent of length scales.
+where $K$ defines a pooling window for each index $i$. This results in neighboring points of $h_j$ to be included in the operation. Typical choices for $\operatorname{pool}$ are $\operatorname{maxpool}$, which chooses the maximum of all given values, or $\operatorname{meanpool}$, which calculates their mean. The pooling operation downsamples the previous layer and enables an extraction of features independent of length scales.
 
-During construction of the CNN one needs control of the geometry of the data in each layer, and a number of additional parameters are introduced to achieve this. A padding parameter $p$ controls the border of the output layer by describing how the kernel or pooling window interacts with the previous layer's border. A stride parameter $s$ allows the kernel or pooling window to operatore along the input layer by skipping every $s$'th pixel. In order to enable the CNN to learn more features one also typically adds more channels to the data as it flows through the CNN, and each channel is associated with it's own weights. 
+During construction of a CNN one needs control of the geometry of the data in each layer, and a number of additional parameters are introduced to achieve this. A padding parameter $p$ controls the border of the output layer by describing how the kernel or pooling window interacts with the previous layer's border. A stride parameter $s$ allows the kernel or pooling window to operate along the input layer by skipping every $s$'th pixel. In order to enable the CNN to learn more features one also typically adds more channels to the data as it flows through the CNN, and each channel is associated with its own weights. 
 
 A typical CNN architecture consists of multiple interchanging convolutional and pooling layers, after which the output is flattened to a vector and connected by a few dense layers to the final output vector. An example is shown in fig~\ref{fig:cnn_architecture}. The final CNN takes an input $x \in \R^{C\times H \times W}$, where C is the channel dimension, H the height dimension and W the width dimension, and learns a summary $f(x) \in \R^n$. For a simple supervised learning task, the CNN could be trained on an MSE loss to recover parameters originally associated with the image. 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{graphics/cnn_architecture.png}
-    \caption{Tpical CNN architecture, taken from~\cite{murphy_2022}}
+    \caption{Typical CNN architecture, taken from~\cite{murphy_2022}}
     \label{fig:cnn_architecture}
 \end{figure}
 
 \subsubsection*{Conditional Normalizing Flows}
-\red{Need to agree on how sampling is written for expectation}
-
 A normalizing flow is a model that learns to transform a simple (often Gaussian) base distribution into a more complex one, the target distribution. The transformation is chosen to be invertible, such that the model becomes generative: once trained, it can be inverted and by transforming samples from the normal, one can sample from the approximated target distribution. The following is based on~\cite{plehn_2025}.
 
 Let $u \sim p_u = \mathcal{N}(0, I_n)$ with $n \in \N$ the base distribution and $\theta \sim p_\theta$ with $p_\theta$ the $n$-dimensional target distribution. Let $f: \R^n \to \R^n$ a diffeomorphism, with $g = f^{-1}$ its inverse. The training objective is to find $g$, such that
@@ -155,11 +148,11 @@ For a given transformation, one computes $p_\theta(\theta)$ by applying the chan
 \begin{align}
 q_\theta(\theta) = p_u(g(\theta)) \left| \det \left( \frac{\partial g(\theta)}{\partial \theta} \right) \right| = p_u(u) \left| \det \left( \frac{\partial f(u)}{\partial u} \right) \right|^{-1}.
 \end{align}
-One optimizes the flow by minimizing the forwards KL-divergence between the true and the approximated distribution, which as discussed ins section~\ref{subsubsec:meas_IT} is equivalent to minimizing the NLL:
+One optimizes the flow by minimizing the forwards KL-divergence between the true and the approximated distribution, which as discussed in section~\ref{subsubsec:meas_IT} is equivalent to minimizing the NLL:
 \begin{align}
     \mathcal{L}_{\text{NF}} = - \E_{\theta \sim p_\theta} \Biggl[ \frac{|g(\theta)|^2}{2} + 
-    \log \left| \det \left( \frac{\partial g(\theta)}{\partial \theta} \right) \right|\Biggr]~\label{eq:nf_loss}
+    \log \left| \det \left( \frac{\partial g(\theta)}{\partial \theta} \right) \right|\Biggr],~\label{eq:nf_loss}
 \end{align}
 where the first term stems from the choice of a Gaussian latent space and the second from the jacobian in eq.~\ref{eq:nf_loss}.
 
-The normalizing flow becomes expressive by allowing the transformation to be as complex as possible, while restricting it to a class of functions with efficiently computable Jacobian determinants makes it computationally tractable.
+The normalizing flow becomes expressive by allowing the transformation to be as complex as possible, while restricting it to a class of functions with efficiently computable Jacobian determinants makes it computationally tractable. It becomes a conditional normalizing flow by conditioning the function $g$ on an additional input.

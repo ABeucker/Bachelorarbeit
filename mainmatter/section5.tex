@@ -1,12 +1,9 @@
 \section{Implementation}
 
-
-\red{Need specific values of learning rate etc for both models. Should this go in appendix?}
-
-The code for the following implementation can be found on \href{https://github.com/ABeucker/EoRFlow_MI}{GitHub}.
+This section covers specifics on the dataset, the architecture of the networks used, and the training process for both types of inference. The code for the following implementation can be found on \href{https://github.com/ABeucker/EoRFlow_MI}{GitHub}.
 
 \subsection{The dataset}
-For this project, an existing dataset simulated with 21cmFast~\cite{Mesinger_2010} is used. The simulation parameters and their priors are shown in table~\ref{tab:sim_params}. Parameters are sampled uniformly from their priors for simulations. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements~\cite{planck_2018}. This means the baryon density is $\Omega_b = 0.04897$, the matter fluctuation amplitude is $\sigma_8 = 0.8102$, the dimensionless Hubble parameter is $h= 0.6766$, and the scalar spectral index is $n_s= 0.9665$. The dataset includes simulated noise.
+An existing dataset simulated with 21cmFast~\cite{Mesinger_2010} is used. The simulation parameters and their priors are shown in table~\ref{tab:sim_params}. Parameters are sampled uniformly from their priors for simulations. All other parameters of the flat $\Lambda$CDM cosmology are fixed to the Planck measurements~\cite{planck_2018}. This means the baryon density is $\Omega_b = 0.04897$, the matter fluctuation amplitude is $\sigma_8 = 0.8102$, the dimensionless Hubble parameter is $h= 0.6766$, and the scalar spectral index is $n_s= 0.9665$. 
 \begin{table}[htbp]
 \centering
 \caption{Parameters and priors used for the simulations}
@@ -27,24 +24,22 @@ X-ray energy threshold for self-absorption by host galaxies & $E_0$ & $\mathcal{
 \end{tabular}
 \end{table}
 
-Each of these parameters can be described as follows:
+Each of the parameters quickly introduced in the following:
 \begin{itemize}
-    \item   The matter density $\Omega_m$, describing the fraction of the universe's energy density from matter (incl. dark matter)
-    \item   The warm dark matter mass $\omega_{\text{WDM}}$, describing the mass of a hypothetical warm dark matter particle
-    \item   The minimum virial temperature $T_{\text{vir}}$, describing the minimum virial temperature to enable star formation in the first places
-    \item   The ionization efficiency $\zeta$, characterizing the strength of ionizing radiation
-    \item   The specific X-ray luminosity $L_X$, a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability
-    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$, a measure for the energy of X-rays below which these do not escape their host galaxies.
+    \item   The matter density $\Omega_m$ describes the fraction of the universe's energy density from matter (incl. dark matter).
+    \item   The warm dark matter mass $\omega_{\text{WDM}}$ describes the mass of a hypothetical warm dark matter particle.
+    \item   The minimum virial temperature $T_{\text{vir}}$  describes the minimum virial temperature to enable star formation in the first place.
+    \item   The ionization efficiency $\zeta$ characterizes the strength of ionizing radiation.
+    \item   The specific X-ray luminosity $L_X$ is a measure of total X-ray luminosity of galaxies, measured per star formation rate for comparability.
+    \item   The X-ray energy threshold for self-absorption by host galaxies $E_0$ measures the energy of X-rays below which these do not escape their host galaxies.
 \end{itemize}
 
-\red{Could still comment on the significance of each parameter. Why are X-rays so relevant?}
-
-The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters $\theta$ and an array of neutral hydrogen fractions $x_\text{HI}$. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim 5-35$ and a box size of $200~\si{Mpc}$, such that the resolution is $1.43~\si{Mpc}$. Since $\Omega_m$ changes the redshift range captured with the first $2350$ pixels of the simulated lightcone, this redshift range corresponds to the maximal redshift range a lightcone encompasses. The neutral hydrogen fractions are stored as 92-dimensional vectors. The distribution of these $x_\text{HI}$-labels is not uniform. To impose a realistic constraint, lightcones are only admitted to the dataset if the optical depth $\tau$ is within $5\sigma$ of the Planck~\cite{planck_2018} measurement and the IGM mean neutral fraction $\hat{x}_\text{HI}$ is below $0.01$ at redshift $z=5$.
+The final dataset consists of 5000 sets of lightcones with the corresponding simulation parameters $\theta$ and an array of neutral hydrogen fractions $x_\text{HI}$. It is important to note that these lightcones include noise simulations. Each lightcone is originally $140\times 140\times 2350$ voxels in size, corresponding to a redshift range of $z \sim 5-35$ and a box size of $200~\si{Mpc}$, such that the resolution is $1.43~\si{Mpc}$. Since $\Omega_m$ changes the redshift range captured with the first $2350$ pixels of the simulated lightcone, $z=35$ corresponds to the maximal redshift a lightcone can encompass. The neutral hydrogen fractions are stored as 92-dimensional vectors. The distribution of these $x_\text{HI}$-labels is not uniform. To impose a realistic constraint, lightcones are only admitted to the dataset if the optical depth $\tau$ is within $5\sigma$ of the Planck~\cite{planck_2018} measurement and the IGM mean neutral fraction $\hat{x}_\text{HI}$ is below $0.01$ at redshift $z=5$.
 
 The dataset is preprocessed as follows: The temperature offset values are min-max-normalized individually for each lightcone, which later improves the CNN's performance. The lightcones are truncated to $140\times 140\times 1916$ voxels. This allows the neutral hydrogen fraction labels to first be truncated to 75 dimensions and then binned to 15-dimensional vectors, reducing the dimensionality of the inference problem. An additional logit transformation is applied to this vector, which improves training performance of the flow. A sigmoid transform can be applied during inference to map the labels back to their physical state. The simulation parameters, which span many different orders of magnitude, are min-max normalized globally. The total dataset has a size of approximately $690~\si{GB}$ and is split into a training, validation and test set with relative sizes $0.7$, $0.2$ and $0.1$, respectively. 
 
 \subsection{The network architecture}
-Section~\ref{subsec:architecture} the basic architecture used in the inference task. In this specific implementation, a lightcone is passed through the CNN, who's output is used as a conditional input to the CNF model to infer either the original simulation parameters or the neutral hydrogen fraction. The general architecture is visualized in~\ref{fig:21cmPIE-INN_architecture}.
+Section~\ref{subsec:architecture} introduced the basic architecture used in the inference task. In this specific implementation, a lightcone is passed through the CNN, who's output is used as a conditional input to the CNF model to infer either the original simulation parameters or the neutral hydrogen fraction. The general architecture is visualized in fig.~\ref{fig:21cmPIE-INN_architecture}.
 \begin{figure}
     \centering
     \includegraphics[width=0.75\linewidth]{graphics/pie-inn_architecture.png}
@@ -52,7 +47,7 @@ Section~\ref{subsec:architecture} the basic architecture used in the inference t
     \label{fig:21cmPIE-INN_architecture}
 \end{figure}
 
-The conditional input changes the loss function of the flow from eq~\ref{eq:nf_loss}. Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are surpressed in the following. For both inference cases, the loss function for jointly training the two models is:
+The conditional input changes the loss function of the flow from eq~\ref{eq:nf_loss}. Let $x$ denote an image from lightcone distribution, $\theta$ the corresponding element of the label distribution, $s_\psi$ the CNN and $g_\phi$ the transformation defining the normalizing flow. The network's parameter indices are suppressed in the following. For both inference cases, the loss function for jointly training the two models is:
 \begin{align}
     \mathcal{L}_{\text{NPE}} = - \E_{(x,\theta) \sim p(x,\theta)} \Biggl[ \frac{|g(\theta|s(x))|^2}{2} + 
     \log \left| \det \left( \frac{\partial g(\theta|s(x))}{\partial \theta} \right) \right|\Biggr].
@@ -75,7 +70,7 @@ The conditional input changes the loss function of the flow from eq~\ref{eq:nf_l
 
 %     \caption{Overall caption for both figures}
 % \end{figure}
-The architecture for inference of the original simulation parameters is based on~\cite{Schosser_2026}, and that for inference of the reionization history on~\cite{Pietschke_2025}. Table~\ref{tab:cnn_architecture} describes the architectures for both inference cases. In the CNN, the first convolutional layer is designed to learn patterns in the redshift direction. An aggressive stride is used to alter the dimensionality of the next layers. The kernel for hidden layers is set to (3x3x2) and max pooling is only applied in spacial dimensions. Finally, all information is compressed into a 128-dimensonal feature vector by global average pooling. This is in turn transformed into an $N_B$-dimensional bottleneck vector by dense layers. In case the CNN is pretrained on the simulation parameters, an additional two dense layers can be attached, which map the $N_B$-dimensional output to a $6$-dimensional output. These can be removed for the rest of training, leaving the rest of the architecture untouched. The CNF is used in two variants depending on the inference task, the heavier of the two architectures containing more coupling layers and more nodes per layer. 
+The architecture for inference of the original simulation parameters is based on~\cite{Schosser_2026}, and that for inference of the reionization history on~\cite{Pietschke_2025}. Table~\ref{tab:cnn_architecture} describes the architectures for both inference cases. In the CNN, the first convolutional layer is designed to learn patterns in the redshift direction. An aggressive stride is used to alter the dimensionality of the next layers. The kernel for hidden layers is set to (3x3x2) and max pooling is only applied in spacial dimensions. Finally, all information is compressed into a 128-dimensional feature vector by global average pooling. This is in turn transformed into an $N_B$-dimensional bottleneck vector by dense layers. In case the CNN is pretrained on the simulation parameters, an additional two dense layers can be attached, which map the $N_B$-dimensional output to a $6$-dimensional output. These can be removed for the rest of training, leaving the rest of the architecture untouched. The CNF is used in two variants depending on the inference task, the heavier of the two architectures containing more coupling layers and more nodes per layer. 
 \begin{table}[htbp]
 \centering
 
@@ -141,7 +136,7 @@ Subnet depth & 3 \\
 \end{minipage}
 \end{table}
 
-\subsection{Setup for inferece of the neutral hydrogen fraction}
+\subsection{Setup for inference of the neutral hydrogen fraction}
 For inference of the neutral hydrogen fraction, the CNN and CNF are trained jointly. Both models are trained using an optimizer, a scheduler and a joint scaler. The batch size is chosen as 8 and gradient accumulation to an effective batch size of 32 is implemented. The learning rate of the flow is initialized as $0.001$ and that of the CNN as $0.0005$. The optimization method is AdamW~\cite{AdamW}, a scheduler reduces the learning rate when the training loss stagnates and gradient scaling ensures more stable backpropagation. Training stops after 250 epochs.
 
 Unlike the original distribution of simulation parameters, the prior distribution of reionization history vectors $x_\text{HI}$ is not uniform. It therefore has to be modeled separately. It is modeled with a flow of the same architecture as the one from the conditional distribution, without any conditional input. An additional prior model adds uncertainty to the mutual information estimation.
